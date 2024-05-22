@@ -1,0 +1,330 @@
+openapi: 3.0.3
+info:
+  title: Exatabank API
+  description: API for banking operations such as sending Pix, recharging mobile phones, and querying transactions.
+  version: 1.0.0
+servers:
+  - url: https://localhost:8080/api/v1/
+
+paths:
+  /transactions/send-pix:
+    post:
+      tags:
+        - Transactions
+      summary: Send Pix
+      description: Method to send a Pix transaction.
+      operationId: sendPix
+      requestBody:
+        description: Pix transaction data.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PixRequest'
+        required: true
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+
+  /transactions/recharge-mobile:
+    post:
+      tags:
+        - Transactions
+      summary: Recharge Mobile
+      description: Method to recharge a mobile phone.
+      operationId: rechargeMobile
+      requestBody:
+        description: Mobile recharge data.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MobileRechargeRequest'
+        required: true
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+
+  /transactions/atm-withdrawal:
+    post:
+      tags:
+        - Transactions
+      summary: Withdraw
+      description: Method to perform a withdrawal.
+      operationId: withdraw
+      requestBody:
+        description: Withdrawal data.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WithdrawRequest'
+        required: true
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+
+  /transactions/deposit:
+    post:
+      tags:
+        - Transactions
+      summary: Deposit
+      description: Method to deposit money into an account.
+      operationId: deposit
+      requestBody:
+        description: Deposit data.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepositRequest'
+        required: true
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+
+
+  /transactions:
+    get:
+      tags:
+        - Transactions
+      summary: Get Transactions
+      description: Method to get a user's transactions.
+      operationId: getTransactions
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transactions'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+
+components:
+  schemas:
+    DepositRequest:
+      type: object
+      required:
+        - amount
+        - account
+        - agency
+      properties:
+        amount:
+          type: number
+          format: double
+          example: 200.00
+        account:
+          type: string
+          example: '123456-7'
+        agency:
+          type: string
+          example: '0001'
+
+    PixRequest:
+      type: object
+      required:
+        - pixKey
+        - transactionAmount
+        - keyType
+      properties:
+        pixKey:
+          type: string
+          example: 'pix-key-123'
+        transactionAmount:
+          type: number
+          format: double
+          example: 150.75
+        keyType:
+          type: string
+          enum:
+            - phone
+            - email
+            - cpf
+          example: 'cpf'
+
+    MobileRechargeRequest:
+      type: object
+      required:
+        - phoneNumber
+        - areaCode
+        - carrier
+        - amount
+      properties:
+        phoneNumber:
+          type: string
+          example: '998877665'
+        areaCode:
+          type: string
+          example: '11'
+        carrier:
+          type: string
+          enum:
+            - VIVO
+            - CLARO
+            - TIM
+            - ALGAR
+          example: 'Vivo'
+        amount:
+          type: number
+          format: double
+          example: 50.00
+
+    WithdrawRequest:
+      type: object
+      required:
+        - amount
+      properties:
+        amount:
+          type: number
+          format: double
+          example: 200.00
+
+    User:
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'John Doe'
+        CPF:
+          type: string
+          example: '12345678900'
+        email:
+          type: string
+          example: 'john.doe@example.com'
+        phone:
+          type: string
+          example: '+15551234567'
+
+    Account:
+      type: object
+      properties:
+        agency:
+          type: string
+          example: '0001'
+        number:
+          type: string
+          example: '123456-7'
+        balance:
+          type: number
+          format: double
+          example: 1000.00
+
+    Transaction:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+          example: 1000.00
+        dateHour:
+          type: string
+          format: date-time
+          example: '2024-05-22T10:00:00Z'
+        transactionType:
+          type: string
+          example: 'Pix'
+
+    Transactions:
+      type: object
+      properties:
+        transaction:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+        sumIncoming:
+          type: number
+          format: double
+          example: 2000.00
+        sumOutgoing:
+          type: number
+          format: double
+          example: 1500.00
+
+    ResponseError:
+      type: object
+      properties:
+        code:
+          type: string
+          example: 'ERR001'
+        message:
+          type: string
+          example: 'Error'
