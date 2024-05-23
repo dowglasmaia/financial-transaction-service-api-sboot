@@ -159,6 +159,59 @@ paths:
       summary: Get Transactions
       description: Method to get a user's transactions.
       operationId: getTransactions
+      parameters:
+        - name: initial-date
+          in: query
+          description: "Initial date for filtering transactions (format: dd/MM/yyyy)"
+          required: false
+          schema:
+            type: string
+            pattern: "^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/([0-9]{4})$"
+            example: "10/10/2024"
+        - name: final-date
+          in: query
+          description: "Final date for filtering transactions (format: dd/MM/yyyy)"
+          required: false
+          schema:
+            type: string
+            pattern: "^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/([0-9]{4})$"
+            example: "10/10/2024"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transactions'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+  /transactions/saldo:
+    get:
+      tags:
+        - Transactions
+      summary: Get Saldo
+      description: Method to get a user's transactions.
+      operationId: getSaldo
+      parameters:
+        - name: initial-date
+          in: query
+          description: "Initial date for filtering transactions (format: dd/MM/yyyy)"
+          required: false
+          schema:
+            type: string
+            pattern: "^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/([0-9]{4})$"
+            example: "10/10/2024"
+
       responses:
         200:
           description: OK
@@ -230,11 +283,15 @@ components:
         - amount
       properties:
         phoneNumber:
-          type: string
-          example: '998877665'
+          type: integer
+          example: 998877665
+          minLength: 9
+          maxLength: 9
         areaCode:
-          type: string
-          example: '11'
+          type: integer
+          minLength: 2
+          maxLength: 2
+          example: 11
         carrier:
           type: string
           enum:
@@ -266,9 +323,12 @@ components:
           example: 'John Doe'
         CPF:
           type: string
+          minLength: 11
+          maxLength: 11
           example: '12345678900'
         email:
           type: string
+          format: email
           example: 'john.doe@example.com'
         phone:
           type: string
