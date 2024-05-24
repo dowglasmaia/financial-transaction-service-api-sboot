@@ -165,20 +165,16 @@
 							<goal>generate</goal>
 						</goals>
 						<configuration>
+							<inputSpec>${project.basedir}/src/main/resources/swagger/exactabank-openapi.yaml</inputSpec>
 							<language>spring</language>
-							<library>spring-boot</library>
-							<inputSpec>
-								${project.basedir}/src/main/resources/swagger/exactabank-openapi.yaml
-							</inputSpec>
-							<modelPackage>${project.groupId}.provider.model</modelPackage>
-							<apiPackage>${project.groupId}.provider.api</apiPackage>
-
 							<configOptions>
 								<delegatePattern>true</delegatePattern>
 								<interfaceOnly>true</interfaceOnly>
 								<dateLibrary>java8</dateLibrary>
+								<modelPackage>${project.groupId}.provider.model</modelPackage>
+								<apiPackage>${project.groupId}.provider.api</apiPackage>
+								<useBeanValidation>true</useBeanValidation> <!-- Certifique-se de adicionar esta linha -->
 							</configOptions>
-
 							<modelNameSuffix>DTO</modelNameSuffix>
 							<generateSupportingFiles>false</generateSupportingFiles>
 							<generateApiTests>false</generateApiTests>

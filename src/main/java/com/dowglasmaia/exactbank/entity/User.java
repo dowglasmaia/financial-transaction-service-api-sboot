@@ -28,9 +28,9 @@ public class User {
     private String email;
 
     @Column(length = 9)
-    private String phoneNumber;
+    private Integer phoneNumber;
 
     @Column(length = 2)
-    private String areaCode;
+    private Integer areaCode;
 
 }

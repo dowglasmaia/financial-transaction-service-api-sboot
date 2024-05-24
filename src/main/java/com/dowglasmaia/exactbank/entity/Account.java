@@ -24,10 +24,14 @@ public class Account {
     @JoinColumn(name = "agency_id")
     private Agency agency;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @Column(length = 100)
     private String number;
 
-    @Column(precision = 12, scale = 2)
+
     private BigDecimal balance;
 }
 

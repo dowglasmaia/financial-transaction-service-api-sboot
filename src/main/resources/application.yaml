@@ -1,19 +1,31 @@
 server:
   port: 8080
 
+
 spring:
+  profiles:
+    active: test
   application:
     name: "exactbank"
   jpa:
     show-sql: true
+    open-in-view: true
     hibernate:
       ddl-auto: create
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+      format_sql: true
   datasource:
     url: jdbc:postgresql://localhost/transactions
     username: maia
     password: maiapw
     driver-class-name: org.postgresql.Driver
     port: 5432
+
+api:
+  client:
+    maiabank:
+      url: http://localhost:8089/api/v1/transactions
+
+

@@ -23,7 +23,6 @@ public class Transaction {
 
     private OffsetDateTime dateHour;
 
-    @Column(precision = 12, scale = 2)
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
