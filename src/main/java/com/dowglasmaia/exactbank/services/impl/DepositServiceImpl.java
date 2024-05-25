@@ -2,6 +2,8 @@ package com.dowglasmaia.exactbank.services.impl;
 
 import com.dowglasmaia.exactbank.entity.Account;
 import com.dowglasmaia.exactbank.entity.Agency;
+import com.dowglasmaia.exactbank.exeptions.ObjectNotFoundExeption;
+import com.dowglasmaia.exactbank.exeptions.UnprocessableEntityExeption;
 import com.dowglasmaia.exactbank.repository.AccountRepository;
 import com.dowglasmaia.exactbank.services.AgencyService;
 import com.dowglasmaia.exactbank.services.DepositService;
@@ -9,6 +11,7 @@ import com.dowglasmaia.exactbank.utils.BigDecimalConvert;
 import com.dowglasmaia.provider.model.DepositRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -36,7 +39,7 @@ public class DepositServiceImpl implements DepositService {
         Agency agency = agencyService.findByNumber(request.getAgency());
 
         Account accountEntity = accountRepository.findByAgencyAndNumber(agency, request.getAccount())
-              .orElseThrow(() -> new RuntimeException("Account not found."));
+              .orElseThrow(() -> new ObjectNotFoundExeption("Account not found.", HttpStatus.FOUND));
 
         var amountToDeposit = BigDecimalConvert.toBigDecimal(request.getAmount());
         var newBalance = accountEntity.getBalance().add(amountToDeposit);
@@ -48,7 +51,7 @@ public class DepositServiceImpl implements DepositService {
             log.info("Deposit successfully");
         } catch (Exception e) {
             log.error("Fail deposit at account {}: {}", request.getAccount(), e.getMessage());
-            throw new RuntimeException("Fail deposito at account " + request.getAccount());
+            throw new UnprocessableEntityExeption("Fail deposito at account " + request.getAccount(), HttpStatus.UNPROCESSABLE_ENTITY);
         }
     }
 

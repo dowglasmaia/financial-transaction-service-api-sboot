@@ -1,6 +1,8 @@
 package com.dowglasmaia.exactbank.services.impl;
 
 import com.dowglasmaia.exactbank.entity.Account;
+import com.dowglasmaia.exactbank.exeptions.ObjectNotFoundExeption;
+import com.dowglasmaia.exactbank.exeptions.UnprocessableEntityExeption;
 import com.dowglasmaia.exactbank.integrations.MaiaBankClient;
 import com.dowglasmaia.exactbank.repository.AccountRepository;
 import com.dowglasmaia.exactbank.services.PixService;
@@ -11,6 +13,7 @@ import com.dowglasmaia.exactbank.utils.PhoneValidator;
 import com.dowglasmaia.provider.model.PixRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -40,8 +43,10 @@ public class PixServiceImpl implements PixService {
             makeTransfer(accountNumber, amountTransferred);
             log.info("Pix sent successfully");
         } else {
-            log.error("Pix key does not exist: KEY. {}", request.getPixKey());
-            throw new RuntimeException("Pix key does not exist");
+            String errorMessage = "Pix key does not exist or is invalid for the specified type: " + request.getKeyType();
+            log.error(errorMessage);
+
+            throw new UnprocessableEntityExeption(errorMessage, HttpStatus.UNPROCESSABLE_ENTITY);
         }
     }
 
@@ -56,7 +61,7 @@ public class PixServiceImpl implements PixService {
 
     public void makeTransfer(String accountNumber, BigDecimal transactionAmount){
         Account accountEntity = accountRepository.findByNumber(accountNumber)
-              .orElseThrow(() -> new RuntimeException("Account not found."));
+              .orElseThrow(() -> new ObjectNotFoundExeption("Account not found.", HttpStatus.FOUND));
 
         if (accountEntity.getBalance().compareTo(transactionAmount) > 0) {
             var originalBalance = accountEntity.getBalance();
@@ -74,11 +79,11 @@ public class PixServiceImpl implements PixService {
                 accountEntity.setBalance(originalBalance);
                 accountRepository.save(accountEntity);
 
-                throw new RuntimeException("Fail send Pix.", e);
+                throw new UnprocessableEntityExeption("Fail send Pix.", HttpStatus.UNPROCESSABLE_ENTITY);
             }
         } else {
             log.error("Operation not performed, there is not enough balance in the account.");
-            throw new RuntimeException("Operation not performed, there is not enough balance in the account.");
+            throw new UnprocessableEntityExeption("Operation not performed, there is not enough balance in the account.", HttpStatus.UNPROCESSABLE_ENTITY);
         }
     }
 
