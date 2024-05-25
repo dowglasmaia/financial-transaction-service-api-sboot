@@ -4,6 +4,6 @@ import com.dowglasmaia.provider.model.PixRequestDTO;
 
 public interface PixService {
 
-    void sendPix(PixRequestDTO request);
+    void makeTransfer(PixRequestDTO request);
 
 }

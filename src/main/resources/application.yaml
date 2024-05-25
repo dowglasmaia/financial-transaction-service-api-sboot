@@ -15,7 +15,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-      format_sql: true
+        format_sql: true
   datasource:
     url: jdbc:postgresql://localhost/transactions
     username: maia
@@ -27,5 +27,55 @@ api:
   client:
     maiabank:
       url: http://localhost:8089/api/v1/transactions
+
+management:
+  tracing:
+    sampling:
+      probability: 1
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  health:
+    circuitbreakers:
+      enabled: true
+    ratelimiters:
+      enabled: true
+  metrics:
+    enable:
+      jvm: true
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: exactbank
+    distribution:
+      slo:
+        http: '5ms,10ms,25ms,50ms,100ms,200ms,300ms,400ms,500ms,1s,2s'
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+
+
+
+#Circuit Breaker
+resilience4j:
+  circuitbreaker:
+    instances:
+      maiabank:
+        slidingWindowType: COUNT_BASED
+        registerHealthIndicator: true
+        slidingWindowSize: 6
+        failureRateThreshold: 50
+        slowCallDurationThreshold: 100
+        slowCallRateThreshold: 80
+        waitDurationInOpenState: 60s
+        permittedNumberOfCallsInHalfOpenState: 3
+        enableAutomaticTransitionFromOpenToClosedState: true
+        transitionFromOpenToClosedStateOnSuccessfulCall: true
 
 

@@ -4,13 +4,16 @@ import com.dowglasmaia.exactbank.entity.Account;
 import com.dowglasmaia.exactbank.integrations.MaiaBankClient;
 import com.dowglasmaia.exactbank.repository.AccountRepository;
 import com.dowglasmaia.exactbank.services.PixService;
+import com.dowglasmaia.exactbank.utils.BigDecimalConvert;
+import com.dowglasmaia.exactbank.utils.CPFValidator;
+import com.dowglasmaia.exactbank.utils.EmailValidator;
+import com.dowglasmaia.exactbank.utils.PhoneValidator;
 import com.dowglasmaia.provider.model.PixRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 @Service
 @Slf4j
@@ -26,25 +29,32 @@ public class PixServiceImpl implements PixService {
     }
 
     @Override
-    public void sendPix(PixRequestDTO request){
-        if (existKey(request.getPixKey())) {
-            String accountNumber = "2022"; // extrair do JWT
+    public void makeTransfer(PixRequestDTO request){
+        log.info("Start Send Pix");
 
-            var amountTransferred = BigDecimal
-                  .valueOf(request.getTransactionAmount())
-                  .setScale(2, RoundingMode.HALF_UP);
+        if (isValidKeyAndExists(request)) {
+            String accountNumber = extractAccountNumberFromJwt();
 
-            send( accountNumber,amountTransferred );
+            BigDecimal amountTransferred = BigDecimalConvert.toBigDecimal(request.getTransactionAmount());
 
-            log.info("Pix sended with successfully");
+            makeTransfer(accountNumber, amountTransferred);
+            log.info("Pix sent successfully");
         } else {
             log.error("Pix key does not exist: KEY. {}", request.getPixKey());
             throw new RuntimeException("Pix key does not exist");
         }
     }
 
-    public void send(String accountNumber, BigDecimal transactionAmount){
-        log.info("Start Send Pix");
+    private boolean isValidKeyAndExists(PixRequestDTO request){
+        return validateKey(request) && existKey(request.getPixKey());
+    }
+
+    private String extractAccountNumberFromJwt(){
+        // Lógica para extrair o número da conta do JWT
+        return "2022"; // Simulação, substituir por lógica real
+    }
+
+    public void makeTransfer(String accountNumber, BigDecimal transactionAmount){
         Account accountEntity = accountRepository.findByNumber(accountNumber)
               .orElseThrow(() -> new RuntimeException("Account not found."));
 
@@ -57,7 +67,6 @@ public class PixServiceImpl implements PixService {
 
             try {
                 maiaBankClient.receiversPix();
-                log.info("End Send Pix");
             } catch (Exception e) {
                 log.error("Fail send Pix. {}", e);
 
@@ -78,5 +87,18 @@ public class PixServiceImpl implements PixService {
         return true;
     }
 
+    private boolean validateKey(PixRequestDTO request){
+        String pixKey = request.getPixKey();
+        switch (request.getKeyType()) {
+            case CPF:
+                return CPFValidator.isCpf(pixKey);
+            case EMAIL:
+                return EmailValidator.isValidEmail(pixKey);
+            case PHONE:
+                return PhoneValidator.isValidPhoneNumber(pixKey);
+            default:
+                return false;
+        }
+    }
 
 }

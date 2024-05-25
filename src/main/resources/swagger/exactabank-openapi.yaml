@@ -321,8 +321,10 @@ components:
           format: email
           example: 'john.doe@example.com'
         phone:
-          type: string
-          example: '+15551234567'
+          type: integer
+          minLength: 11
+          maxLength: 11
+          example: 99988887777
 
     Account:
       type: object
