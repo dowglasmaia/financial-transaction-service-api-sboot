@@ -1,17 +1,16 @@
 package com.dowglasmaia.exactbank.services.impl;
 
 import com.dowglasmaia.exactbank.entity.Account;
-import com.dowglasmaia.exactbank.exeptions.ObjectNotFoundExeption;
 import com.dowglasmaia.exactbank.exeptions.UnprocessableEntityExeption;
-import com.dowglasmaia.exactbank.integrations.MaiaBankClient;
+import com.dowglasmaia.exactbank.services.client.maiaBank.MaiaBankClient;
 import com.dowglasmaia.exactbank.repository.AccountRepository;
 import com.dowglasmaia.exactbank.services.PixService;
 import com.dowglasmaia.exactbank.services.TransactionService;
+import com.dowglasmaia.exactbank.services.client.account.FindAccountByNumberAndUserIdService;
 import com.dowglasmaia.exactbank.utils.CPFValidator;
 import com.dowglasmaia.exactbank.utils.EmailValidator;
 import com.dowglasmaia.exactbank.utils.PhoneValidator;
 import com.dowglasmaia.provider.model.PixRequestDTO;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,17 +21,20 @@ import org.springframework.stereotype.Service;
 public class PixServiceImpl implements PixService {
 
     private final MaiaBankClient maiaBankClient;
-    private final AccountRepository accountRepository;
+    private final FindAccountByNumberAndUserIdService findAccountByNumberAndUserIdService;
     private final TransactionService transactionService;
+    private final AccountRepository accountRepository;
 
     @Autowired
     public PixServiceImpl(MaiaBankClient maiaBankClient,
-                          AccountRepository accountRepository,
-                          TransactionService transactionService
+                          FindAccountByNumberAndUserIdService findAccountByNumberAndUserIdService,
+                          TransactionService transactionService,
+                          AccountRepository accountRepository
     ){
         this.maiaBankClient = maiaBankClient;
-        this.accountRepository = accountRepository;
+        this.findAccountByNumberAndUserIdService = findAccountByNumberAndUserIdService;
         this.transactionService = transactionService;
+        this.accountRepository = accountRepository;
     }
 
     @Override
@@ -40,9 +42,9 @@ public class PixServiceImpl implements PixService {
         log.info("Start Send Pix");
 
         if (isValidKeyAndExists(request)) {
-            var account = extractUserAccountFromJwt();
+            Account accountEntity = findAccountByNumberAndUserIdService.findByNumberAndUserId();
 
-            makeTransfer(account, request);
+            makeTransfer(accountEntity, request);
 
             log.info("Pix sent successfully");
         } else {
@@ -53,16 +55,7 @@ public class PixServiceImpl implements PixService {
         }
     }
 
-    private boolean isValidKeyAndExists(PixRequestDTO request){
-        return validateKey(request) && existKey(request.getPixKey());
-    }
-
-
-    private void makeTransfer(UserAccountDTO account, PixRequestDTO request){
-        Account accountEntity = accountRepository.findByNumber(account.getNumber())
-              .orElseThrow(() -> new ObjectNotFoundExeption("Account not found.", HttpStatus.FOUND));
-
-
+    private void makeTransfer(Account accountEntity, PixRequestDTO request){
         if (accountEntity.getBalance().compareTo(request.getTransactionAmount()) > 0) {
             var originalBalance = accountEntity.getBalance();
             var newBalance = originalBalance.subtract(request.getTransactionAmount());
@@ -90,6 +83,11 @@ public class PixServiceImpl implements PixService {
         }
     }
 
+    private boolean isValidKeyAndExists(PixRequestDTO request){
+        return validateKey(request) && existKey(request.getPixKey());
+    }
+
+
     private boolean existKey(String key){
         log.info("validate if the pixKey exists. {}", key);
         return true;
@@ -107,20 +105,6 @@ public class PixServiceImpl implements PixService {
             default:
                 return false;
         }
-    }
-
-
-    private UserAccountDTO extractUserAccountFromJwt(){
-        return new UserAccountDTO();
-    }
-
-
-    @Getter
-    class UserAccountDTO {
-        private String id = "750acb6e-79f8-45e2-b3f7-eb729142041d";
-        private String userId = "user_id";
-        private String agencyNumber = "1122";
-        private String number = "2022";
     }
 
 }

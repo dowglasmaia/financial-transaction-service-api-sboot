@@ -1,14 +1,13 @@
 package com.dowglasmaia.exactbank.services.impl;
 
 import com.dowglasmaia.exactbank.entity.Account;
-import com.dowglasmaia.exactbank.exeptions.ObjectNotFoundExeption;
 import com.dowglasmaia.exactbank.exeptions.UnprocessableEntityExeption;
 import com.dowglasmaia.exactbank.repository.AccountRepository;
 import com.dowglasmaia.exactbank.services.RechargeMobileService;
 import com.dowglasmaia.exactbank.services.TransactionService;
+import com.dowglasmaia.exactbank.services.client.account.FindAccountByNumberAndUserIdService;
 import com.dowglasmaia.exactbank.utils.PhoneValidator;
 import com.dowglasmaia.provider.model.MobileRechargeRequestDTO;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,17 +21,20 @@ import java.math.BigDecimal;
 public class RechargeMobileServiceImpl implements RechargeMobileService {
 
     private final KafkaTemplate<String, MobileRechargeRequestDTO> mobileRechargeRequesKafkaTemplate;
-    private final AccountRepository accountRepository;
+    private final FindAccountByNumberAndUserIdService findAccountByNumberAndUserIdService;
     private final TransactionService transactionService;
+    private final AccountRepository accountRepository;
 
     @Autowired
     public RechargeMobileServiceImpl(KafkaTemplate<String, MobileRechargeRequestDTO> mobileRechargeRequesKafkaTemplate,
-                                     AccountRepository accountRepository,
-                                     TransactionService transactionService
+                                     FindAccountByNumberAndUserIdService findAccountByNumberAndUserIdService,
+                                     TransactionService transactionService,
+                                     AccountRepository accountRepository
     ){
         this.mobileRechargeRequesKafkaTemplate = mobileRechargeRequesKafkaTemplate;
-        this.accountRepository = accountRepository;
+        this.findAccountByNumberAndUserIdService = findAccountByNumberAndUserIdService;
         this.transactionService = transactionService;
+        this.accountRepository = accountRepository;
     }
 
     @Override
@@ -47,8 +49,7 @@ public class RechargeMobileServiceImpl implements RechargeMobileService {
     }
 
     private Account validateAndUpdateBalanceAccount(BigDecimal amoutReacharge){
-        Account accountEntity = accountRepository.findByNumber(extractUserAccountFromJwt().getNumber())
-              .orElseThrow(() -> new ObjectNotFoundExeption("Account not found.", HttpStatus.FOUND));
+        Account accountEntity = findAccountByNumberAndUserIdService.findByNumberAndUserId();
 
         if (accountEntity.getBalance().compareTo(amoutReacharge) > 0) {
             var newBalance = accountEntity.getBalance().subtract(amoutReacharge);
@@ -70,18 +71,5 @@ public class RechargeMobileServiceImpl implements RechargeMobileService {
         }
     }
 
-    // Simulated method to extract user account details from JWT
-    private UserAccountDTO extractUserAccountFromJwt(){
-        return new UserAccountDTO();
-    }
-
-
-    @Getter
-    class UserAccountDTO {
-        private String id = "750acb6e-79f8-45e2-b3f7-eb729142041d";
-        private String userId = "user_id";
-        private String agencyNumber = "1122";
-        private String number = "2022";
-    }
 
 }

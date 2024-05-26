@@ -1,14 +1,15 @@
 package com.dowglasmaia.exactbank.services.impl;
 
+import com.dowglasmaia.exactbank.entity.Account;
 import com.dowglasmaia.exactbank.entity.Transaction;
 import com.dowglasmaia.exactbank.entity.TransactionTypeEnum;
 import com.dowglasmaia.exactbank.exeptions.UnprocessableEntityExeption;
 import com.dowglasmaia.exactbank.repository.TransactionRepository;
 import com.dowglasmaia.exactbank.services.TransactionService;
-import com.dowglasmaia.provider.model.DepositRequestDTO;
-import com.dowglasmaia.provider.model.MobileRechargeRequestDTO;
-import com.dowglasmaia.provider.model.PixRequestDTO;
-import com.dowglasmaia.provider.model.WithdrawRequestDTO;
+import com.dowglasmaia.exactbank.services.client.account.FindAccountByNumberAndUserIdService;
+import com.dowglasmaia.exactbank.services.impl.mapper.TransactionMapper;
+import com.dowglasmaia.exactbank.utils.DateConverter;
+import com.dowglasmaia.provider.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,15 +24,20 @@ import java.time.OffsetDateTime;
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
+    private final FindAccountByNumberAndUserIdService findAccountByNumberAndUserIdService;
 
 
     @Autowired
-    public TransactionServiceImpl(TransactionRepository transactionRepository){
+    public TransactionServiceImpl(TransactionRepository transactionRepository,
+                                  FindAccountByNumberAndUserIdService findAccountByNumberAndUserIdService
+    ){
         this.transactionRepository = transactionRepository;
+        this.findAccountByNumberAndUserIdService = findAccountByNumberAndUserIdService;
     }
 
     @Override
     public void save(Object transaction, String accountId, BigDecimal amount, String agencyId){
+        log.info("Start save Transaction");
         var transactionEntity = Transaction.builder()
               .transactionType(getTransactionType(transaction))
               .accountId(accountId)
@@ -43,7 +49,26 @@ public class TransactionServiceImpl implements TransactionService {
         transactionRepository.save(transactionEntity);
     }
 
+    @Override
+    public TransactionsResponseDTO findByDateRange(String initialDate, String finalDate){
+        log.info("Start findByDateRange Transactions");
 
+        Account accountEntity = findAccountByNumberAndUserIdService.findByNumberAndUserId();
+
+        var startDate = DateConverter.convertStringToOffsetDateTime(initialDate);
+        log.info("startDate: {}", startDate);
+
+        var endDate = DateConverter.convertStringToOffsetDateTime(finalDate);
+        log.info("endDate: {}", endDate);
+
+        var transactionsEntity = transactionRepository.findByDateHourBetween(startDate, endDate);
+
+        var transactionsResponse = TransactionMapper.toTransactionsResponse(transactionsEntity);
+
+        transactionsResponse.setBalance(accountEntity.getBalance());
+
+        return transactionsResponse;
+    }
 
 
     private TransactionTypeEnum getTransactionType(Object object){
@@ -61,5 +86,4 @@ public class TransactionServiceImpl implements TransactionService {
 
         throw new UnprocessableEntityExeption("Type of transaction is not valid", HttpStatus.UNPROCESSABLE_ENTITY);
     }
-
 }

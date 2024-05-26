@@ -181,7 +181,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Transactions'
+                $ref: '#/components/schemas/TransactionsResponse'
         401:
           description: Unauthorized
           content:
@@ -195,20 +195,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResponseError'
 
-  /transactions/balance:
+  /transactions/{id}:
     get:
       tags:
         - Transactions
-      summary: Get Balance
-      description: Method to get a user's Balance.
-      operationId: getBalance
+      summary: Get Transaction
+      description: Method to get a Transaction.
+      operationId: getTransaction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "6c6fa8c9-743a-4c79-9cf6-e1d5e25ad4a5"
+          description: The ID of the transaction to retrieve
       responses:
         200:
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Transactions'
+                $ref: '#/components/schemas/TransactionResponse'
         401:
           description: Unauthorized
           content:
@@ -234,11 +243,10 @@ components:
         amount:
           type: number
           format: decimal
-
           example: 200.00
         account:
           type: string
-          example: '123456-7'
+          example: '1234567'
         agency:
           type: string
           example: '0001'
@@ -342,20 +350,19 @@ components:
           example: '0001'
         number:
           type: string
-          example: '123456-7'
+          example: '1234567'
         balance:
           type: number
           format: decimal
 
           example: 1000.00
 
-    Transaction:
+    TransactionResponse:
       type: object
       properties:
         amount:
           type: number
           format: decimal
-
           example: 1000.00
         dateHour:
           type: string
@@ -365,23 +372,25 @@ components:
           type: string
           example: 'Pix'
 
-    Transactions:
+    TransactionsResponse:
       type: object
       properties:
         transaction:
           type: array
           items:
-            $ref: '#/components/schemas/Transaction'
+            $ref: '#/components/schemas/TransactionResponse'
         sumIncoming:
           type: number
           format: decimal
-
           example: 2000.00
         sumOutgoing:
           type: number
           format: decimal
-
           example: 1500.00
+        balance:
+          type: number
+          format: decimal
+          example: 10500.00
 
     ResponseError:
       type: object

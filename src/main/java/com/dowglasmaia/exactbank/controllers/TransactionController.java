@@ -1,9 +1,6 @@
 package com.dowglasmaia.exactbank.controllers;
 
-import com.dowglasmaia.exactbank.services.AtmWithdrawalService;
-import com.dowglasmaia.exactbank.services.DepositService;
-import com.dowglasmaia.exactbank.services.PixService;
-import com.dowglasmaia.exactbank.services.RechargeMobileService;
+import com.dowglasmaia.exactbank.services.*;
 import com.dowglasmaia.provider.api.TransactionsApi;
 import com.dowglasmaia.provider.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,17 +19,20 @@ public class TransactionController implements TransactionsApi {
     private final DepositService depositService;
     private final RechargeMobileService rechargeMobileService;
     private final AtmWithdrawalService atmWithdrawalService;
+    private final TransactionService transactionService;
 
     @Autowired
     public TransactionController(PixService pixService,
                                  DepositService depositService,
                                  RechargeMobileService rechargeMobileService,
-                                 AtmWithdrawalService atmWithdrawalService
+                                 AtmWithdrawalService atmWithdrawalService,
+                                 TransactionService transactionService
     ){
         this.pixService = pixService;
         this.depositService = depositService;
         this.rechargeMobileService = rechargeMobileService;
         this.atmWithdrawalService = atmWithdrawalService;
+        this.transactionService = transactionService;
     }
 
 
@@ -73,15 +73,14 @@ public class TransactionController implements TransactionsApi {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @Override
-    public ResponseEntity<TransactionsDTO> getBalance(){
-
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
 
     @Override
-    public ResponseEntity<TransactionsDTO> getTransactions(String initialDate, String finalDate){
+    public ResponseEntity<TransactionsResponseDTO> getTransactions(String initialDate, String finalDate){
 
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        var transactions = transactionService.findByDateRange(initialDate, finalDate);
+
+        return ResponseEntity.status(HttpStatus.OK).body(transactions);
     }
+
+
 }

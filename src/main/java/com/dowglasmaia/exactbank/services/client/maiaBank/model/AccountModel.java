@@ -1,4 +1,4 @@
-package com.dowglasmaia.exactbank.integrations.model;
+package com.dowglasmaia.exactbank.services.client.maiaBank.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

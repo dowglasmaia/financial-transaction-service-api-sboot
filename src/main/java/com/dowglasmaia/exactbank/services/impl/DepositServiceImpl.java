@@ -1,7 +1,6 @@
 package com.dowglasmaia.exactbank.services.impl;
 
 import com.dowglasmaia.exactbank.entity.Account;
-import com.dowglasmaia.exactbank.entity.Agency;
 import com.dowglasmaia.exactbank.exeptions.ObjectNotFoundExeption;
 import com.dowglasmaia.exactbank.exeptions.UnprocessableEntityExeption;
 import com.dowglasmaia.exactbank.repository.AccountRepository;
@@ -22,6 +21,7 @@ public class DepositServiceImpl implements DepositService {
     private final AccountRepository accountRepository;
     private final TransactionService transactionService;
 
+
     @Autowired
     public DepositServiceImpl(AgencyService agencyService,
                               AccountRepository accountRepository,
@@ -39,9 +39,7 @@ public class DepositServiceImpl implements DepositService {
         String agencyId = agencyService.getCurrentAgency();
         log.info("Deposit requested at agency: {}", agencyId);
 
-        Agency agency = agencyService.findByNumber(request.getAgency());
-
-        Account accountEntity = accountRepository.findByAgencyAndNumber(agency, request.getAccount())
+        Account accountEntity = accountRepository.findByAgencyAndNumber(agencyId, request.getAccount())
               .orElseThrow(() -> new ObjectNotFoundExeption("Account not found.", HttpStatus.FOUND));
 
         var newBalance = accountEntity.getBalance().add(request.getAmount());

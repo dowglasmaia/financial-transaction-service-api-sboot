@@ -1,4 +1,4 @@
-package com.dowglasmaia.exactbank.integrations;
+package com.dowglasmaia.exactbank.services.client.maiaBank;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.cloud.openfeign.FeignClient;
