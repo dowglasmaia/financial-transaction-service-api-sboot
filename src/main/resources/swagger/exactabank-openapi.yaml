@@ -291,11 +291,10 @@ components:
             - CLARO
             - TIM
             - ALGAR
-          example: 'Vivo'
+          example: 'VIVO'
         amount:
           type: number
           format: decimal
-
           example: 50.00
 
     WithdrawRequest:

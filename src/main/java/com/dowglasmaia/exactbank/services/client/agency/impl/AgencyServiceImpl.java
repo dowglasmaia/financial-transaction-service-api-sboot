@@ -25,7 +25,7 @@ public class AgencyServiceImpl implements AgencyService {
         log.info("Start getCurrentAgency");
 
         // Lógica para obter a agência atual
-        return "1120";
+        return "c0ede6d9-7c6d-4964-b2be-b3284f40e650";
     }
 
     @Override

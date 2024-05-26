@@ -1,6 +1,6 @@
-package com.dowglasmaia.exactbank.entity;
+package com.dowglasmaia.exactbank.services.model;
 
-import jakarta.persistence.*;
+import com.dowglasmaia.exactbank.entity.TransactionTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,24 +13,11 @@ import java.time.OffsetDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "transaction")
-public class Transaction {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+public class TransactionRequestDTO {
 
     private OffsetDateTime dateHour;
-
     private BigDecimal amount;
-
     private String accountId;
-
-    private String agencyId;
-
-    @Enumerated(EnumType.STRING)
     private TransactionTypeEnum transactionType;
 
 }
-
