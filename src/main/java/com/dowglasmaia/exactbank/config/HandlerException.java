@@ -32,4 +32,13 @@ public class HandlerException extends ResponseEntityExceptionHandler {
     }
 
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public final ResponseEntity<ResponseErrorDTO> handleIllegalArgumentException(IllegalArgumentException ex){
+        ResponseErrorDTO exceptionResponse = new ResponseErrorDTO();
+        exceptionResponse.setCode(HttpStatus.UNPROCESSABLE_ENTITY.name());
+        exceptionResponse.setMessage(ex.getMessage());
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+
 }

@@ -18,8 +18,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
-@Service
 @Slf4j
+@Service
 public class PixServiceImpl implements PixService {
 
     private final MaiaBankClient maiaBankClient;

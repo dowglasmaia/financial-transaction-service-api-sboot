@@ -1,7 +1,10 @@
 package com.dowglasmaia.exactbank.controllers.validate;
 
 import com.dowglasmaia.provider.model.DepositRequestDTO;
+import com.dowglasmaia.provider.model.MobileRechargeRequestDTO;
 import com.dowglasmaia.provider.model.PixRequestDTO;
+
+import java.util.EnumSet;
 
 import static java.util.Objects.nonNull;
 
@@ -31,6 +34,24 @@ public class ValidateBodyRequest {
             throw new IllegalArgumentException("Agency is required");
         }
 
+    }
+
+    public static void validateMobileRechargeRequest(MobileRechargeRequestDTO body) {
+        if (body == null) {
+            throw new IllegalArgumentException("Request body is required");
+        }
+        if (body.getPhoneNumber() == null) {
+            throw new IllegalArgumentException("Phone number is required");
+        }
+        if (body.getAmount() == null || body.getAmount() <= 0) {
+            throw new IllegalArgumentException("Amount must be positive and non-null");
+        }
+        if (body.getAreaCode() == null) {
+            throw new IllegalArgumentException("Area code is required");
+        }
+        if (body.getCarrier() == null || !EnumSet.allOf(MobileRechargeRequestDTO.CarrierEnum.class).contains(body.getCarrier())) {
+            throw new IllegalArgumentException("Invalid carrier");
+        }
     }
 
 }
