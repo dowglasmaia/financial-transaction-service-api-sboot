@@ -5,7 +5,6 @@ import com.dowglasmaia.exactbank.exeptions.ObjectNotFoundExeption;
 import com.dowglasmaia.exactbank.exeptions.UnprocessableEntityExeption;
 import com.dowglasmaia.exactbank.repository.AccountRepository;
 import com.dowglasmaia.exactbank.services.RechargeMobileService;
-import com.dowglasmaia.exactbank.utils.BigDecimalConvert;
 import com.dowglasmaia.exactbank.utils.PhoneValidator;
 import com.dowglasmaia.provider.model.MobileRechargeRequestDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -35,9 +34,7 @@ public class RechargeMobileServiceImpl implements RechargeMobileService {
     public void makeRecharge(MobileRechargeRequestDTO request){
         validatePhoneNumber(request);
 
-        var amoutReacharge = BigDecimalConvert.toBigDecimal(request.getAmount());
-
-        validateAndUpdateBalanceAccount(amoutReacharge);
+        validateAndUpdateBalanceAccount(request.getAmount());
 
         mobileRechargeRequesKafkaTemplate.send("recharge-mobile-topic", request);
     }

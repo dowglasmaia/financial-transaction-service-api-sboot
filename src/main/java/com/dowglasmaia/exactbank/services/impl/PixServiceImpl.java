@@ -6,7 +6,6 @@ import com.dowglasmaia.exactbank.exeptions.UnprocessableEntityExeption;
 import com.dowglasmaia.exactbank.integrations.MaiaBankClient;
 import com.dowglasmaia.exactbank.repository.AccountRepository;
 import com.dowglasmaia.exactbank.services.PixService;
-import com.dowglasmaia.exactbank.utils.BigDecimalConvert;
 import com.dowglasmaia.exactbank.utils.CPFValidator;
 import com.dowglasmaia.exactbank.utils.EmailValidator;
 import com.dowglasmaia.exactbank.utils.PhoneValidator;
@@ -38,9 +37,7 @@ public class PixServiceImpl implements PixService {
         if (isValidKeyAndExists(request)) {
             String accountNumber = extractAccountNumberFromJwt();
 
-            BigDecimal amountTransferred = BigDecimalConvert.toBigDecimal(request.getTransactionAmount());
-
-            makeTransfer(accountNumber, amountTransferred);
+            makeTransfer(accountNumber, request.getTransactionAmount());
             log.info("Pix sent successfully");
         } else {
             String errorMessage = "Pix key does not exist or is invalid for the specified type: " + request.getKeyType();
@@ -59,7 +56,8 @@ public class PixServiceImpl implements PixService {
         return "2022"; // Simulação, substituir por lógica real
     }
 
-    public void makeTransfer(String accountNumber, BigDecimal transactionAmount){
+
+    private void makeTransfer(String accountNumber, BigDecimal transactionAmount){
         Account accountEntity = accountRepository.findByNumber(accountNumber)
               .orElseThrow(() -> new ObjectNotFoundExeption("Account not found.", HttpStatus.FOUND));
 

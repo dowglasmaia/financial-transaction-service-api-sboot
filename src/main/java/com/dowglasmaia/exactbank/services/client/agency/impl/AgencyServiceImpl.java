@@ -1,9 +1,9 @@
-package com.dowglasmaia.exactbank.services.impl;
+package com.dowglasmaia.exactbank.services.client.agency.impl;
 
 import com.dowglasmaia.exactbank.entity.Agency;
 import com.dowglasmaia.exactbank.exeptions.ObjectNotFoundExeption;
 import com.dowglasmaia.exactbank.repository.AgencyRepository;
-import com.dowglasmaia.exactbank.services.AgencyService;
+import com.dowglasmaia.exactbank.services.client.agency.AgencyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

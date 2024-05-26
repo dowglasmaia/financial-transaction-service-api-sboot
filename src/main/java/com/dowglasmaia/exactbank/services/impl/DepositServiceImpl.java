@@ -5,9 +5,8 @@ import com.dowglasmaia.exactbank.entity.Agency;
 import com.dowglasmaia.exactbank.exeptions.ObjectNotFoundExeption;
 import com.dowglasmaia.exactbank.exeptions.UnprocessableEntityExeption;
 import com.dowglasmaia.exactbank.repository.AccountRepository;
-import com.dowglasmaia.exactbank.services.AgencyService;
+import com.dowglasmaia.exactbank.services.client.agency.AgencyService;
 import com.dowglasmaia.exactbank.services.DepositService;
-import com.dowglasmaia.exactbank.utils.BigDecimalConvert;
 import com.dowglasmaia.provider.model.DepositRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +40,7 @@ public class DepositServiceImpl implements DepositService {
         Account accountEntity = accountRepository.findByAgencyAndNumber(agency, request.getAccount())
               .orElseThrow(() -> new ObjectNotFoundExeption("Account not found.", HttpStatus.FOUND));
 
-        var amountToDeposit = BigDecimalConvert.toBigDecimal(request.getAmount());
-        var newBalance = accountEntity.getBalance().add(amountToDeposit);
+        var newBalance = accountEntity.getBalance().add(request.getAmount());
 
         accountEntity.setBalance(newBalance);
 

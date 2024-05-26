@@ -1,5 +1,6 @@
 package com.dowglasmaia.exactbank.controllers;
 
+import com.dowglasmaia.exactbank.services.AtmWithdrawalService;
 import com.dowglasmaia.exactbank.services.DepositService;
 import com.dowglasmaia.exactbank.services.PixService;
 import com.dowglasmaia.exactbank.services.RechargeMobileService;
@@ -20,15 +21,18 @@ public class TransactionController implements TransactionsApi {
     private final PixService pixService;
     private final DepositService depositService;
     private final RechargeMobileService rechargeMobileService;
+    private final AtmWithdrawalService atmWithdrawalService;
 
     @Autowired
     public TransactionController(PixService pixService,
                                  DepositService depositService,
-                                 RechargeMobileService rechargeMobileService
+                                 RechargeMobileService rechargeMobileService,
+                                 AtmWithdrawalService atmWithdrawalService
     ){
         this.pixService = pixService;
         this.depositService = depositService;
         this.rechargeMobileService = rechargeMobileService;
+        this.atmWithdrawalService = atmWithdrawalService;
     }
 
 
@@ -61,6 +65,15 @@ public class TransactionController implements TransactionsApi {
     }
 
     @Override
+    public ResponseEntity<Void> withdraw(WithdrawRequestDTO body){
+        validateWithdrawRequest(body);
+
+        atmWithdrawalService.makeAtmWithdrawal(body);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @Override
     public ResponseEntity<TransactionsDTO> getBalance(){
 
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
@@ -71,13 +84,4 @@ public class TransactionController implements TransactionsApi {
 
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
-
-
-    @Override
-    public ResponseEntity<Void> withdraw(WithdrawRequestDTO body){
-
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
-
-
 }

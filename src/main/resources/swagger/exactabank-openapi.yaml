@@ -233,7 +233,8 @@ components:
       properties:
         amount:
           type: number
-          format: double
+          format: decimal
+
           example: 200.00
         account:
           type: string
@@ -254,7 +255,8 @@ components:
           example: 'pix-key-123'
         transactionAmount:
           type: number
-          format: double
+          format: decimal
+
           example: 150.75
         keyType:
           type: string
@@ -292,7 +294,8 @@ components:
           example: 'Vivo'
         amount:
           type: number
-          format: double
+          format: decimal
+
           example: 50.00
 
     WithdrawRequest:
@@ -302,8 +305,14 @@ components:
       properties:
         amount:
           type: number
-          format: double
+          format: decimal
           example: 200.00
+        agency:
+          type: string
+          example: '0001'
+        numberAccount:
+          type: string
+          example: '1234567'
 
     User:
       type: object
@@ -337,7 +346,8 @@ components:
           example: '123456-7'
         balance:
           type: number
-          format: double
+          format: decimal
+
           example: 1000.00
 
     Transaction:
@@ -345,7 +355,8 @@ components:
       properties:
         amount:
           type: number
-          format: double
+          format: decimal
+
           example: 1000.00
         dateHour:
           type: string
@@ -364,11 +375,13 @@ components:
             $ref: '#/components/schemas/Transaction'
         sumIncoming:
           type: number
-          format: double
+          format: decimal
+
           example: 2000.00
         sumOutgoing:
           type: number
-          format: double
+          format: decimal
+
           example: 1500.00
 
     ResponseError:

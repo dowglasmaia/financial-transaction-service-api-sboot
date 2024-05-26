@@ -1,4 +1,4 @@
-package com.dowglasmaia.exactbank.services;
+package com.dowglasmaia.exactbank.services.client.agency;
 
 import com.dowglasmaia.exactbank.entity.Agency;
 
