@@ -3,11 +3,12 @@ package com.dowglasmaia.exactbank.services.impl;
 import com.dowglasmaia.exactbank.entity.Account;
 import com.dowglasmaia.exactbank.entity.Transaction;
 import com.dowglasmaia.exactbank.entity.TransactionTypeEnum;
+import com.dowglasmaia.exactbank.exeptions.ObjectNotFoundExeption;
 import com.dowglasmaia.exactbank.exeptions.UnprocessableEntityExeption;
 import com.dowglasmaia.exactbank.repository.TransactionRepository;
 import com.dowglasmaia.exactbank.services.TransactionService;
 import com.dowglasmaia.exactbank.services.client.account.FindAccountByNumberAndUserIdService;
-import com.dowglasmaia.exactbank.services.impl.mapper.TransactionMapper;
+import com.dowglasmaia.exactbank.services.model.TransactionRequestDTO;
 import com.dowglasmaia.exactbank.utils.DateConverter;
 import com.dowglasmaia.provider.model.*;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+
+import static com.dowglasmaia.exactbank.services.impl.mapper.TransactionMapper.toTransactionRequest;
+import static com.dowglasmaia.exactbank.services.impl.mapper.TransactionMapper.toTransactionsResponse;
 
 
 @Slf4j
@@ -63,11 +67,20 @@ public class TransactionServiceImpl implements TransactionService {
 
         var transactionsEntity = transactionRepository.findByDateHourBetween(startDate, endDate);
 
-        var transactionsResponse = TransactionMapper.toTransactionsResponse(transactionsEntity);
+        var transactionsResponse = toTransactionsResponse(transactionsEntity);
 
         transactionsResponse.setBalance(accountEntity.getBalance());
 
         return transactionsResponse;
+    }
+
+    @Override
+    public TransactionResponseDTO findById(String id){
+        var transaction = transactionRepository.findById(id)
+              .orElseThrow(() -> new ObjectNotFoundExeption("Transaction not found", HttpStatus.FOUND));
+
+        return toTransactionRequest(transaction);
+
     }
 
 

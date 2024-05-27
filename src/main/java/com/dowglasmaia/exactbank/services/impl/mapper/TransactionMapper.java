@@ -44,4 +44,12 @@ public class TransactionMapper {
         return transactionsResponse;
     }
 
+    public static TransactionResponseDTO toTransactionRequest(Transaction transaction){
+        TransactionResponseDTO response = new TransactionResponseDTO();
+        response.setAmount(transaction.getAmount());
+        response.setTransactionType(transaction.getTransactionType().name());
+        response.setDateHour(transaction.getDateHour());
+        return response;
+    }
+
 }

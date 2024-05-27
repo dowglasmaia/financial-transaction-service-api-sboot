@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 import static com.dowglasmaia.exactbank.controllers.validate.ValidateBodyRequest.*;
 
 @RestController
@@ -80,6 +82,14 @@ public class TransactionController implements TransactionsApi {
         var transactions = transactionService.findByDateRange(initialDate, finalDate);
 
         return ResponseEntity.status(HttpStatus.OK).body(transactions);
+    }
+
+    @Override
+    public ResponseEntity<TransactionResponseDTO> getTransaction(UUID id){
+
+        var transaction = transactionService.findById(String.valueOf(id));
+
+        return ResponseEntity.status(HttpStatus.OK).body(transaction);
     }
 
 
