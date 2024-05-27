@@ -194,8 +194,8 @@ resilience4j:
 ### Execution
 
 ---
-* Todos os componentes necessários para a execução, incluindo banco de dados, Kafka e API receptora, estão configurados 
-no docker-compose. Para iniciar a execução, é necessário ter o Docker instalado na máquina e executar o seguinte:
+* All necessary components for execution, including the database, Kafka, and receiving API, are configured in the 
+docker-compose file. To start the execution, it is required to have Docker installed on the machine and run the following command:
 ```docker
 docker-compose up
 ````
