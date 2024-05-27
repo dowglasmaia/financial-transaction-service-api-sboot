@@ -190,14 +190,26 @@ resilience4j:
 </dependencyManagement>
 ```
 
+
+### Execution
+
 ---
+* Todos os componentes necessários para a execução, incluindo banco de dados, Kafka e API receptora, estão configurados 
+no docker-compose. Para iniciar a execução, é necessário ter o Docker instalado na máquina e executar o seguinte:
+```docker
+docker-compose up
+````
 
 ### Technology References
+
+--- 
 
 * [Resilience4j Docs](https://resilience4j.readme.io/docs/circuitbreaker)
 * [Spring Boot3](https://docs.spring.io/spring-boot/docs/3.1.11/reference/html/)
 * [Docker Docs](https://docs.docker.com/)
 * [JUnit Docs](https://junit.org/junit5/docs/current/user-guide/)
 * [Opentelemetry Docs](https://opentelemetry.io/docs/)
+* [Grafana](https://grafana.com/docs/)
+* [Prometheus](https://prometheus.io/docs/introduction/overview/)
 
 
