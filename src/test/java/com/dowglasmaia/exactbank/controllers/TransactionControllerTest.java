@@ -1,7 +1,6 @@
 package com.dowglasmaia.exactbank.controllers;
 
 
-import com.dowglasmaia.exactbank.mock.MockBuild;
 import com.dowglasmaia.exactbank.services.*;
 import com.dowglasmaia.provider.model.PixRequestDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +20,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.UUID;
+
+import static com.dowglasmaia.exactbank.mock.MockBuild.pixRequestBuild;
+import static com.dowglasmaia.exactbank.mock.MockBuild.transactionResponseBuild;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -53,7 +57,7 @@ public class TransactionControllerTest {
     @SneakyThrows
     @Test
     public void souldSendPixSuccessfully(){
-        var pixRequest = MockBuild.pixRequestBuild();
+        var pixRequest = pixRequestBuild();
 
         willDoNothing().given(pixService).makeTransfer(Mockito.any(PixRequestDTO.class));
 
@@ -89,6 +93,28 @@ public class TransactionControllerTest {
               .andExpect(status().isUnprocessableEntity())
               .andExpect(jsonPath("$.code").value("UNPROCESSABLE_ENTITY"))
               .andExpect(jsonPath("$.message").value(msgError));
+    }
+
+    @SneakyThrows
+    @Test
+    public void souldGetTransactionSuccessfully(){
+        var response = transactionResponseBuild();
+
+        System.out.println(response.getDateHour());
+
+        var id = UUID.randomUUID();
+
+        given(transactionService.findById(Mockito.any()))
+              .willReturn(response);
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+              .get(URI_PATH.concat("/" + id))
+              .accept(MediaType.APPLICATION_JSON);
+
+        mvc.perform(requestBuilder)
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.amount").value(response.getAmount()))
+              .andExpect(jsonPath("$.transactionType").value(response.getTransactionType()));
     }
 
 }
