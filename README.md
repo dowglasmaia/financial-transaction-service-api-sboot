@@ -194,10 +194,23 @@ resilience4j:
 ### Execution
 
 ---
-* All necessary components for execution, including the database, Kafka, and receiving API, are configured in the 
-docker-compose file. To start the execution, it is required to have Docker installed on the machine and run the following command:
+* The entire application is containerized with Docker, which makes it easy to set up and run tests. To test the application, follow these steps:
+
+* 1: Make sure Docker is installed on your machine.
+* 2: Download the project from the repository.
+* 3: Navigate to the project directory in your terminal.
+* 4: Run the following command:
+
+This will start all the necessary services, including the database, Kafka, Zookeeper, and the Spring Boot application. Docker Compose will automatically build the API image as defined in the docker-compose.yml file.
+
+Additionally, in the resources/postman_collection folder, you'll find a Postman collection with example requests to test the API.
+
+With these steps, your application will be up and running, ready for testing.
 ```docker
-docker-compose up
+mvn clean -U install
+
+docker-compose up --build
+
 ````
 
 ### Technology References

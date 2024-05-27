@@ -1,7 +1,6 @@
 server:
   port: 8080
 
-
 spring:
   profiles:
     active: test
@@ -17,19 +16,22 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
   datasource:
-    url: jdbc:postgresql://localhost/transactions
+    url: jdbc:postgresql://pg-db:5432/transactions
     username: maia
     password: maiapw
     driver-class-name: org.postgresql.Driver
-    port: 5432
   kafka:
+    bootstrap-servers: kafka:29092
     producer:
-      bootstrap-servers: localhost:29092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    admin:
+      client-id: admin
 
 api:
   client:
     maiabank:
-      url: http://localhost:8089/api/v1/transactions
+      url: http://maiabank-api:8089/api/v1/transactions
 
 management:
   tracing:
@@ -63,9 +65,7 @@ management:
           server:
             requests: true
 
-
-
-#Circuit Breaker
+# Circuit Breaker
 resilience4j:
   circuitbreaker:
     instances:
@@ -80,5 +80,3 @@ resilience4j:
         permittedNumberOfCallsInHalfOpenState: 3
         enableAutomaticTransitionFromOpenToClosedState: true
         transitionFromOpenToClosedStateOnSuccessfulCall: true
-
-

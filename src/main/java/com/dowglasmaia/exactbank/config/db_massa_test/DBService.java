@@ -6,11 +6,13 @@ import com.dowglasmaia.exactbank.entity.User;
 import com.dowglasmaia.exactbank.repository.AccountRepository;
 import com.dowglasmaia.exactbank.repository.AgencyRepository;
 import com.dowglasmaia.exactbank.repository.UserRepository;
+import lombok.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.util.UUID;
 
 @Component
 public class DBService {
@@ -18,6 +20,24 @@ public class DBService {
     private final UserRepository userRepository;
     private final AgencyRepository agencyRepository;
     private final AccountRepository accountRepository;
+
+    private UserAccountDTO userAccountDTO = new UserAccountDTO();
+
+    public UserAccountDTO extractUserAccountFromJwt(){
+        return userAccountDTO;
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class UserAccountDTO {
+        private String id;
+        private String userId;
+        private String agencyNumber;
+        private String number;
+    }
+
 
     @Autowired
     public DBService(UserRepository userRepository,
@@ -28,12 +48,20 @@ public class DBService {
         this.accountRepository = accountRepository;
     }
 
-    public void instanciateTestDatabase() throws ParseException{
+    @SneakyThrows
+    public void instanciateTestDatabase()   {
         var user = createUser();
 
         var agency = createAgency();
 
         var account = createAccount(agency, user);
+
+        Thread.sleep(1000);
+
+        userAccountDTO.setId(String.valueOf(UUID.randomUUID()));
+        userAccountDTO.setUserId(user.getId());
+        userAccountDTO.setAgencyNumber(agency.getNumber());
+        userAccountDTO.setNumber(account.getNumber());
 
     }
 

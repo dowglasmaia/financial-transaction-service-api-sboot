@@ -1,5 +1,19 @@
 version: "3.3"
 services:
+  exactbank-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=test
+    networks:
+      - maianet
+    depends_on:
+      - pg-db
+      - kafka
+
   pg-db:
     container_name: pg-db
     image: postgres:14.12-alpine3.18
@@ -8,8 +22,9 @@ services:
     environment:
       - POSTGRES_USER=maia
       - POSTGRES_PASSWORD=maiapw
+      - POSTGRES_DB=transactions
     ports:
-      - 5432:5432
+      - "5432:5432"
     volumes:
       - postgresql:/var/lib/postgresql
       - postgresql_data:/var/lib/postgresql/data
@@ -47,7 +62,7 @@ services:
     ports:
       - "19000:9000"
     environment:
-      KAFKA_BROKERCONNECT: kafka:29092
+      KAFKA_BROKERCONNECT: kafka:9092
 
   maiabank-api:
     container_name: maiabank-api
@@ -55,7 +70,7 @@ services:
     networks:
       - maianet
     ports:
-      - 8089:8089
+      - "8089:8089"
 
 networks:
   maianet:

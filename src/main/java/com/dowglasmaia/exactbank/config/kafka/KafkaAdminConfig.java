@@ -14,18 +14,18 @@ import java.util.HashMap;
 @Configuration
 public class KafkaAdminConfig {
     private final KafkaProperties properties;
-    private final int PARTITION = 1;
-    private final int REPLICA = 1;
+    private static final int PARTITION = 1;
+    private static final int REPLICA = 1;
 
     @Bean
-    public KafkaAdmin kafkaAdmin(){
+    public KafkaAdmin kafkaAdmin() {
         var configs = new HashMap<String, Object>();
         configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getBootstrapServers());
         return new KafkaAdmin(configs);
     }
 
     @Bean
-    public KafkaAdmin.NewTopics topics(){
+    public KafkaAdmin.NewTopics topics() {
         return new KafkaAdmin.NewTopics(
               TopicBuilder.name("recharge-mobile-topic")
                     .partitions(PARTITION)
