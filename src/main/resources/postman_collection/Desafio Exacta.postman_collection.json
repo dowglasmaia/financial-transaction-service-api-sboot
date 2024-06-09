@@ -42,12 +42,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/v1/transactions/send-pix",
+					"raw": "http://localhost:8088/api/v1/transactions/send-pix",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "8088",
 					"path": [
 						"api",
 						"v1",
@@ -65,7 +65,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n \"amount\": 1000.00,\r\n \"account\": \"2022\",\r\n \"agency\": \"0211\"\r\n}",
+					"raw": "{\r\n \"amount\": 100.00,\r\n \"account\": \"2022\",\r\n \"agency\": \"0211\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -73,12 +73,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/v1/transactions/deposit",
+					"raw": "http://localhost:8088/api/v1/transactions/deposit",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "8088",
 					"path": [
 						"api",
 						"v1",
@@ -104,12 +104,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/v1/transactions/recharge-mobile",
+					"raw": "http://localhost:8088/api/v1/transactions/recharge-mobile",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "8088",
 					"path": [
 						"api",
 						"v1",
@@ -135,12 +135,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/v1/transactions/atm-withdrawal",
+					"raw": "http://localhost:8088/api/v1/transactions/atm-withdrawal",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "8088",
 					"path": [
 						"api",
 						"v1",
@@ -166,12 +166,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/v1/transactions/atm-withdrawal",
+					"raw": "http://localhost:8088/api/v1/transactions/atm-withdrawal",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "8088",
 					"path": [
 						"api",
 						"v1",
@@ -188,12 +188,12 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/v1/transactions?initial-date=20/05/2024&final-date=26/05/2024",
+					"raw": "http://localhost:8088/api/v1/transactions?initial-date=20/05/2024&final-date=27/05/2025",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "8088",
 					"path": [
 						"api",
 						"v1",
@@ -206,7 +206,7 @@
 						},
 						{
 							"key": "final-date",
-							"value": "26/05/2024"
+							"value": "27/05/2025"
 						}
 					]
 				}
@@ -219,12 +219,12 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/v1/transactions/4f93014d-174b-4725-b275-5f58d1ac6c45",
+					"raw": "http://localhost:8088/api/v1/transactions/4f93014d-174b-4725-b275-5f58d1ac6c45",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "8088",
 					"path": [
 						"api",
 						"v1",
