@@ -207,7 +207,6 @@ Additionally, in the resources/postman_collection folder, you'll find a Postman 
 
 With these steps, your application will be up and running, ready for testing.
 ```docker
-mvn clean -U install
 
 docker-compose up --build
 
