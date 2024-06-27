@@ -1,6 +1,6 @@
 version: "3.3"
 services:
-  exactbank-api:
+  financial-transaction-api:
     build:
       context: .
       dockerfile: Dockerfile
