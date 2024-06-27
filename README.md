@@ -1,4 +1,4 @@
-## Exactbank API
+## Financial Transaction Service API
 
 * API developed with 17 Java and Spring Boot 3x
 
