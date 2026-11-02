@@ -18,7 +18,7 @@ Each app has an isolated, path-filtered pipeline. Run backend commands from `api
 
 ## Code map (package root `com.dowglasmaia.financialtransaction`, under `api-financial-transaction-service/src/main/java/`) — **do not move or rename packages**
 `controllers` (`TransactionController` implements generated `TransactionsApi`; `validate.ValidateBodyRequest`) · `services` (+`impl`: Pix, Deposit, RechargeMobile, AtmWithdrawal, Transaction; `impl.mapper.TransactionMapper`) · `services.client.account|agency|maiaBank` (local helpers + Feign client) · `entity` (User→table `usuario`, Agency, Account, Transaction, TransactionTypeEnum) · `repository` · `config` (`HandlerException`, `kafka`, `db_massa_test`) · `exeptions` (sic) · `utils` (CPF/e-mail/phone validators, `DateConverter`).
-Data: `usuario(id,name,cpf uniq,email uniq,phone_number,area_code)`, `agency(id,number)`, `account(id,agency_id,user_id,number,balance)`, `transaction(id,date_hour,amount,account_id,agency_id,transaction_type)` — UUID strings as ids, no FKs/indexes on `transaction`, `ddl-auto: create`.
+Schema is owned by **Flyway** (`db/migration/V1__baseline.sql`; Hibernate `ddl-auto: validate`; `transaction.account_id` has no FK until BE-03 fixes F-08). Data: `usuario(id,name,cpf uniq,email uniq,phone_number,area_code)`, `agency(id,number)`, `account(id,agency_id,user_id,number,balance)`, `transaction(id,date_hour,amount,account_id,agency_id,transaction_type)` — UUID strings as ids, FK only on `transaction.agency_id`, index `(account_id, date_hour desc)`.
 
 ## Hard constraints
 * **Package structure and architecture stay** (controller → service → repository). Improve inside existing packages; new classes go into existing packages.
@@ -36,7 +36,7 @@ Data: `usuario(id,name,cpf uniq,email uniq,phone_number,area_code)`, `agency(id,
 | F-03 | Read-modify-write on `balance`, no lock/`@Version`; Pix "restore balance" overwrites concurrent changes | BE-03 |
 | F-04 | Statement + sums unscoped (all accounts); `GET /transactions/{id}` no ownership | BE-04 |
 | F-05 | Non-card withdraw debits any account by number, ledger on caller | BE-04 |
-| F-06 | Default profile `test` + `ddl-auto: create` wipes DB; DB credentials in tracked `application.yaml` | BE-02 |
+| F-06 | ~~Default profile `test` + `ddl-auto: create` wipes DB; DB credentials in tracked `application.yaml`~~ **fixed in BE-02** (old dev credential `maia/maiapw` stays in git history — treat as burned, rotate where reused) | BE-02 |
 | F-07 | Both statement dates → end-of-day UTC (initial day excluded); null date → NPE | BE-05 |
 | F-08 | Recharge ledger stores account **number** in `accountId` (others store id); Kafka publish is a dual write | BE-03 |
 | F-09 | Pix: `receiversPix()` is an empty POST; key-existence stub; `agencyId` null | BE-03 |
@@ -78,4 +78,4 @@ Screens in the prototype: landing/sign-in, Home, Statement (+detail), Pix (3 ste
 5. Skills: `java-modern-engineering` (Java/Spring code, Mode A: keep existing architecture) · `java-persistence-performance` (SQL, JPA, transactions, Flyway) · `openapi-rest-contract` (contract) · `angular-frontend-scaffold` (once, project creation) · `angular-module-scaffold` (feature modules) · `angular-tailwind-ui-specialist` (UI) · `angular-architect` (Angular design) · `ui-ux-pro-max` (UX review). Skills mention a different project ("Finance Controller": Boot 4.1.1, Modulith, `owner_id`) — ignore those stack assumptions.
 
 ## Run / verify (expected, unverified here)
-`cd api-financial-transaction-service && ./mvnw -B verify` · `docker compose up --build` from the repo root (API on 8088) · Postman collection in `src/main/resources/postman_collection/`.
+`cd api-financial-transaction-service && ./mvnw -B verify` · `cp .env.example .env` then `docker compose up --build` from the repo root (API on 8088; DB credentials come from `.env`, never from tracked files) · Postman collection in `src/main/resources/postman_collection/`.
