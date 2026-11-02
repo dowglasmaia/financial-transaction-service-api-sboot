@@ -70,6 +70,9 @@ Screens in the prototype: landing/sign-in, Home, Statement (+detail), Pix (3 ste
 * **Where prototype and backend disagree, the backend contract wins** and the agent proposes the reconciliation. Known case: the prototype's **Deposit is an online boleto flow** ("Proposed · client-side demo" with "Simulate payment"), while the real endpoint is `POST /transactions/deposit {agency, account, amount}` — a Tier-2 proposal is needed (e.g. boleto step is a UI simulation whose "payment" calls the real deposit for the caller's own account from `/accounts/me`).
 * Prototype palette/typography replace the earlier Grafite Ciano tokens as the starting point; the agent may refine them (contrast ≥ 4.5:1 text, ≥ 3:1 UI) and logs changes.
 
+## Frontend app (as built in FE-02)
+`app-financial-transaction-service/`: Angular 21 (zoneless, strict), Tailwind 4, Vitest (`npm test`), Phosphor icons, Manrope/Sora fonts. Tokens live only in `src/styles.scss` (dark default + light; semantic Tailwind names such as `bg-surface`, `text-content`, `text-income`) and are guarded by `core/theme/tokens-contrast.spec.ts`. Runtime config: `public/config.json` (`apiBaseUrl`, `auth`, `demoBanner`); dev proxy `/api → localhost:8088`. HTTP boundary: interceptors request-id → auth (dev-open) → api-error (typed `ApiError`). Shared UI in `src/app/shared/ui`, living style guide at `/design`. Prototype deviations: `docs/prototype-deviations.md`. No chart library (hand-made SVG).
+
 ## How the agent must work
 1. Read `produto.md`, this file, the spec you were given, and follow `../spec-execution-flow.md` for the execution loop. Read `auth-okta.md` / `designer-brief.md` only for auth or UI work.
 2. Work **only** within the spec scope; list extra ideas as proposals.

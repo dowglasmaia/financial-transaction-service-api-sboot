@@ -1,0 +1,126 @@
+<div class="flex flex-col gap-12">
+  <header class="flex flex-col gap-2">
+    <p class="text-xs font-semibold tracking-[0.12em] text-accent uppercase">Design system</p>
+    <h1 class="font-display text-3xl font-semibold sm:text-4xl">Tokens and components</h1>
+    <p class="max-w-prose text-content-muted">
+      Extracted from the approved prototype. Active theme: <strong class="text-content">{{ theme() }}</strong> — use the toggle in the
+      header to compare. Example data only.
+    </p>
+  </header>
+
+  <!-- Tokens -->
+  <section aria-labelledby="tokens-title" class="flex flex-col gap-4">
+    <h2 id="tokens-title" class="font-display text-xl font-semibold">Colour tokens</h2>
+    <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      @for (swatch of swatches(); track swatch.name) {
+        <li class="overflow-hidden rounded-card border border-line bg-surface-raised">
+          <div class="h-14 border-b border-line" [class]="swatch.background"></div>
+          <div class="p-3">
+            <p class="text-sm font-semibold">{{ swatch.name }}</p>
+            <p class="font-mono text-xs text-content-muted">{{ swatch.hex }}</p>
+            <p class="text-xs text-content-muted">{{ swatch.role }}</p>
+          </div>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <!-- Typography -->
+  <section aria-labelledby="type-title" class="flex flex-col gap-4">
+    <h2 id="type-title" class="font-display text-xl font-semibold">Typography</h2>
+    <div class="flex flex-col gap-3 rounded-card border border-line bg-surface-raised p-6">
+      <p class="font-display text-5xl font-semibold"><span class="text-content-muted">R$</span> 12,480.50</p>
+      <p class="font-display text-3xl font-semibold">Heading — Sora 600</p>
+      <p class="text-lg">Body large — Manrope 400, 18 px. Money and dates use tabular numerals.</p>
+      <p>Body — Manrope 400, 16 px / 24 px.</p>
+      <p class="text-sm text-content-muted">Caption — Manrope 400, 14 px, secondary text.</p>
+    </div>
+  </section>
+
+  <!-- Buttons -->
+  <section aria-labelledby="buttons-title" class="flex flex-col gap-4">
+    <h2 id="buttons-title" class="font-display text-xl font-semibold">Buttons</h2>
+    <div class="grid gap-4 rounded-card border border-line bg-surface-raised p-6 sm:grid-cols-3">
+      @for (variant of variants; track variant) {
+        <div class="flex flex-col items-start gap-3">
+          <p class="text-sm font-medium text-content-muted capitalize">{{ variant }}</p>
+          <button appButton [variant]="variant" type="button">Default</button>
+          <button appButton [variant]="variant" type="button" disabled>Disabled</button>
+          <button appButton [variant]="variant" type="button" [loading]="loading()" (click)="simulateLoading()">Loading (click)</button>
+        </div>
+      }
+    </div>
+    <p class="text-sm text-content-muted">Hover and keyboard focus states are live: tab to any control to see the focus ring.</p>
+  </section>
+
+  <!-- Forms -->
+  <section aria-labelledby="forms-title" class="flex flex-col gap-4">
+    <h2 id="forms-title" class="font-display text-xl font-semibold">Form fields</h2>
+    <div class="grid gap-6 rounded-card border border-line bg-surface-raised p-6 md:grid-cols-2">
+      <app-form-field label="Pix key" hint="Check the key with the recipient before sending.">
+        <input appFieldControl type="text" placeholder="CPF, email or phone" />
+      </app-form-field>
+      <app-form-field label="Pix key" error="Enter a valid CPF, email or phone number.">
+        <input appFieldControl type="text" value="12345" />
+      </app-form-field>
+      <app-form-field label="Amount" hint="Up to two decimals.">
+        <app-money-input [(value)]="amount" />
+      </app-form-field>
+      <app-form-field label="Agency" [optional]="true">
+        <input appFieldControl type="text" disabled value="0211" />
+      </app-form-field>
+    </div>
+  </section>
+
+  <!-- Chips -->
+  <section aria-labelledby="chips-title" class="flex flex-col gap-4">
+    <h2 id="chips-title" class="font-display text-xl font-semibold">Chips</h2>
+    <div class="flex flex-wrap gap-2 rounded-card border border-line bg-surface-raised p-6" role="group" aria-label="Type filter example">
+      @for (chip of chips; track chip) {
+        <app-chip [selected]="selectedChip() === chip" (toggled)="selectedChip.set(chip)">{{ chip }}</app-chip>
+      }
+    </div>
+  </section>
+
+  <!-- Alerts -->
+  <section aria-labelledby="alerts-title" class="flex flex-col gap-4">
+    <h2 id="alerts-title" class="font-display text-xl font-semibold">Alerts</h2>
+    <div class="grid gap-3 md:grid-cols-2">
+      <app-alert kind="info" title="Heads up">Recharge requests are processed by your operator shortly.</app-alert>
+      <app-alert kind="success" title="Pix sent">Recorded on this device at 2:35 PM.</app-alert>
+      <app-alert kind="warning" title="We couldn't confirm this operation">Check your statement before trying again so you don't pay twice.</app-alert>
+      <app-alert kind="error" title="Not enough balance">The amount can't exceed your available balance.</app-alert>
+    </div>
+  </section>
+
+  <!-- Data display -->
+  <section aria-labelledby="data-title" class="flex flex-col gap-4">
+    <h2 id="data-title" class="font-display text-xl font-semibold">Balance, figures and ledger</h2>
+    <app-balance-card [amount]="12480.5" updated="Updated Nov 2, 2026, 6:42 PM · example data" />
+    <div class="grid gap-3 sm:grid-cols-3">
+      <app-kpi-tile label="Money in" [value]="'+ ' + formatBrl(1800)" tone="income" icon="ph-bold ph-arrow-down-left" />
+      <app-kpi-tile label="Money out" [value]="'− ' + formatBrl(250)" tone="expense" icon="ph-bold ph-arrow-up-right" />
+      <app-kpi-tile label="Net for period" [value]="formatBrl(1550)" />
+    </div>
+    <div class="flex flex-col gap-2">
+      @for (row of sampleRows; track row.date) {
+        <app-ledger-row [type]="row.type" [amount]="row.amount" [date]="row.date" />
+      }
+    </div>
+  </section>
+
+  <!-- Loading and empty -->
+  <section aria-labelledby="states-title" class="flex flex-col gap-4">
+    <h2 id="states-title" class="font-display text-xl font-semibold">Loading and empty states</h2>
+    <div class="grid gap-3 md:grid-cols-2">
+      <div class="flex flex-col gap-3">
+        <app-skeleton [height]="96" />
+        <app-skeleton [height]="56" />
+        <app-skeleton [height]="56" />
+      </div>
+      <app-empty-state title="No activity yet" message="Make a deposit to get started." icon="ph-bold ph-tray">
+        <button appButton type="button">Make a deposit</button>
+      </app-empty-state>
+    </div>
+  </section>
+</div>
