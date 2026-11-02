@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Local configuration (never commit) ###
+application-local.yaml
+application-local.yml
+.env

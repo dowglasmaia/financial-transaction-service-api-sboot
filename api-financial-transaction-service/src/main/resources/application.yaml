@@ -2,26 +2,28 @@ server:
   port: 8080
 
 spring:
-  profiles:
-    active: test
   application:
     name: "financial-transaction-service"
+  # No profile is forced here. Use SPRING_PROFILES_ACTIVE=local for development (seed data) or prod.
   jpa:
-    show-sql: true
+    show-sql: false
     open-in-view: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate   # the schema belongs to Flyway (db/migration); Hibernate only validates it
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
   datasource:
-    url: jdbc:postgresql://pg-db:5432/transactions
-    username: maia
-    password: maiapw
+    # Required environment variables - there are no defaults on purpose (no secrets in this file)
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   kafka:
-    bootstrap-servers: kafka:29092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -31,7 +33,7 @@ spring:
 api:
   client:
     maiabank:
-      url: http://maiabank-api:8089/api/v1/transactions
+      url: ${MAIABANK_URL:http://localhost:8089/api/v1/transactions}
 
 management:
   tracing:

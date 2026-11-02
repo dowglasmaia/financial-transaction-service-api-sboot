@@ -47,13 +47,17 @@ public class DBService {
         this.accountRepository = accountRepository;
     }
 
+    /**
+     * Idempotent: creates the demo agency/user/account only when they do not exist yet, so the app can restart
+     * on an existing database (the schema is no longer recreated). Always loads the acting identity.
+     */
     @SneakyThrows
     public void instanciateTestDatabase()   {
-        var user = createUser();
+        var agency = agencyRepository.findByNumber("0211").orElseGet(this::createAgency);
 
-        var agency = createAgency();
-
-        var account = createAccount(agency, user);
+        var account = accountRepository.findByNumber("2022")
+              .orElseGet(() -> createAccount(agency, createUser()));
+        var user = account.getUser();
 
         Thread.sleep(1000);
 
@@ -66,9 +70,9 @@ public class DBService {
 
     private User createUser(){
         return userRepository.save(User.builder()
-              .name("Dowglas Maia")
-              .CPF("82215344040")
-              .email("dowglasmaia@live.com")
+              .name("Demo User")
+              .CPF("11144477735")
+              .email("demo.user@example.test")
               .areaCode(11)
               .phoneNumber(999998888)
               .build());

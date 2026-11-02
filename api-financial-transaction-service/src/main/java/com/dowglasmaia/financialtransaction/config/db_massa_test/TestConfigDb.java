@@ -1,30 +1,23 @@
 package com.dowglasmaia.financialtransaction.config.db_massa_test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import java.text.ParseException;
 
+/** Demo/test seed - never active in production (profiles: local, test). */
 @Configuration
-@Profile("test")
+@Profile({"local", "test"})
 public class TestConfigDb {
 
     @Autowired
     private DBService dbService;
 
-    @Value("${spring.jpa.hibernate.ddl-auto}")
-    private String strategy;
-
     @Bean
     public boolean instantiateDataBase() throws ParseException {
-        if ("create".equals(strategy)) {
-            dbService.instanciateTestDatabase();
-            return true;
-        }
-        return false;
-
+        dbService.instanciateTestDatabase();
+        return true;
     }
 }

@@ -68,6 +68,14 @@ This API manages user financial transactions, allowing for the insertion, visual
 
 ---
 
+## Configuration and profiles
+
+* **No secrets in the repository.** `application.yaml` reads `DB_URL`, `DB_USER`, `DB_PASSWORD` (required, no defaults), `KAFKA_BOOTSTRAP_SERVERS` and `MAIABANK_URL` from the environment.
+* **Schema = Flyway** (`src/main/resources/db/migration`). Hibernate runs with `ddl-auto: validate`; never use `create`/`update`.
+* **Profiles:** none is forced. `local` and `test` seed a demo user/account (idempotent, safe to restart); do not use them in production. Until spec BE-04 (Okta) the acting account is the seeded one, so a non-`local` run cannot resolve an account yet.
+* **Docker:** copy `.env.example` to `.env` (git-ignored) at the monorepo root, then `docker compose up --build`.
+* **IDE run:** copy `src/main/resources/application-local.yaml.example` to `application-local.yaml` (git-ignored) and run with `SPRING_PROFILES_ACTIVE=local`.
+
 ## Configuration for Circuit Breaker And Observability
 
 
