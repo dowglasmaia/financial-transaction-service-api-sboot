@@ -31,11 +31,11 @@ Schema is owned by **Flyway** (`db/migration/V1__baseline.sql`; Hibernate `ddl-a
 ## Known defects (what the specs fix)
 | ID | Defect [CODE] | Fixed in |
 |---|---|---|
-| F-01 | No auth; identity = startup singleton from test seed (`DBService`) | BE-04 |
+| F-01 | ~~No auth; identity = startup singleton~~ **fixed in BE-04** (JWT resource server, `CurrentUser`; manual Auth0 sign-in pending) | BE-04 |
 | F-02 | ~~No `@Transactional` anywhere…~~ **fixed in BE-03** (one transaction per operation; Pix reserve/confirm/compensate) | BE-03 |
 | F-03 | ~~Read-modify-write on `balance`~~ **fixed in BE-03** (atomic conditional UPDATE) | BE-03 |
-| F-04 | Statement + sums unscoped (all accounts); `GET /transactions/{id}` no ownership | BE-04 |
-| F-05 | Non-card withdraw debits any account by number, ledger on caller | BE-04 |
+| F-04 | ~~Statement + sums unscoped; by-id no ownership~~ **fixed in BE-04** (caller account only, foreign id → 404) | BE-04 |
+| F-05 | ~~Non-card withdraw debits any account~~ **fixed in BE-04** (only the caller own number, else 404) | BE-04 |
 | F-06 | ~~Default profile `test` + `ddl-auto: create` wipes DB; DB credentials in tracked `application.yaml`~~ **fixed in BE-02** (old dev credential `maia/maiapw` stays in git history — treat as burned, rotate where reused) | BE-02 |
 | F-07 | Both statement dates → end-of-day UTC (initial day excluded); null date → NPE | BE-05 |
 | F-08 | ~~Recharge ledger stored the account number; Kafka dual write~~ **fixed in BE-03** (account id + transactional outbox) | BE-03 |
@@ -55,7 +55,7 @@ One conditional UPDATE enforces `balance >= amount` (`AccountRepository.debit`, 
 ## Target design in one screen
 * Each money operation = one `@Transactional` service method; debit via atomic conditional update (`WHERE balance >= :amt`) or `@Version`; ledger written in the same transaction.
 * Pix: reserve (debit + ledger PENDING) → commit → call MaiaBank → confirm/compensate; Kafka via transactional outbox.
-* `CurrentUser` bean (package `services.client`) resolves the Auth0 `sub` → `usuario.external_subject` → the single account. Unknown `sub` → 403. Authorization = role claim `https://financial-transaction/roles` (only `customer`, D-30); no scopes.
+* [built in BE-04] `CurrentUser` bean (package `services.client`) resolves the Auth0 `sub` → `usuario.external_subject` → the single account. Unknown `sub` → 403. Authorization = role claim `https://financial-transaction/roles` (only `customer`, D-30); no scopes.
 * Statement: account-scoped, half-open date range, paginated, totals by aggregate query, rows carry `id`.
 * `GET /accounts/me`. Idempotency-Key on POSTs (store in DB).
 
