@@ -96,11 +96,17 @@ public abstract class AbstractIntegrationTest {
         return agencyRepository.findByNumber(SEED_AGENCY).orElseThrow();
     }
 
-    /** A second account in the same agency, owned by another user. */
+    /** A second account in the same agency, owned by another user whose token subject is NOT linked. */
     protected Account createOtherAccount(String number, BigDecimal balance) {
+        return createOtherAccount(number, balance, null);
+    }
+
+    /** A second account in the same agency, owned by the user linked to {@code subject} (see {@link MockIssuer#OTHER_SUB}). */
+    protected Account createOtherAccount(String number, BigDecimal balance, String subject) {
         User user = userRepository.save(User.builder()
               .name("Other Test User").CPF(number + "000000000".substring(0, 11 - number.length()))
-              .email("other-" + number + "@example.test").areaCode(11).phoneNumber(988887777).build());
+              .email("other-" + number + "@example.test").areaCode(11).phoneNumber(988887777)
+              .externalSubject(subject).build());
         extraUsers.add(user);
         Account account = accountRepository.save(Account.builder()
               .agency(seedAgency()).user(user).number(number).balance(balance).build());
