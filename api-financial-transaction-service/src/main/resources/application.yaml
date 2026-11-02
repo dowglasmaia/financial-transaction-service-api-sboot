@@ -29,11 +29,22 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     admin:
       client-id: admin
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 2000   # ms - fail fast when MaiaBank is unreachable
+            read-timeout: 5000      # ms - never hold a request thread for long
 
 api:
   client:
     maiabank:
       url: ${MAIABANK_URL:http://localhost:8089/api/v1/transactions}
+
+app:
+  outbox:
+    poll-interval-ms: 1000
 
 management:
   tracing:
@@ -76,7 +87,7 @@ resilience4j:
         registerHealthIndicator: true
         slidingWindowSize: 6
         failureRateThreshold: 50
-        slowCallDurationThreshold: 100
+        slowCallDurationThreshold: 2s
         slowCallRateThreshold: 80
         waitDurationInOpenState: 60s
         permittedNumberOfCallsInHalfOpenState: 3

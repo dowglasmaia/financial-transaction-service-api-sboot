@@ -14,6 +14,7 @@ import java.util.HashMap;
 @Configuration
 public class KafkaAdminConfig {
     private final KafkaProperties properties;
+    public static final String RECHARGE_MOBILE_TOPIC = "recharge-mobile-topic";
     private static final int PARTITION = 1;
     private static final int REPLICA = 1;
 
@@ -27,7 +28,7 @@ public class KafkaAdminConfig {
     @Bean
     public KafkaAdmin.NewTopics topics() {
         return new KafkaAdmin.NewTopics(
-              TopicBuilder.name("recharge-mobile-topic")
+              TopicBuilder.name(RECHARGE_MOBILE_TOPIC)
                     .partitions(PARTITION)
                     .replicas(REPLICA)
                     .build()

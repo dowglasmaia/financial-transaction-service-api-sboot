@@ -6,6 +6,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 
 import static org.apache.kafka.clients.producer.ProducerConfig.*;
 
+@EnableScheduling // the outbox relay is @Scheduled
 @RequiredArgsConstructor
 @Configuration
 public class KafkaProducerConfig {
@@ -29,6 +31,17 @@ public class KafkaProducerConfig {
         props.put(VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
         return new DefaultKafkaProducerFactory(props, new StringSerializer(), new JsonSerializer());
+    }
+
+    /** String template used by the outbox relay: it publishes the JSON stored in the outbox row as is. */
+    @Bean
+    public KafkaTemplate<String, String> outboxKafkaTemplate(){
+        var props = new HashMap<String, Object>();
+        props.put(BOOTSTRAP_SERVERS_CONFIG, properties.getBootstrapServers());
+        props.put(KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        props.put(VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+
+        return new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(props));
     }
 
     @Bean

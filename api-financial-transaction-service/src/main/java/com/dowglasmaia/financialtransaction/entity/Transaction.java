@@ -32,5 +32,9 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionTypeEnum transactionType;
 
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private TransactionStatusEnum status = TransactionStatusEnum.COMPLETED;
+
 }
 

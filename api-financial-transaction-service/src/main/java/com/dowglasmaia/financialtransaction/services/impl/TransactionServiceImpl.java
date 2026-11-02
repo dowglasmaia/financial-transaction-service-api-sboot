@@ -2,18 +2,20 @@ package com.dowglasmaia.financialtransaction.services.impl;
 
 import com.dowglasmaia.financialtransaction.entity.Account;
 import com.dowglasmaia.financialtransaction.entity.Transaction;
+import com.dowglasmaia.financialtransaction.entity.TransactionStatusEnum;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
-import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;
 import com.dowglasmaia.financialtransaction.repository.TransactionRepository;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
 import com.dowglasmaia.financialtransaction.services.client.account.FindAccountByNumberAndUserIdService;
 import com.dowglasmaia.financialtransaction.utils.DateConverter;
-import com.dowglasmaia.provider.model.*;
+import com.dowglasmaia.provider.model.TransactionResponseDTO;
+import com.dowglasmaia.provider.model.TransactionsResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -39,17 +41,31 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public void save(Object transaction, String accountId, BigDecimal amount, String agencyId){
+    @Transactional
+    public void save(TransactionTypeEnum type, String accountId, BigDecimal amount, String agencyId){
+        record(type, accountId, amount, agencyId, TransactionStatusEnum.COMPLETED);
+    }
+
+    @Override
+    @Transactional
+    public String record(TransactionTypeEnum type, String accountId, BigDecimal amount, String agencyId, TransactionStatusEnum status){
         log.info("Start save Transaction");
         var transactionEntity = Transaction.builder()
-              .transactionType(getTransactionType(transaction))
+              .transactionType(type)
               .accountId(accountId)
               .amount(amount)
               .agencyId(agencyId)
+              .status(status)
               .dateHour(OffsetDateTime.now())
               .build();
 
-        transactionRepository.save(transactionEntity);
+        return transactionRepository.save(transactionEntity).getId();
+    }
+
+    @Override
+    @Transactional
+    public void updateStatus(String id, TransactionStatusEnum status){
+        transactionRepository.updateStatus(id, status);
     }
 
     @Override
@@ -64,7 +80,7 @@ public class TransactionServiceImpl implements TransactionService {
         var endDate = DateConverter.convertStringToOffsetDateTime(finalDate);
         log.info("endDate: {}", endDate);
 
-        var transactionsEntity = transactionRepository.findByDateHourBetween(startDate, endDate);
+        var transactionsEntity = transactionRepository.findByStatusAndDateHourBetween(TransactionStatusEnum.COMPLETED, startDate, endDate);
 
         var transactionsResponse = toTransactionsResponse(transactionsEntity);
 
@@ -80,22 +96,5 @@ public class TransactionServiceImpl implements TransactionService {
 
         return toTransactionRequest(transaction);
 
-    }
-
-
-    private TransactionTypeEnum getTransactionType(Object object){
-        if (object instanceof WithdrawRequestDTO)
-            return TransactionTypeEnum.WITHDRAW;
-
-        if (object instanceof DepositRequestDTO)
-            return TransactionTypeEnum.DEPOSIT;
-
-        if (object instanceof PixRequestDTO)
-            return TransactionTypeEnum.PIX;
-
-        if (object instanceof MobileRechargeRequestDTO)
-            return TransactionTypeEnum.PHONE_RECHARGE;
-
-        throw new UnprocessableEntityExeption("Type of transaction is not valid", HttpStatus.UNPROCESSABLE_ENTITY);
     }
 }

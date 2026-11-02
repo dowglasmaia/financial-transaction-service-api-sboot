@@ -1,5 +1,6 @@
 package com.dowglasmaia.financialtransaction.services.impl;
 
+import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import com.dowglasmaia.financialtransaction.services.AtmWithdrawalService;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
 import com.dowglasmaia.financialtransaction.services.client.account.AddAmountService;
@@ -9,6 +10,7 @@ import com.dowglasmaia.provider.model.WithdrawRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -31,7 +33,9 @@ public class AtmWithdrawalServiceImpl implements AtmWithdrawalService {
         this.findAccountByNumberAndUserIdService = findAccountByNumberAndUserIdService;
     }
 
+    /** Debit + ledger row in ONE transaction. (Which account may be debited is decided later, spec BE-04.) */
     @Override
+    @Transactional
     public void makeAtmWithdrawal(WithdrawRequestDTO withdrawRequest){
         log.info("Start makeAtmWithdrawal");
 
@@ -43,14 +47,14 @@ public class AtmWithdrawalServiceImpl implements AtmWithdrawalService {
         if (isCardBasedWithdrawal(withdrawRequest)) {
             log.info("AtmWithdrawal base card");
 
-            addAmountService.addAmountToAccount(account.getNumber(), withdrawRequest.getAmount());
+            addAmountService.debitById(account.getId(), withdrawRequest.getAmount());
         } else {
             log.info("AtmWithdrawal not based card");
 
-            addAmountService.addAmountToAccount(withdrawRequest.getNumberAccount(), withdrawRequest.getAmount());
+            addAmountService.debit(withdrawRequest.getNumberAccount(), withdrawRequest.getAmount());
         }
 
-        transactionService.save(withdrawRequest, account.getId(), withdrawRequest.getAmount(), agencyId);
+        transactionService.save(TransactionTypeEnum.WITHDRAW, account.getId(), withdrawRequest.getAmount(), agencyId);
     }
 
     private boolean isCardBasedWithdrawal(WithdrawRequestDTO withdrawRequest){
