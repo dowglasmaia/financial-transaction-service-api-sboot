@@ -7,7 +7,7 @@
 SDD: nothing is implemented without an approved spec. All are **Draft**. A spec starts when its dependencies are **Done**. Protocol: `../shared/como-executar.md`. Base context: `../memory/`.
 
 ## Step 0
-`MONO-01` (monorepo + isolated CI) — [mono-01-monorepo.md](mono-01-monorepo.md) — executed; three verification items open.
+`MONO-01` (monorepo + isolated CI) — [mono-01-monorepo.md](mono-01-monorepo.md) — **Done** (PR #1).
 
 ## Backend (strictly sequential — they touch the same services)
 `BE-01 → BE-02 → BE-03 → BE-04 → BE-05 → BE-06 → BE-07 → BE-08`
@@ -22,7 +22,7 @@ SDD: nothing is implemented without an approved spec. All are **Draft**. A spec 
 |---|---|---|---|
 | [MONO-01](mono-01-monorepo.md) | Monorepo restructure + isolated CI | — | — |
 | [BE-01](be-01-safety-net.md) | Safety net: CI + characterization tests | — | FE-01 |
-| [BE-02](be-02-foundation-config-db.md) | Foundation: profiles, secrets, Flyway | BE-01 | FE-01 |
+| [BE-02](be-02-foundation-config-db.md) | Foundation: profiles, secrets, Flyway | BE-01 | Done (PR #1 merged 2026-11-02; api-ci green on 062cf0b) |
 | [BE-03](be-03-money-integrity.md) | Money integrity: transactions, atomic balance, Pix, recharge | BE-02 | none (touches the same services as BE-04) |
 | [BE-04](be-04-auth-and-ownership.md) | Okta authentication, CurrentUser, ownership | BE-03 | FE-02 |
 | [BE-05](be-05-behaviour-fixes.md) | Dates, validation and error handling | BE-04 | none |
@@ -49,8 +49,8 @@ BE-02 rotate committed DB credentials · BE-04/FE-03 create the Okta org/app/use
 ## Status
 | Spec | Status |
 |---|---|
-| MONO-01 | Executed (GitHub/Docker verification pending) |
-| BE-01 | In progress (approved 2026-11-02) |
+| MONO-01 | Done (merged in PR #1, 2026-11-02) |
+| BE-01 | Done (PR #1 merged 2026-11-02; api-ci green on 062cf0b) |
 | BE-02 | Draft |
 | BE-03 | Draft |
 | BE-04 | Draft |

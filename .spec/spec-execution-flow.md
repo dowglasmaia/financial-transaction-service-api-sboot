@@ -7,12 +7,12 @@ Monorepo: `api-financial-transaction-service/` (backend), `app-financial-transac
 
 ## 1. The loop (same for every spec)
 1. **Gate check** — all dependencies are Done; the spec's human actions are completed; spec status set to *Approved* by the owner (a Draft is never executed).
-2. **Prepare** — new branch `spec/<id>-<slug>` from the up-to-date `main`; read memory + the spec; run the test suite once to record the baseline.
+2. **Prepare** — `git checkout main && git pull origin main`, then new branch `spec/<id>-<slug>` (if main lacks a dependency spec, stop and ask); read memory + the spec; run the test suite once to record the baseline.
 3. **Test first** — for each behaviour change write/adjust the failing test (characterization → flip), watch it fail.
 4. **Implement the smallest change** for one task; commit (`<id>: <task>`); run the suite.
 5. **Verify + evidence** — run the spec's checks; tick the task; add the evidence line under it.
 6. **Stop at gates** — any contract/behaviour/scope/dependency change not in the spec → stop and ask.
-7. **Close** — all acceptance boxes ticked with proof, fill *Result*, set status *Done* in `specs/README.md`, open one PR per spec (CI green), merge, delete the branch.
+7. **Close** — all acceptance boxes ticked with proof, fill *Result*, set status in `specs/README.md`, **commit on the spec branch (the agent does not push or open the PR)**. The owner opens the PR, checks CI, merges; the spec is *Done* after the merge with green CI.
 8. **Sync memory** — if reality diverged from `memory/`, update it in the same PR.
 
 Ready-made prompts per spec: `prompts.md`. **Every spec has a *Minimal validation* block; a spec cannot be closed until it passes (and unexecuted checks are reported as not executed).** After all specs are Done, run `FINAL-01` (final test round).
@@ -37,7 +37,7 @@ Generic prompt (the per-spec versions in `prompts.md` add the extras):
 Rules: a row starts only when the previous rows it depends on are Done (dependency list in `specs/README.md`). `∥` means run in parallel on separate branches/worktrees **only if** they do not touch the same files. Backend specs are never parallel with each other.
 
 ## 3. Conventions
-* **Branch/PR:** one branch and one PR per spec; commits per task; PR description = spec link + evidence summary. Never push to `main` directly.
+* **Branch/PR:** one branch and one PR per spec; commits per task; the **owner opens the PRs manually** (PR description = spec link + evidence summary) and merges before the next spec starts. Agents never push and never commit to `main`.
 * **Commands (backend)** — from `api-financial-transaction-service/`: `./mvnw -B verify` (all tests), `./mvnw -B -Dtest=<Class> test` (focused). From the repo root: `docker compose up --build` (stack; API on 8088). Integration tests use Testcontainers (Docker required).
 * **Commands (frontend)** — from `app-financial-transaction-service/`: `npm ci`, `npm start` (4200), `npm run build`, test runner chosen in FE-02, Playwright for e2e against the compose stack.
 * **Evidence line:** `> ✅ YYYY-MM-DD HH:MM ±TZ — result. Verification: command → outcome.` Say whether a test was *run* or only *written*.
