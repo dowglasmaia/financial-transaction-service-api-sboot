@@ -52,7 +52,7 @@ BE-02 rotate committed DB credentials · BE-04/FE-03 create the Okta org/app/use
 | MONO-01 | Done (merged in PR #1, 2026-11-02) |
 | BE-01 | Done (PR #1 merged 2026-11-02; api-ci green on 062cf0b) |
 | BE-02 | Done (PR #3 merged 2026-11-02; api-ci green on 567c8ab). Owner still owes the rotation of the old DB credential |
-| BE-03 | Draft |
+| BE-03 | Implemented + verified locally (72 tests green); PR/CI pending (owner) |
 | BE-04 | Draft |
 | BE-05 | Draft |
 | BE-06 | Draft |

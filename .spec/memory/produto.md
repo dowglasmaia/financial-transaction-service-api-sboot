@@ -22,8 +22,8 @@ Ledger types: `PIX`, `PHONE_RECHARGE`, `WITHDRAW` (outgoing), `DEPOSIT` (incomin
 2. `amount > 0` on every operation.
 3. Pix key formats: CPF (check digits), e-mail regex, phone `^[1-9]{2}9[0-9]{8}$` (area code + 9 digits). Key "existence" is not verified (stub) — keep it that way.
 4. Recharge phone = `areaCode + phoneNumber` matching the same phone regex; carrier must be one of four.
-5. Pix = debit sender → call MaiaBank (`POST` to `api.client.maiabank.url`) → ledger. On failure the customer is **never left debited**. **No local recipient is credited** (decided).
-6. Recharge = debit → publish original request JSON to Kafka topic `recharge-mobile-topic` → ledger. Payload and topic unchanged (no consumer exists yet).
+5. Pix = reserve (debit + PENDING ledger row) → call MaiaBank (`POST` to `api.client.maiabank.url`) → confirm (COMPLETED) or compensate (credit back, FAILED). On failure the customer is **never left debited**. **No local recipient is credited** (decided). The statement only includes COMPLETED rows.
+6. Recharge = debit + ledger + event written in ONE transaction; the original request JSON reaches Kafka topic `recharge-mobile-topic` through a transactional outbox (same payload bytes, at-least-once). No consumer exists yet.
 7. Deposit credits **any** existing account number (third-party deposits allowed); the typed agency is ignored by the backend (uses agency `0211`).
 8. Statement: `sumIncoming` = Σ DEPOSIT; `sumOutgoing` = Σ PIX+PHONE_RECHARGE+WITHDRAW; `balance` = current balance of the caller's account.
 9. Ledger `dateHour` = server time at insert.
@@ -31,7 +31,7 @@ Ledger types: `PIX`, `PHONE_RECHARGE`, `WITHDRAW` (outgoing), `DEPOSIT` (incomin
 ## Decided changes (these are the only intended behaviour changes)
 | Decision | Change |
 |---|---|
-| Balance rule | Debit allowed when `balance >= amount` (today strict `>`). |
+| Balance rule | Debit allowed when `balance >= amount` — **implemented in BE-03** (atomic, single place). |
 | Ownership | A user may only debit accounts they own; ledger row belongs to the **debited** account; statement and transaction lookup limited to the caller's account (today unscoped = data leak). |
 | Statement dates | Fix so a single-day range returns that day (today the initial day is excluded; dates are end-of-day UTC). Time zone for day boundaries: to be chosen in spec BE-05. |
 | Auth | Okta (OIDC, Authorization Code + PKCE); API is a JWT resource server (`auth-okta.md`). |
