@@ -40,7 +40,7 @@ Pin today's behaviour (including known quirks) with tests and run them in CI, be
 - [x] `cd api-financial-transaction-service && ./mvnw -B verify` is green locally
   > ✅ 2026-11-02 16:45 +0000 — run through Docker (no JDK on the host): `mvn -B -ntp verify` in container `maven:3.9-eclipse-temurin-17` (Docker socket + Testcontainers PostgreSQL 14.12): 45 tests, 0 failures/errors/skipped, BUILD SUCCESS. Note: Testcontainers needed `api.version=1.44` in `~/.docker-java.properties` because the local Docker Engine (29.x) rejects the old API version used by Testcontainers 1.19.7; GitHub runners (older Engine) should not need it.
 - [ ] `api-ci` is green on the PR
-  > ⛔ Not executed: needs the MONO-01 move committed and a push/PR. Para desbloquear: commit + push.
+  > ⛔ 2026-11-02 — First CI run FAILED: `./mvnw: Permission denied` (exit 126). Cause: `mvnw` has been stored in git as mode 100644 since the original repo (Windows). Fix: `git update-index --chmod=+x api-financial-transaction-service/mvnw` (commit pending re-run). Para desbloquear: green `api-ci` after the push.
 - [x] `git diff -- api-financial-transaction-service/src/main` is empty
   > ✅ 2026-11-02 16:45 +0000 — see acceptance item above.
 - [x] Each rule in `memory/produto.md` ('Rules that must be preserved') maps to at least one test
