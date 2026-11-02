@@ -8,7 +8,7 @@ Spec-Driven Development for a **small web banking prototype** (monorepo: `api-fi
 | 2 | `memory/contexto-tecnico.md` | Stack, code map, constraints, known defects, decisions, how to work |
 | 3 | `spec-execution-flow.md` | **How and in what order to execute every spec** (loop, master order, per-spec runbooks) |
 | 4 | `specs/README.md` → one spec | The task to execute (order, dependencies, acceptance) |
-| as needed | `auth-okta.md` | Auth work (Okta, OIDC, Spring Security, Angular) |
+| as needed | `auth-auth0.md` | Auth work (Auth0, OIDC, Spring Security, Angular) |
 | as needed | `designer-brief.md` | Standalone brief for the UI/UX designer agent |
 | prompts | `prompts.md` | Ready-to-paste prompt per spec (with minimal validation) |
 | protocol | `shared/como-executar.md` | How to execute and record evidence |

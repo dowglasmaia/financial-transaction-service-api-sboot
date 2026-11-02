@@ -27,10 +27,10 @@ Generic prompt (the per-spec versions in `prompts.md` add the extras):
 | 1 | **BE-01** safety net ∥ **FE-01** prototype review | BE ∥ FE | — (prototype already delivered in `prototype/`) | `api-ci` green with all rules characterized ∥ prototype signed off + divergence list |
 | 2 | **BE-02** foundation (profiles, secrets, Flyway) | BE | rotate committed DB credentials | app boots on empty DB via Flyway, data survives restart |
 | 3 | **BE-03** money integrity ∥ **FE-02** foundation | BE ∥ FE | FE-01 signed off (tokens tasks) — project name is fixed: `app-financial-transaction-service` | concurrency test green; `npm run build` green |
-| 4 | **BE-04** Okta + ownership | BE | create Okta org/app/users (see `auth-okta.md`) | 401/403/404 matrix tests; two-user isolation |
+| 4 | **BE-04** Auth0 + ownership | BE | Auth0 Action + 2 test users (see `auth-auth0.md`) | 401/403/404 matrix tests; two-user isolation |
 | 5 | **BE-05** dates, validation, errors | BE | choose day-boundary time zone | single-day statement works; no 500/NPE |
 | 6 | **BE-06** contract + API evolution | BE | approve the OpenAPI preview | contract = behaviour; `/accounts/me`, row ids, pagination live |
-| 7 | **FE-03** auth + Home + Statement ∥ **BE-07** platform upgrade | FE ∥ BE | — | login works against Okta/mock; Home + Statement e2e ∥ suite green on 17→21→25 |
+| 7 | **FE-03** auth + Home + Statement ∥ **BE-07** platform upgrade | FE ∥ BE | — | login works against Auth0/mock; Home + Statement e2e ∥ suite green on 17→21→25 |
 | 8 | **FE-04** operations (Pix, Deposit, Recharge, Withdraw) | FE | — | four flows complete against compose stack |
 | 9 | **FE-05** final validation ∥ **BE-08** cleanup | FE ∥ BE | release sign-off | e2e + axe green; no PII in logs; memory updated |
 | 10 | **FINAL-01** final test round | both | all specs Done | `docs/test-report.md` with evidence; CI green on `main` |
@@ -59,8 +59,8 @@ Rules: a row starts only when the previous rows it depends on are Done (dependen
 **Verify:** concurrency + failure-injection tests green on PostgreSQL; Kafka payload identical to BE-01. **Skills:** `java-persistence-performance` (transactions-concurrency), `java-modern-engineering`.
 
 ### BE-04 Auth and ownership
-1. Human sets up Okta exactly as `auth-okta.md` §Okta configuration; record non-secret ids. 2. Add Spring Security resource server, audience validator, authority converter, method security; `V3` (`external_subject`) + `CurrentUser`; remove `DBService` from the main path. 3. Mock JWKS issuer for tests/local; update tests to send tokens. 4. Scope statement/by-id/withdraw by caller; ledger follows debited account. 5. Re-verify every `[VERIFY]` item.
-**Verify:** matrix tests (401/403/404), two-user isolation, manual login against a real Okta dev org. **Skills:** `java-modern-engineering`, `java-persistence-performance`.
+1. Human finishes Auth0 as `auth-auth0.md` §Auth0 configuration (Action + two users); record non-secret ids and each user's `sub`. 2. Add Spring Security resource server, audience validator, role-claim converter, method security; `V3` (`external_subject`) + `CurrentUser`; remove `DBService` from the main path. 3. Mock JWKS issuer for tests/local; update tests to send tokens. 4. Scope statement/by-id/withdraw by caller; ledger follows debited account. 5. Re-verify every `[VERIFY]` item.
+**Verify:** matrix tests (401/403/404), two-user isolation, manual login against the real Auth0 tenant. **Skills:** `java-modern-engineering`, `java-persistence-performance`.
 
 ### BE-05 Behaviour fixes
 1. Tests first (single-day range, null/invalid dates, null bodies). 2. Half-open date range in the chosen zone; validators and CPF fixed; handler extended (parse errors, generic 500 with `{code,message}`). **Verify:** suite green; existing messages unchanged. **Skill:** `java-modern-engineering`.
@@ -83,7 +83,7 @@ The prototype is delivered (`prototype/Maia Bank UI prototype/`). Open `Maia Ban
 **Verify:** `npm run build`; axe on `/design`; contrast report. **Skills:** `angular-frontend-scaffold`, `angular-tailwind-ui-specialist`, `angular-architect`.
 
 ### FE-03 Auth, Home, Statement
-Prerequisites: BE-04 (auth) and BE-06 (contract with `/accounts/me`, row ids). Use `angular-module-scaffold` per feature (`features/<module>/` with routes, `pages/`, `ui/`, `data-access/`, `doc.md`) driven by the approved OpenAPI operations. Order: auth (`AuthService` wrapper, guard, callback, interceptor, session-expired) → Home → Statement/detail → AI Assistant concept screen (static, "Coming soon"). **Verify:** unit + e2e against mock issuer; manual login with Okta; axe; 320/768/1280. **Skills:** `angular-module-scaffold`, `angular-tailwind-ui-specialist`, `ui-ux-pro-max`.
+Prerequisites: BE-04 (auth) and BE-06 (contract with `/accounts/me`, row ids). Use `angular-module-scaffold` per feature (`features/<module>/` with routes, `pages/`, `ui/`, `data-access/`, `doc.md`) driven by the approved OpenAPI operations. Order: auth (`AuthService` wrapper, guard, callback, interceptor, session-expired) → Home → Statement/detail → AI Assistant concept screen (static, "Coming soon"). **Verify:** unit + e2e against mock issuer; manual login with Auth0; axe; 320/768/1280. **Skills:** `angular-module-scaffold`, `angular-tailwind-ui-specialist`, `ui-ux-pro-max`.
 
 ### FE-04 Operations
 Modules in this order: Withdrawal (simplest) → Deposit → Recharge → Pix. Shared result panel first (success / business failure / uncertain outcome). Tests per module: double-click sends one request, exact balance allowed, no POST auto-retry, withdrawal body is `{amount}` only. **Verify:** each flow end-to-end on `docker compose` stack. **Skills:** as FE-03.

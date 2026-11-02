@@ -4,7 +4,7 @@
 
 **Audience:** a design/prototyping agent (no access to the codebase). **Self-contained:** everything needed to design every screen, flow and navigation path supported by the real backend is below.
 **Language:** English only (all UI copy in English). **Theme:** Grafite Ciano, dark default + light (D-17).
-**Update 2026-11-03 (D-22):** the backend additions `GET /accounts/me` (agency, number, balance) and statement row `id` are **approved**; screens tagged for them (Home balance, S-04 Transaction detail, row→detail navigation) are design-ready and no longer optional. Login (S-01) stays tagged Proposed until the Okta integration is implemented. The `operator` role does not exist (customer only).
+**Update 2026-11-03 (D-22):** the backend additions `GET /accounts/me` (agency, number, balance) and statement row `id` are **approved**; screens tagged for them (Home balance, S-04 Transaction detail, row→detail navigation) are design-ready and no longer optional. Login (S-01) stays tagged Proposed until the Auth0 integration is implemented. The `operator` role does not exist (customer only).
 **Status legend (plus [FUTURE] = designed concept only, no backend, tagged "Coming soon"):** **[REAL]** backed by an existing endpoint · **[PROPOSAL]** needs backend work/decision, design it but mark it with a "Proposed" tag in the file · **[ABSENT]** does not exist: **do not design it**.
 
 ## 0. Platform and product positioning (read first — updated 2026-11-03, decisions D-27, D-28)
@@ -61,7 +61,7 @@ Distinctive motifs to avoid a generic template look: (a) large balance numeral w
 | `GET /api/v1/transactions?initial-date&final-date` | Statement for a period | two dates | 200: `transaction[]` (`transactionType`, `amount`, `dateHour`), `sumIncoming`, `sumOutgoing`, `balance` | 500/generic if dates invalid |
 | `GET /api/v1/transactions/{id}` | One transaction | id | 200: `transactionType`, `amount`, `dateHour` | 404 "Transaction not found" |
 Transaction types and display: `DEPOSIT` → "Deposit" (income, ↓ icon) · `PIX` → "Pix sent" (outgoing) · `PHONE_RECHARGE` → "Mobile recharge" (outgoing) · `WITHDRAW` → "ATM withdrawal" (outgoing).
-Facts that shape UX: balance is **current** (not end-of-period); there is no pagination, search or type filter (type filter is done in the UI); statement rows currently have **no id** so row→detail navigation is **[PROPOSAL]** (design it, tag "Proposed"); there is **no balance-only endpoint** — the Home balance comes from the statement call **[PROPOSAL: `GET /accounts/me`]**; the backend has **no login** — a login screen is **[PROPOSAL]** (Okta hosted sign-in via redirect; design only the app-side screens).
+Facts that shape UX: balance is **current** (not end-of-period); there is no pagination, search or type filter (type filter is done in the UI); statement rows currently have **no id** so row→detail navigation is **[PROPOSAL]** (design it, tag "Proposed"); there is **no balance-only endpoint** — the Home balance comes from the statement call **[PROPOSAL: `GET /accounts/me`]**; the backend has **no login** — a login screen is **[PROPOSAL]** (Auth0 Universal Login via redirect; design only the app-side screens).
 
 ## 5. Information architecture and navigation
 ```mermaid
@@ -89,7 +89,7 @@ flowchart TD
 Common to every data screen: **Loading** (skeleton matching final layout, no spinners except buttons), **Error** (inline card with message, "Try again", request id in muted text), **Offline banner**. Every form: persistent labels, helper text, error text under field with icon, summary alert at top on submit failure, disabled+spinner primary button while pending.
 
 ### S-01 Sign in **[PROPOSAL]**
-Purpose: single entry. Content: wordmark, one-line value statement, one primary button "Sign in" (redirects to Okta), secondary text "Secure sign-in provided by Okta". States: default, redirecting (button loading), error ("We couldn't sign you in. Try again."). Also: callback "Signing you in…" full-screen skeleton; **Session expired dialog** ("Your session expired. Sign in again to continue." → button "Sign in"; the unsent form data is kept).
+Purpose: single entry. Content: wordmark, one-line value statement, one primary button "Sign in" (redirects to Auth0), secondary text "Secure sign-in provided by Auth0". States: default, redirecting (button loading), error ("We couldn't sign you in. Try again."). Also: callback "Signing you in…" full-screen skeleton; **Session expired dialog** ("Your session expired. Sign in again to continue." → button "Sign in"; the unsent form data is kept).
 
 ### S-02 Home **[REAL: statement call]**
 Layout: greeting row ("Good evening"), **Balance card** (label "Current balance", big numeral, eye icon to hide/show amounts [PROPOSAL], last-updated time), **Period switcher** (7 / 30 / 90 days segmented control), **Totals tiles** ("Money in" `sumIncoming`, "Money out" `sumOutgoing`, "Net" = in − out labelled "Net for period"), **Income vs outgoing bar/chart** with text legend and data-table toggle, **Recent activity** (5 latest rows, link "See full statement"), **Quick actions** row (Send Pix primary, Deposit, Recharge, Withdraw as secondary).
@@ -134,7 +134,7 @@ Content: header with assistant name placeholder ("Maia Assistant") + status chip
 Rules: the assistant never initiates or confirms money movement; any action is a **link to an existing screen**; include the pattern for a future "AI-generated · may be inaccurate" note; no chat persistence; no endpoints. States to design: default preview, composer focused (disabled tooltip), empty conversation, "feature unavailable" toast, mobile layout, dark/light.
 
 ## 7. Flows (prototype must implement these, including branches)
-**F-1 Sign in [PROPOSAL]:** S-01 → (Okta, out of scope: show a neutral "Redirecting…" frame) → callback → S-02. Branch: error → S-01 error state. Branch: expired session mid-form → dialog → sign in → return to the same step with data preserved.
+**F-1 Sign in [PROPOSAL]:** S-01 → (Auth0, out of scope: show a neutral "Redirecting…" frame) → callback → S-02. Branch: error → S-01 error state. Branch: expired session mid-form → dialog → sign in → return to the same step with data preserved.
 **F-2 Check balance and activity:** S-02 → change period → totals/graph update (loading state) → "See full statement" → S-03 with same period.
 **F-3 Send Pix:** S-02 quick action → S-05.1 Key (invalid → inline error, button disabled) → .2 Amount (> balance → warning, next disabled; = balance → allowed) → .3 Review → Confirm → pending → S-09 success | business failure | uncertain outcome. After success → S-03 shows new row at top (prototype: static mock).
 **F-4 Deposit:** S-06 form → validation → Review dialog → Confirm → S-09 (success | "Account not found." returns to form with field error).

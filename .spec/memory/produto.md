@@ -34,7 +34,7 @@ Ledger types: `PIX`, `PHONE_RECHARGE`, `WITHDRAW` (outgoing), `DEPOSIT` (incomin
 | Balance rule | Debit allowed when `balance >= amount` — **implemented in BE-03** (atomic, single place). |
 | Ownership | A user may only debit accounts they own; ledger row belongs to the **debited** account; statement and transaction lookup limited to the caller's account (today unscoped = data leak). |
 | Statement dates | Fix so a single-day range returns that day (today the initial day is excluded; dates are end-of-day UTC). Time zone for day boundaries: to be chosen in spec BE-05. |
-| Auth | Okta (OIDC, Authorization Code + PKCE); API is a JWT resource server (`auth-okta.md`). |
+| Auth | Auth0 (OIDC, Authorization Code + PKCE, SPA app); API is a JWT resource server with a role claim (`auth-auth0.md`). |
 | Additive API | `GET /accounts/me` → `{agency, number, balance}`; `id` on each statement row; pagination/sort/type filter; optional `Idempotency-Key`. |
 | Schema | Flyway, clean `V1` (database is disposable). |
 
