@@ -55,12 +55,12 @@ One conditional UPDATE enforces `balance >= amount` (`AccountRepository.debit`, 
 ## Target design in one screen
 * Each money operation = one `@Transactional` service method; debit via atomic conditional update (`WHERE balance >= :amt`) or `@Version`; ledger written in the same transaction.
 * Pix: reserve (debit + ledger PENDING) → commit → call MaiaBank → confirm/compensate; Kafka via transactional outbox.
-* `CurrentUser` bean (package `services.client`) resolves Okta `sub` → `usuario.external_subject` → the single account. Unknown `sub` → 403. Scopes `transactions:read|write`, role `customer`.
+* `CurrentUser` bean (package `services.client`) resolves the Auth0 `sub` → `usuario.external_subject` → the single account. Unknown `sub` → 403. Authorization = role claim `https://financial-transaction/roles` (only `customer`, D-30); no scopes.
 * Statement: account-scoped, half-open date range, paginated, totals by aggregate query, rows carry `id`.
 * `GET /accounts/me`. Idempotency-Key on POSTs (store in DB).
 
 ## Decisions log (final)
-Okta Integrator Free plan (10 users; limits in `auth-okta.md`) · Boot 3.5.x via Java 21 then 25 · keep architecture/packages · `>=` balance rule · Pix behaviour kept (no local credit) · owner-only debits · English UI · visual identity = the approved prototype in `prototype/` (supersedes the earlier "Grafite Ciano" proposal; skills' stack assumptions ignored) · additive API (`/accounts/me`, row `id`) · manual user↔Okta linking, role `customer` only · disposable DB, clean Flyway V1 · no Kafka consumer, payload frozen · one account per user · GitHub Actions + Docker · web-only portfolio prototype · AI Assistant = future concept only.
+Auth0 free plan, tenant `dev-twljocmfwpvlxx1q.eu.auth0.com` (D-29, supersedes Okta; details in `auth-auth0.md`) · Boot 3.5.x via Java 21 then 25 · keep architecture/packages · `>=` balance rule · Pix behaviour kept (no local credit) · owner-only debits · English UI · visual identity = the approved prototype in `prototype/` (supersedes the earlier "Grafite Ciano" proposal; skills' stack assumptions ignored) · additive API (`/accounts/me`, row `id`) · manual user↔Auth0 linking, role `customer` only · disposable DB, clean Flyway V1 · no Kafka consumer, payload frozen · one account per user · GitHub Actions + Docker · web-only portfolio prototype · AI Assistant = future concept only.
 
 ## Frontend: prototype and agent autonomy
 **Reference:** `prototype/Maia Bank UI prototype/Maia Bank.dc.html` (design-canvas export with `support.js`; **do not copy its markup** — reimplement in Angular). Observed identity [INFERRED from the file, confirm when opening it]: warm dark-brown surfaces, gold accent (`#CEA45C`), teal/green status tones, Manrope + Sora fonts, Phosphor icons, "Demo environment · test data only" chip, prototype controls (data state, on-confirm outcome, screen jump). `_ds/nocturne-*` inside it is a bundled design-system export (blurple, Inter) that the main page does not appear to use — treat as non-authoritative.
@@ -77,7 +77,7 @@ Screens in the prototype: landing/sign-in, Home, Statement (+detail), Pix (3 ste
 `app-financial-transaction-service/`: Angular 21 (zoneless, strict), Tailwind 4, Vitest (`npm test`), Phosphor icons, Manrope/Sora fonts. Tokens live only in `src/styles.scss` (dark default + light; semantic Tailwind names such as `bg-surface`, `text-content`, `text-income`) and are guarded by `core/theme/tokens-contrast.spec.ts`. Runtime config: `public/config.json` (`apiBaseUrl`, `auth`, `demoBanner`); dev proxy `/api → localhost:8088`. HTTP boundary: interceptors request-id → auth (dev-open) → api-error (typed `ApiError`). Shared UI in `src/app/shared/ui`, living style guide at `/design`. Prototype deviations: `docs/prototype-deviations.md`. No chart library (hand-made SVG).
 
 ## How the agent must work
-1. Read `produto.md`, this file, the spec you were given, and follow `../spec-execution-flow.md` for the execution loop. Read `auth-okta.md` / `designer-brief.md` only for auth or UI work.
+1. Read `produto.md`, this file, the spec you were given, and follow `../spec-execution-flow.md` for the execution loop. Read `auth-auth0.md` / `designer-brief.md` only for auth or UI work.
 2. Work **only** within the spec scope; list extra ideas as proposals.
 3. Tests first for behaviour changes; run the suite; record an evidence line per task (`shared/como-executar.md`).
 4. Stop and ask at the spec's approval gates.

@@ -24,7 +24,7 @@ SDD: nothing is implemented without an approved spec. All are **Draft**. A spec 
 | [BE-01](be-01-safety-net.md) | Safety net: CI + characterization tests | — | FE-01 |
 | [BE-02](be-02-foundation-config-db.md) | Foundation: profiles, secrets, Flyway | BE-01 | FE-01 |
 | [BE-03](be-03-money-integrity.md) | Money integrity: transactions, atomic balance, Pix, recharge | BE-02 | none (touches the same services as BE-04) |
-| [BE-04](be-04-auth-and-ownership.md) | Okta authentication, CurrentUser, ownership | BE-03 | FE-02 |
+| [BE-04](be-04-auth-and-ownership.md) | Auth0 authentication, CurrentUser, ownership | BE-03 | FE-02 |
 | [BE-05](be-05-behaviour-fixes.md) | Dates, validation and error handling | BE-04 | none |
 | [BE-06](be-06-api-contract-and-evolution.md) | OpenAPI contract, generator, new endpoints | BE-05 | none |
 | [BE-07](be-07-platform-upgrade.md) | Platform upgrade: Boot 3.5.x, Java 21, Java 25 | BE-06 | none |
@@ -44,7 +44,7 @@ SDD: nothing is implemented without an approved spec. All are **Draft**. A spec 
 5. Frontend needs: design (FE-01) → foundation (FE-02) → real auth + `accounts/me` + row ids (BE-04/06) → operations.
 
 ## Human actions required
-BE-02 rotate committed DB credentials · BE-04/FE-03 create the Okta org/app/users · BE-06 approve OpenAPI preview · FE-01 approve design · FE-02 provide the Angular project name · BE-03 provide the MaiaBank contract only if the Pix payload must change.
+BE-02 rotate committed DB credentials · BE-04/FE-03 add the Auth0 Action and 2 test users · BE-06 approve OpenAPI preview · FE-01 approve design · FE-02 provide the Angular project name · BE-03 provide the MaiaBank contract only if the Pix payload must change.
 
 ## Status
 | Spec | Status |

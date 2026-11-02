@@ -80,21 +80,21 @@ Finish: fill the spec's Result section, set its status in .spec/specs/README.md,
 
 ## BE-04 — be-04-auth-and-ownership
 
-**Human action before:** Create the Okta org, authorization server, scopes, `groups` claim, SPA app, trusted origins and test users following `auth-okta.md`.
+**Human action before:** Finish Auth0 per `auth-auth0.md`: Post-Login Action attached to the Login flow, two test users, sign-ups disabled; give the agent each user's `sub` (the SPA app and API already exist).
 
 ```text
 Execute SPEC-BE-04 (.spec/specs/be-04-auth-and-ownership.md).
 Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md.
 Process: follow .spec/spec-execution-flow.md section 1 (the loop) and the runbook for this spec in section 4. Tests first, one commit per task, tick a task only with an evidence line (.spec/shared/como-executar.md).
-Re-verify every `[VERIFY]` item in `auth-okta.md` against current Okta docs and record the result.
-Use the mock JWKS issuer for tests; a real Okta login is a manual check.
+Re-verify every `[VERIFY]` item in `auth-auth0.md` against current Auth0 docs and record the result.
+Use the mock JWKS issuer for tests; a real Auth0 login is a manual check.
 Git: FIRST run `git checkout main && git pull origin main`, then create the branch `spec/be-04-auth-and-ownership` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually.
 Stay strictly in the spec scope; stop and ask at its 'Stop and ask' items.
 Minimal validation (you may NOT mark the spec Done until all pass; paste the real outputs in the PR):
-  - No token → 401; wrong issuer/audience/expired → 401; missing scope → 403; unlinked `sub` → 403
+  - No token → 401; wrong issuer/audience/expired → 401; missing `customer` role → 403; unlinked `sub` → 403
   - User A requests user B's transaction id → 404; user A cannot debit B's account
   - Statement totals contain only the caller's rows
-  - One manual sign-in against the real Okta dev org succeeds
+  - One manual sign-in against the real Auth0 tenant succeeds
 Finish: fill the spec's Result section, set its status in .spec/specs/README.md, commit on the spec branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
 ```
 
@@ -284,5 +284,5 @@ Finish: fill the spec's Result section, set its status in .spec/specs/README.md,
 ## Rules for every prompt
 - **Git:** always `git checkout main && git pull origin main` before creating the spec branch; commit after the spec's minimal validation passes, then push the branch; never open PRs or merge (the owner does it manually). If the dependency specs are not merged into main yet, stop and ask.
 - Fresh session per spec; never combine two specs in one session.
-- If a validation cannot be run (e.g. no Docker or no Okta org), the agent reports it as **not executed** and the spec stays open.
+- If a validation cannot be run (e.g. no Docker or no Auth0 tenant), the agent reports it as **not executed** and the spec stays open.
 - If the agent proposes a change outside the spec, it writes a proposal and stops (backend contract wins over the prototype).

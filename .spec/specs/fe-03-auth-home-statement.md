@@ -7,7 +7,7 @@
 Implement sign-in, Home and the Statement/detail from the approved design and contract.
 
 ## Scope
-- Auth: `AuthService` wrapper (Okta/OIDC code + PKCE), guard, callback, interceptor, silent renew, session-expired dialog (see `auth-okta.md` frontend section)
+- Auth: `AuthService` wrapper (Auth0/OIDC code + PKCE, `audience` always sent), guard, callback, interceptor, silent renew, session-expired dialog (see `auth-auth0.md` frontend section)
 - Home: balance from `/accounts/me`, period totals + chart (table fallback), recent activity, quick actions, AI Assistant concept card
 - Statement: period/type filters in query params, server pagination, sort, table/cards, detail by id, all states
 
