@@ -43,6 +43,8 @@ const PAIRS: ReadonlyArray<[string, string, number]> = [
   ['expense', 'surface', 4.5],
   ['expense', 'surface-raised', 4.5],
   ['warning', 'surface-raised', 4.5],
+  ['on-brand', 'brand', 4.5],
+  ['on-brand-muted', 'brand', 4.5],
   ['line-input', 'surface', 3],
   ['line-input', 'surface-raised', 3],
   ['line-input', 'surface-sunken', 3],

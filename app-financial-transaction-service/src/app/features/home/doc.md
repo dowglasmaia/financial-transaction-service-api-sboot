@@ -1,13 +1,10 @@
-# Home
+# Home (placeholder)
 
-## Responsabilidade
+## Responsibility
+Temporary landing page that proves lazy routing and the shared UI work. It is replaced by the real Home (balance, totals, chart, recent activity) in spec FE-03.
 
-Fornecer o shell inicial da aplicação e confirmar que a navegação lazy funciona sem depender de uma API.
+## Contract
+No OpenAPI operations are consumed yet.
 
-## Contratos
-
-Ainda não há operações OpenAPI neste módulo.
-
-## Próxima evolução
-
-Substituir este exemplo somente por uma mudança especificada e com contrato aprovado.
+## Next
+Spec FE-03 implements the Home module from the approved prototype and the corrected contract (`GET /accounts/me`, statement).
