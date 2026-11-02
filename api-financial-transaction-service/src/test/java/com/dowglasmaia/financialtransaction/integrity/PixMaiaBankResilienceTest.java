@@ -6,6 +6,7 @@ import com.dowglasmaia.financialtransaction.entity.TransactionStatusEnum;
 import com.dowglasmaia.financialtransaction.repository.AccountRepository;
 import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
 import com.dowglasmaia.financialtransaction.repository.TransactionRepository;
+import com.dowglasmaia.financialtransaction.support.MockIssuer;
 import com.dowglasmaia.financialtransaction.support.SharedPostgres;
 import com.sun.net.httpserver.HttpServer;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
@@ -94,6 +95,7 @@ class PixMaiaBankResilienceTest {
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
         SharedPostgres.register(registry);
+        MockIssuer.register(registry);
         registry.add("api.client.maiabank.url", () -> "http://127.0.0.1:" + MAIABANK.getAddress().getPort() + "/api/v1/transactions");
     }
 
@@ -128,6 +130,7 @@ class PixMaiaBankResilienceTest {
 
     private org.springframework.test.web.servlet.ResultActions pix() throws Exception {
         return mvc.perform(MockMvcRequestBuilders.post("/api/v1/transactions/send-pix")
+              .header("Authorization", "Bearer " + MockIssuer.ownerToken())
               .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON).content(PIX));
     }
 

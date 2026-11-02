@@ -54,6 +54,7 @@ public abstract class AbstractIntegrationTest {
     @DynamicPropertySource
     static void database(DynamicPropertyRegistry registry) {
         SharedPostgres.register(registry);
+        MockIssuer.register(registry);
     }
 
     @Autowired protected MockMvc mvc;
@@ -116,14 +117,26 @@ public abstract class AbstractIntegrationTest {
               .transactionType(type).amount(amount).accountId(accountId).agencyId(null).dateHour(when).build());
     }
 
+    /** Requests are made as the seeded owner (a valid token from the mock issuer) unless a test says otherwise. */
     protected ResultActions post(String path, String body) throws Exception {
-        return mvc.perform(MockMvcRequestBuilders.post("/api/v1/transactions" + path)
-              .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON).content(body));
+        return postAs(MockIssuer.ownerToken(), path, body);
     }
 
     protected ResultActions get(String pathAndQuery) throws Exception {
-        return mvc.perform(MockMvcRequestBuilders.get("/api/v1/transactions" + pathAndQuery)
-              .accept(MediaType.APPLICATION_JSON));
+        return getAs(MockIssuer.ownerToken(), pathAndQuery);
+    }
+
+    protected ResultActions postAs(String token, String path, String body) throws Exception {
+        var request = MockMvcRequestBuilders.post("/api/v1/transactions" + path)
+              .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON).content(body);
+        if (token != null) request.header("Authorization", "Bearer " + token);
+        return mvc.perform(request);
+    }
+
+    protected ResultActions getAs(String token, String pathAndQuery) throws Exception {
+        var request = MockMvcRequestBuilders.get("/api/v1/transactions" + pathAndQuery).accept(MediaType.APPLICATION_JSON);
+        if (token != null) request.header("Authorization", "Bearer " + token);
+        return mvc.perform(request);
     }
 
     protected JsonNode bodyOf(ResultActions result) throws Exception {
