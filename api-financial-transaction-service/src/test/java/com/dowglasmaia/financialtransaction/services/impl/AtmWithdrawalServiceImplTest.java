@@ -1,8 +1,6 @@
 package com.dowglasmaia.financialtransaction.services.impl;
 
-
 import com.dowglasmaia.financialtransaction.entity.Account;
-import com.dowglasmaia.financialtransaction.repository.AccountRepository;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
 import com.dowglasmaia.financialtransaction.services.client.account.AddAmountService;
 import com.dowglasmaia.financialtransaction.services.client.account.FindAccountByNumberAndUserIdService;
@@ -10,75 +8,59 @@ import com.dowglasmaia.financialtransaction.services.client.agency.AgencyService
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 import static com.dowglasmaia.financialtransaction.mock.MockBuild.userAccountBuild;
 import static com.dowglasmaia.financialtransaction.mock.MockBuild.withdrawRequestBuild;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
+/** Unit test of the card / non-card branching (spec BE-01: replaces the previous vacuous assertions). */
+@ExtendWith(MockitoExtension.class)
+class AtmWithdrawalServiceImplTest {
 
-@ActiveProfiles("test")
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
-public class AtmWithdrawalServiceImplTest {
+    @Mock AgencyService agencyService;
+    @Mock AddAmountService addAmountService;
+    @Mock TransactionService transactionService;
+    @Mock FindAccountByNumberAndUserIdService findAccount;
 
-    private AtmWithdrawalServiceImpl service;
-
-    @MockBean
-    AccountRepository accountRepository;
-
-    @MockBean
-    private AgencyService agencyService;
-    @MockBean
-    private AddAmountService addAmountService;
-    @MockBean
-    private TransactionService transactionService;
-    @MockBean
-    private FindAccountByNumberAndUserIdService findAccountByNumberAndUserIdService;
+    AtmWithdrawalServiceImpl service;
+    Account actingAccount;
 
     @BeforeEach
-    public void setUp(){
-        this.service = new AtmWithdrawalServiceImpl(
-              agencyService,
-              addAmountService,
-              transactionService,
-              findAccountByNumberAndUserIdService);
-
-        var agencyId = String.valueOf(UUID.randomUUID());
-
-        when(agencyService.getCurrentAgency()).thenReturn(agencyId);
-        when(findAccountByNumberAndUserIdService.findByNumberAndUserId()).thenReturn(userAccountBuild());
-        doNothing().when(addAmountService).addAmountToAccount(anyString(), any());
-        doNothing().when(transactionService).save(any(), any(), any(), any());
+    void setUp() {
+        service = new AtmWithdrawalServiceImpl(agencyService, addAmountService, transactionService, findAccount);
+        actingAccount = userAccountBuild();
+        actingAccount.setNumber("2022");
+        actingAccount.setId("acting-id");
+        when(agencyService.getCurrentAgency()).thenReturn("agency-id");
+        when(findAccount.findByNumberAndUserId()).thenReturn(actingAccount);
     }
 
     @Test
-    public void souldMakeAtmWithdrawalNotBasedCardSuccessfully(){
-        var request = withdrawRequestBuild("21024", "1000", BigDecimal.valueOf(15000.00));
+    void cardBasedWithdrawalDebitsTheActingAccount() {
+        var request = withdrawRequestBuild(null, null, new BigDecimal("150.00"));
 
         service.makeAtmWithdrawal(request);
 
-        assertThatNoException();
-
-        verify(accountRepository, never()).save(any(Account.class));
+        verify(addAmountService).addAmountToAccount("2022", new BigDecimal("150.00"));
+        verify(transactionService).save(request, "acting-id", new BigDecimal("150.00"), "agency-id");
+        verifyNoMoreInteractions(addAmountService);
     }
 
     @Test
-    public void souldMakeAtmWithdrawalBasedCardSuccessfully(){
-        var request = withdrawRequestBuild(null, null, BigDecimal.valueOf(15000.00));
+    void nonCardWithdrawalDebitsTheAccountNumberFromTheRequestButLogsTheActingAccount() { // characterizes F-05
+        var request = withdrawRequestBuild("9999", "0211", new BigDecimal("80.00"));
 
         service.makeAtmWithdrawal(request);
 
-        assertThatNoException();
-
-        verify(accountRepository, never()).save(any(Account.class));
+        verify(addAmountService).addAmountToAccount(eq("9999"), eq(new BigDecimal("80.00")));
+        verify(transactionService).save(any(), eq("acting-id"), eq(new BigDecimal("80.00")), eq("agency-id"));
     }
-
-
 }
