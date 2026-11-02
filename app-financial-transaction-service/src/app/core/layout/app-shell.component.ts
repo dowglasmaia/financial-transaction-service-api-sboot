@@ -2,12 +2,13 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { APP_CONFIG } from '../config/app-config';
 import { ThemeToggleComponent } from '../../shared/ui/theme-toggle.component';
+import { SiteFooterComponent } from './site-footer.component';
 
-/** Page frame: skip link, header (brand, demo chip, theme toggle), main landmark and the demo disclaimer footer. */
+/** Page frame: skip link, header (brand, demo chip, theme toggle), main landmark and the portfolio credit footer. */
 @Component({
   selector: 'app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, ThemeToggleComponent],
+  imports: [RouterOutlet, RouterLink, ThemeToggleComponent, SiteFooterComponent],
   template: `
     <a
       href="#main"
@@ -41,11 +42,7 @@ import { ThemeToggleComponent } from '../../shared/ui/theme-toggle.component';
       <router-outlet />
     </main>
 
-    @if (config.demoBanner) {
-      <footer class="mx-auto w-full max-w-[1200px] px-4 pt-4 pb-10 text-sm text-content-muted sm:px-6">
-        Demo environment · test data only. Not a real bank. “Maia Bank” is a placeholder name.
-      </footer>
-    }
+    <app-site-footer />
   `,
 })
 export class AppShellComponent {

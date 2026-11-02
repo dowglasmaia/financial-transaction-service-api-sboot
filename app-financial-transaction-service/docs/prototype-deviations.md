@@ -16,6 +16,8 @@ Seeded from the FE-01 review (`.spec/specs/fe-01-design-prototype.md`).
 | 5 | Fonts (Manrope, Sora) still come from Google Fonts like the prototype | Matches the design; self-hosting is a future privacy/perf improvement | `src/index.html` |
 | 6 | Money rendered as `R$ 12,480.50` through one util (`formatBrl`) and never recomputed in the UI | Single formatting rule; backend is the authority for balances | `shared/util/money.ts` |
 | 7 | Ledger row shows direction by rail + icon + label + sign + screen-reader text | Colour must not be the only cue (a11y) | `shared/ui/ledger-row.component.ts` |
+| 8 | **Portfolio credit footer** replicated from the check-in app (`check-in-api-kotlin/app-check-in-api-angular`, `site-footer`): author block, "Find me" profile links, "Built with" stack tags, fictitious/demo notices. Not in the prototype; requested by the owner | Owner request; same layout and content structure, restyled with this app's tokens (`content`, `content-muted`, `accent`, `line`); stack list adapted (Java 25, Spring Boot, PostgreSQL, Kafka) | `core/layout/site-footer.component.ts`, `shared/ui/tag.component.ts` |
+| 9 | LinkedIn/GitHub logos use the Phosphor **regular** weight instead of the reference's filled weight | The fill weight CSS added ~84 kB to the initial bundle (508 kB, over the 500 kB budget); only two icons need it | footer |
 
 ## Proposals / open (Tier 2 — need the owner)
 | # | Proposal | Detail |

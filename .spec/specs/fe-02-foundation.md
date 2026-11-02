@@ -52,5 +52,8 @@ Create the Angular 21 project and the shared base every module uses.
 ## Skills
 angular-frontend-scaffold, angular-tailwind-ui-specialist, angular-architect
 
+## Addendum (owner request)
+Portfolio credit footer replicated from `check-in-api-kotlin/app-check-in-api-angular` (`SiteFooterComponent` + `app-tag`), 9 new unit tests (69 total, green), initial bundle 434.76 kB, visually checked in dark and light. Logged as deviation #8/#9.
+
 ## Result
 Angular 21 foundation in place: scaffold (skill), runtime config, typed HTTP boundary (request id → auth → error), design tokens in two themes with a contrast test, theme service, 12 shared UI pieces, shell and a `/design` living style guide; Vitest runner with 60 tests. Executed: clean `npm ci` + build, unit tests, visual check of `/design` in dark and light. **Open:** `app-ci` on GitHub (PR by the owner), axe-core run (FE-05), OpenAPI type generation (after BE-06), formal sign-off of the prototype (FE-01). **Needs the owner's OK:** new dependencies (`@phosphor-icons/web`, `vitest`, `jsdom`, `@types/node`) and the decisions Vitest / no chart library. Deviations from the prototype are in `app-financial-transaction-service/docs/prototype-deviations.md`.
