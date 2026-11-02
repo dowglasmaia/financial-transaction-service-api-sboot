@@ -1,6 +1,6 @@
 # SPEC-BE-02 — Foundation: profiles, secrets, Flyway
 
-**Status:** Implemented and verified locally — commits ready on the branch; PR/CI pending (owner) · **Depends on:** BE-01 · **Parallel with:** FE-01
+**Status:** Done (PR #3 merged 2026-11-02; api-ci green) — except the human credential rotation · **Depends on:** BE-01 · **Parallel with:** FE-01
 **Read first:** `../memory/produto.md`, `../memory/contexto-tecnico.md`. Protocol: `../shared/como-executar.md` (tick a task only after verification + evidence line).
 
 ## Objective
@@ -54,4 +54,6 @@ Stop the schema wipe and committed credentials; give the DB a versioned schema.
 java-persistence-performance (Flyway, indexes)
 
 ## Result
-Schema is now versioned (Flyway V1) and only validated by Hibernate; no secrets in tracked files; seed is demo-only and idempotent; compose is env-driven with pinned tags. Executed: full suite (52/52) and a two-start restart test on an empty PostgreSQL. **Not done / needs the owner:** credential rotation (human), PR + `api-ci` run, full `docker compose up`. Accepted limitations: no FK on `transaction.account_id` until BE-03 (F-08); outside `local`/`test` the acting account is unresolved until BE-04; `dowglasmaia/maiabank` image tag unpinned.
+**Closed 2026-11-02:** PR #3 merged, `api-ci` success on the PR (567c8ab) and on `main` (aed8319). Original result follows.
+
+Schema is now versioned (Flyway V1) and only validated by Hibernate; no secrets in tracked files; seed is demo-only and idempotent; compose is env-driven with pinned tags. Executed: full suite (52/52) and a two-start restart test on an empty PostgreSQL. **Not done / needs the owner:** credential rotation (human), full `docker compose up`. Accepted limitations: no FK on `transaction.account_id` until BE-03 (F-08); outside `local`/`test` the acting account is unresolved until BE-04; `dowglasmaia/maiabank` image tag unpinned.
