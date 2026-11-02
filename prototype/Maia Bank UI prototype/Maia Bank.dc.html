@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+<style>body{margin:0}a{color:#CEA45C}a:hover{color:#E3C58A}@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,-30px)}}@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}@keyframes ring{0%{transform:scale(.9);opacity:.8}100%{transform:scale(2.3);opacity:0}}@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}button{transition:transform .15s ease-out,filter .15s,box-shadow .2s,background .2s,border-color .2s}button:not(:disabled):hover{filter:brightness(1.1);transform:translateY(-1px)}::selection{background:rgba(206,164,92,.35)}*{scrollbar-width:thin;scrollbar-color:#6F5C4E transparent}a:hover{text-decoration:underline}button:not(:disabled):active{transform:scale(.97) translateY(0)}input:focus{border-color:var(--a)!important;box-shadow:0 0 0 4px rgba(206,164,92,.18)}input{transition:box-shadow .2s,border-color .2s}@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}input::placeholder{color:#8C7A64}input:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--a);outline-offset:2px}</style>
+</helmet>
+<div style="{{ rootStyle }}">
+<!-- Prototype controls -->
+<div style="position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:10px 16px;background:#0E0907;border-bottom:1px solid #3A2820;font:500 12px Manrope;color:#B8A794">
+<span style="color:#F3EADB;font-weight:600">Prototype controls</span>
+<sc-for list="{{ bpOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
+<span style="width:1px;height:18px;background:#3A2820"></span>
+<sc-for list="{{ themeOpts }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
+<span style="width:1px;height:18px;background:#3A2820"></span>
+<span>Data state</span>
+<sc-for list="{{ dataOpts }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
+<span style="width:1px;height:18px;background:#3A2820"></span>
+<span>On confirm</span>
+<sc-for list="{{ outOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
+<span style="width:1px;height:18px;background:#3A2820"></span>
+<span>Jump</span>
+<sc-for list="{{ jumpOpts }}" as="o" hint-placeholder-count="8"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
+</div>
+
+<div style="overflow:auto;padding:24px 16px 48px">
+<div style="{{ frameStyle }}"><i class="{{ bgIcon }}" style="position:absolute;z-index:-1;right:-70px;bottom:-50px;font-size:{{ bgIconSize }}px;line-height:1;color:var(--a);opacity:.07;pointer-events:none;transform:rotate(-10deg);animation:floatY 10s ease-in-out infinite"></i><i class="{{ bgIcon }}" style="position:absolute;z-index:-1;left:-90px;top:-70px;font-size:300px;line-height:1;color:var(--a2);opacity:.05;pointer-events:none;transform:rotate(14deg)"></i><div style="position:absolute;z-index:-1;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(206,164,92,.22),transparent 65%);top:140px;left:-90px;pointer-events:none;animation:drift 14s ease-in-out infinite"></div><div style="position:absolute;z-index:-1;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(73,131,121,.2),transparent 65%);top:420px;right:-100px;pointer-events:none;animation:drift 18s ease-in-out infinite;animation-delay:-7s"></div>
+
+<!-- ============ LANDING ============ -->
+<sc-if value="{{ isLanding }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;min-height:760px">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:20px 32px;gap:12px">
+<div style="display:flex;align-items:center;gap:10px;font:700 20px Sora"><span style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#CEA45C,#5FA899);color:#2A1708;box-shadow:0 6px 20px -4px rgba(206,164,92,.6);display:grid;place-items:center"><i class="ph-bold ph-wave-sine"></i></span>Maia Bank</div>
+<div style="display:flex;align-items:center;gap:12px"><span style="{{ chipStyle }}"><i class="ph ph-flask"></i>Demo environment · test data only</span><button onClick="{{ goSignin }}" style="{{ btnS }}">Sign in</button></div>
+</div>
+<div style="{{ heroGrid }}">
+<div style="display:flex;flex-direction:column;gap:20px;justify-content:center;animation:fadeUp .7s cubic-bezier(.2,.8,.2,1) both">
+<span style="font:600 12px Manrope;letter-spacing:.12em;text-transform:uppercase;color:var(--a)">A calmer way to bank</span>
+<h1 style="margin:0;font:600 {{ heroSize }}px/1.05 Sora;letter-spacing:-.03em">Your money,<br><span style="background:linear-gradient(90deg,#CEA45C,#5FA899,#6FB8A8);-webkit-background-clip:text;background-clip:text;color:transparent">in plain sight.</span></h1>
+<p style="margin:0;font:400 18px/1.55 Manrope;color:var(--cm);max-width:480px">Send Pix, top up a phone, add money with a boleto and see every real that comes in and goes out — all from your browser.</p>
+<div style="display:flex;gap:12px;flex-wrap:wrap"><button onClick="{{ goSignin }}" style="{{ btnP }}">Sign in<i class="ph-bold ph-arrow-right"></i></button></div>
+</div>
+<div style="{{ heroCard }}">
+<div style="font:500 13px Manrope;color:var(--cm)">Current balance</div>
+<div style="font:600 48px/1.1 Sora;font-variant-numeric:tabular-nums;margin-top:6px"><span style="color:var(--cm);font-size:28px">R$</span> 12,480.50</div>
+<div style="display:flex;height:8px;border-radius:4px;overflow:hidden;margin:20px 0 8px;gap:2px"><span style="flex:62;background:var(--inc)"></span><span style="flex:38;background:var(--exp)"></span></div>
+<div style="display:flex;justify-content:space-between;font:500 12px Manrope;color:var(--cm)"><span><i class="ph ph-arrow-down-left"></i> Money in</span><span><i class="ph ph-arrow-up-right"></i> Money out</span></div>
+<div style="position:absolute;right:-12px;top:-20px;display:flex;gap:8px;align-items:center;padding:10px 14px;border-radius:12px;background:var(--so);border:1px solid var(--ln);box-shadow:0 14px 34px rgba(0,0,0,.35);font:600 13px Manrope;animation:floatY 5s ease-in-out infinite;animation-delay:-2s"><i class="ph-bold ph-arrow-down-left" style="color:var(--inc)"></i>+ R$ 1,800.00<span style="color:var(--cm);font-weight:500">Deposit</span></div><div style="position:absolute;left:-14px;bottom:-18px;display:flex;gap:8px;align-items:center;padding:10px 14px;border-radius:12px;background:var(--so);border:1px solid var(--ln);box-shadow:0 14px 34px rgba(0,0,0,.35);font:600 13px Manrope;animation:floatY 6s ease-in-out infinite"><i class="ph-bold ph-paper-plane-tilt" style="color:var(--exp)"></i>− R$ 250.00<span style="color:var(--cm);font-weight:500">Pix sent</span></div><div style="margin-top:18px;font:500 11px Manrope;color:var(--cm);border-top:1px dashed var(--ln);padding-top:12px">Example data</div>
+</div>
+</div>
+<div style="{{ valueGrid }}">
+<sc-for list="{{ values }}" as="v" hint-placeholder-count="3"><div style="background:linear-gradient(160deg,var(--so),var(--sr));border:1px solid var(--ln);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:10px;transition:transform .25s ease-out,border-color .25s,box-shadow .25s" style-hover="transform:translateY(-4px);border-color:var(--a);box-shadow:0 18px 40px -12px rgba(206,164,92,.35)"><span style="width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:22px;color:var(--a);background:linear-gradient(135deg,rgba(206,164,92,.2),rgba(73,131,121,.2));border:1px solid var(--ln)"><i class="{{ v.icon }}"></i></span><div style="font:600 17px Manrope">{{ v.t }}</div><div style="font:400 14px/1.5 Manrope;color:var(--cm)">{{ v.b }}</div></div></sc-for>
+</div>
+<div style="margin-top:auto;padding:20px 32px;font:400 12px Manrope;color:var(--cm);text-align:center;border-top:1px solid var(--ln)">Demo environment · test data only. Not a real bank. “Maia Bank” is a placeholder name.</div>
+</div>
+</sc-if>
+
+<!-- ============ SIGN IN ============ -->
+<sc-if value="{{ isSignin }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:760px;display:grid;place-items:center;padding:24px;position:relative">
+<div style="position:absolute;top:20px;right:24px"><span style="{{ chipStyle }}"><i class="ph ph-flask"></i>Demo environment · test data only</span></div>
+<div style="width:100%;max-width:400px;background:var(--sr);border:1px solid var(--ln);border-radius:12px;padding:32px;display:flex;flex-direction:column;gap:16px;text-align:center;align-items:center">
+<span style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#CEA45C,#5FA899);color:#2A1708;box-shadow:0 6px 20px -4px rgba(206,164,92,.6);display:grid;place-items:center;font-size:24px"><i class="ph-bold ph-wave-sine"></i></span>
+<h1 style="margin:0;font:600 24px Sora">Welcome back</h1>
+<p style="margin:0;color:var(--cm);font:400 15px/1.5 Manrope">Sign in to see your balance and move money.</p>
+<sc-if value="{{ signinError }}" hint-placeholder-val="{{ false }}"><div role="alert" style="{{ alertErr }}"><i class="ph-bold ph-warning-circle"></i>We couldn't sign you in. Try again.</div></sc-if>
+<button onClick="{{ doSignin }}" style="{{ btnPFull }}"><sc-if value="{{ redirecting }}" hint-placeholder-val="{{ false }}"><i class="ph-bold ph-spinner" style="animation:spin .8s linear infinite"></i>Redirecting…</sc-if><sc-if value="{{ notRedirecting }}" hint-placeholder-val="{{ true }}">Sign in</sc-if></button>
+<div style="font:400 13px Manrope;color:var(--cm)"><i class="ph ph-lock-simple"></i> Secure sign-in provided by Okta</div>
+<span style="{{ tagProposed }}">Proposed</span>
+<a href="#" onClick="{{ failSignin }}" style="font:400 12px Manrope">Preview error state</a>
+</div>
+</div>
+</sc-if>
+
+<!-- ============ APP SHELL ============ -->
+<sc-if value="{{ inApp }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;min-height:820px">
+<header style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px {{ padX }}px;background:var(--sr);backdrop-filter:blur(14px);border-bottom:1px solid var(--ln);position:relative;z-index:15">
+<div style="display:flex;align-items:center;gap:10px;font:700 18px Sora"><span style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#CEA45C,#5FA899);color:#2A1708;box-shadow:0 6px 20px -4px rgba(206,164,92,.6);display:grid;place-items:center"><i class="ph-bold ph-wave-sine"></i></span>Maia Bank</div>
+<div style="display:flex;align-items:center;gap:10px">
+<sc-if value="{{ showChip }}" hint-placeholder-val="{{ true }}"><span style="{{ chipStyle }}"><i class="ph ph-flask"></i>Demo environment · test data only</span></sc-if>
+<button aria-label="Toggle theme" onClick="{{ toggleTheme }}" style="{{ iconBtn }}"><i class="{{ themeIcon }}"></i></button>
+<button aria-label="Account menu" onClick="{{ toggleMenu }}" style="{{ iconBtn }}"><i class="ph ph-user-circle"></i></button>
+</div>
+<sc-if value="{{ menu }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;right:{{ padX }}px;top:58px;z-index:20;background:var(--so);border:1px solid var(--ln);border-radius:12px;padding:8px;width:240px;box-shadow:0 12px 32px rgba(0,0,0,.35)">
+<div style="padding:8px 12px;font:500 13px Manrope;color:var(--cm)">Agency 0001 · Account 12345-6<br><span style="font-size:11px">Proposed: from GET /accounts/me</span></div>
+<button onClick="{{ toggleTheme }}" style="{{ menuItem }}"><i class="{{ themeIcon }}"></i>{{ themeLabel }}</button>
+<button onClick="{{ askSignout }}" style="{{ menuItem }}"><i class="ph ph-sign-out"></i>Sign out</button>
+</div>
+</sc-if>
+</header>
+
+<div style="display:flex;flex:1;min-height:0">
+<sc-if value="{{ showRail }}" hint-placeholder-val="{{ true }}">
+<nav aria-label="Primary" style="{{ railStyle }}">
+<sc-for list="{{ navItems }}" as="n" hint-placeholder-count="7"><button onClick="{{ n.go }}" aria-label="{{ n.label }}" style-hover="background:rgba(206,164,92,.12);color:#FBF1DE" style="{{ n.style }}"><i class="{{ n.icon }}" style="font-size:20px"></i><sc-if value="{{ n.showLabel }}" hint-placeholder-val="{{ true }}"><span style="flex:1;text-align:left">{{ n.label }}</span></sc-if><sc-if value="{{ n.soon }}" hint-placeholder-val="{{ false }}"><span style="{{ soonBadge }}">Soon</span></sc-if></button></sc-for>
+</nav>
+</sc-if>
+
+<main style="flex:1;min-width:0;padding:{{ padY }}px {{ padX }}px;display:flex;flex-direction:column;gap:20px;align-items:stretch">
+<div style="max-width:1200px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:20px">
+
+<!-- ===== HOME ===== -->
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+<div style="animation:fadeUp .45s cubic-bezier(.2,.8,.2,1) both;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><div style="font:400 14px Manrope;color:var(--cm)">Good evening</div><h1 style="margin:2px 0 0;font:600 30px/1.1 Sora;letter-spacing:-.01em">Home</h1></div>
+<div role="group" aria-label="Period" style="display:flex;background:var(--ss);border:1px solid var(--ln);border-radius:10px;padding:3px;gap:2px"><sc-for list="{{ periodOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div>
+
+<sc-if value="{{ stLoading }}" hint-placeholder-val="{{ false }}"><div style="{{ homeGrid }}"><div style="{{ skel180 }}"></div><div style="{{ skel180 }}"></div></div></sc-if>
+<sc-if value="{{ stError }}" hint-placeholder-val="{{ false }}"><div role="alert" style="{{ cardStyle }}"><div style="display:flex;gap:12px;align-items:flex-start;color:var(--exp)"><i class="ph-bold ph-warning-circle" style="font-size:22px"></i><div><div style="font:600 16px Manrope">We couldn't load your balance</div><div style="font:400 14px Manrope;color:var(--cm);margin-top:4px">Something went wrong. Try again.</div><div style="font:400 12px 'SF Mono',monospace;color:var(--cm);margin-top:8px">Request ID req_7f3a91c2</div></div></div><button onClick="{{ setOk }}" style="{{ btnSCss }};margin-top:16px">Try again</button></div></sc-if>
+<sc-if value="{{ stEmpty }}" hint-placeholder-val="{{ false }}"><div style="{{ cardCss }};text-align:center;padding:48px 20px"><div style="font:600 18px Sora">No activity yet</div><div style="font:400 14px Manrope;color:var(--cm);margin:6px 0 20px">Make a deposit to get started.</div><button onClick="{{ goDeposit }}" style="{{ btnP }}">Make a deposit</button></div></sc-if>
+
+<sc-if value="{{ stOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="{{ homeGrid }}">
+<section style="{{ heroBalCss }}"><svg viewBox="0 0 300 80" preserveAspectRatio="none" style="position:absolute;z-index:-1;left:0;right:0;bottom:0;width:100%;height:100px;pointer-events:none"><path d="{{ sparkArea }}" style="fill:rgba(206,164,92,.16)"></path><path d="{{ sparkLine }}" pathLength="1" style="fill:none;stroke:#F0DDB0;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round;stroke-dasharray:1;animation:draw 1.6s ease-out both"></path></svg>
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font:500 14px Manrope;color:var(--cm)">Current balance</span><button aria-label="Hide or show amounts" onClick="{{ toggleHide }}" style="{{ iconBtn }}"><i class="{{ eyeIcon }}"></i></button></div>
+<div style="text-shadow:0 4px 30px rgba(206,164,92,.5);font:600 {{ balSize }}px/1.1 Sora;font-variant-numeric:tabular-nums;letter-spacing:-.02em"><span style="color:var(--cm);font-size:.55em;font-weight:500">R$</span> {{ balText }}</div>
+<div style="font:400 12px Manrope;color:var(--cm)">Updated Nov 2, 2026, 18:42 · from statement</div>
+<div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><button onClick="{{ goPix }}" style="{{ btnHeroP }}"><i class="ph-bold ph-paper-plane-tilt"></i>Send Pix</button><button onClick="{{ goDeposit }}" style="{{ btnS }}">Deposit</button><button onClick="{{ goRecharge }}" style="{{ btnS }}">Recharge</button><button onClick="{{ goWithdraw }}" style="{{ btnS }}">Withdraw</button></div>
+</section>
+<section style="{{ cardCss }};display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font:600 16px Manrope">Income vs outgoing</span><button onClick="{{ toggleTable }}" style="{{ linkBtn }}">{{ tableLabel }}</button></div>
+<sc-if value="{{ !showTable }}" hint-placeholder-val="{{ true }}"><div role="img" aria-label="{{ chartAlt }}" style="display:flex;height:14px;border-radius:7px;overflow:hidden;gap:2px;background:var(--ss)"><span style="{{ inBar }}"></span><span style="{{ outBar }}"></span></div></sc-if>
+<sc-if value="{{ showTable }}" hint-placeholder-val="{{ false }}"><table style="width:100%;border-collapse:collapse;font:400 14px Manrope"><tr style="color:var(--cm);text-align:left"><th style="padding:6px 0;font-weight:500">Series</th><th style="text-align:right;font-weight:500">Amount</th></tr><tr><td style="padding:6px 0">Money in</td><td style="text-align:right;font-variant-numeric:tabular-nums">{{ inText }}</td></tr><tr><td style="padding:6px 0">Money out</td><td style="text-align:right;font-variant-numeric:tabular-nums">{{ outText }}</td></tr></table></sc-if>
+<div style="display:flex;gap:20px;flex-wrap:wrap;font:500 13px Manrope"><span style="color:var(--inc)"><i class="ph-bold ph-arrow-down-left"></i> Money in</span><span style="color:var(--exp)"><i class="ph-bold ph-arrow-up-right"></i> Money out</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
+<div style="{{ tile }}" style-hover="transform:translateY(-3px);border-color:var(--a)"><div style="font:500 12px Manrope;color:var(--cm)">Money in</div><div style="font:600 18px Sora;font-variant-numeric:tabular-nums;color:var(--inc)">+ {{ inText }}</div></div>
+<div style="{{ tile }}" style-hover="transform:translateY(-3px);border-color:var(--a)"><div style="font:500 12px Manrope;color:var(--cm)">Money out</div><div style="font:600 18px Sora;font-variant-numeric:tabular-nums;color:var(--exp)">− {{ outText }}</div></div>
+<div style="{{ tile }}" style-hover="transform:translateY(-3px);border-color:var(--a)"><div style="font:500 12px Manrope;color:var(--cm)">Net for period</div><div style="font:600 18px Sora;font-variant-numeric:tabular-nums">{{ netText }}</div></div>
+</div>
+</section>
+</div>
+<div style="{{ homeGrid2 }}">
+<section style="{{ cardStyle }}">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font:600 16px Manrope">Recent activity</span><button onClick="{{ goStatement }}" style="{{ linkBtn }}">See full statement</button></div>
+<sc-for list="{{ recentRows }}" as="r" hint-placeholder-count="5"><div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--ln);animation:fadeUp .5s ease-out both;animation-delay:{{ r.delay }}"><span style="width:3px;align-self:stretch;border-radius:2px;background:{{ r.rail }}"></span><span style="width:36px;height:36px;border-radius:8px;background:var(--ss);display:grid;place-items:center;color:{{ r.rail }}"><i class="{{ r.icon }}"></i></span><div style="flex:1;min-width:0"><div style="font:500 15px Manrope">{{ r.label }}</div><div style="font:400 12px Manrope;color:var(--cm)">{{ r.date }}</div></div><div style="font:600 15px Manrope;font-variant-numeric:tabular-nums;color:{{ r.rail }}">{{ r.amount }}</div></div></sc-for>
+</section>
+<button onClick="{{ goAssistant }}" style-hover="transform:translateY(-3px);border-color:var(--a)" style="{{ cardCss }};text-align:left;cursor:pointer;color:var(--c);display:flex;flex-direction:column;gap:10px;align-items:flex-start;font-family:Manrope"><i class="ph ph-sparkle" style="font-size:26px;color:var(--a)"></i><span style="font:600 16px Manrope">Ask your assistant</span><span style="font:400 14px/1.5 Manrope;color:var(--cm)">Summaries and guidance for your account.</span><span style="{{ soonBadge }}">Coming soon</span></button>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<!-- ===== STATEMENT ===== -->
+<sc-if value="{{ isStatement }}" hint-placeholder-val="{{ false }}">
+<div style="animation:fadeUp .45s cubic-bezier(.2,.8,.2,1) both;display:flex;flex-direction:column;gap:16px">
+<h1 style="margin:0;font:600 30px/1.1 Sora">Statement</h1>
+<div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ periodOpts2 }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div>
+<div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ typeChips }}" as="o" hint-placeholder-count="5"><button onClick="{{ o.go }}" aria-pressed="{{ o.on }}" style-hover="border-color:var(--a);color:var(--c)" style="{{ o.style }}">{{ o.label }}</button></sc-for></div>
+<sc-if value="{{ stOk }}" hint-placeholder-val="{{ true }}"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px"><div style="{{ tile }}" style-hover="transform:translateY(-3px);border-color:var(--a)"><div style="font:500 12px Manrope;color:var(--cm)">Money in</div><div style="font:600 18px Sora;color:var(--inc);font-variant-numeric:tabular-nums">+ {{ inText }}</div></div><div style="{{ tile }}" style-hover="transform:translateY(-3px);border-color:var(--a)"><div style="font:500 12px Manrope;color:var(--cm)">Money out</div><div style="font:600 18px Sora;color:var(--exp);font-variant-numeric:tabular-nums">− {{ outText }}</div></div><div style="{{ tile }}" style-hover="transform:translateY(-3px);border-color:var(--a)"><div style="font:500 12px Manrope;color:var(--cm)">Current balance</div><div style="font:600 18px Sora;font-variant-numeric:tabular-nums">{{ balFull }}</div></div></div></sc-if>
+<sc-if value="{{ stLoading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:8px"><div style="{{ skel56 }}"></div><div style="{{ skel56 }}"></div><div style="{{ skel56 }}"></div><div style="{{ skel56 }}"></div></div></sc-if>
+<sc-if value="{{ stError }}" hint-placeholder-val="{{ false }}"><div role="alert" style="{{ cardCss }};color:var(--exp)"><b>Something went wrong. Try again.</b><div><button onClick="{{ setOk }}" style="{{ btnSCss }};margin-top:12px">Try again</button></div></div></sc-if>
+<sc-if value="{{ stmtEmpty }}" hint-placeholder-val="{{ false }}"><div style="{{ cardCss }};text-align:center;padding:48px 20px"><div style="font:600 18px Sora">No transactions in this period</div><button onClick="{{ setOk }}" style="{{ btnSCss }};margin-top:16px">Change period</button></div></sc-if>
+<sc-if value="{{ stmtList }}" hint-placeholder-val="{{ true }}">
+<div style="{{ cardCss }};padding:0;overflow:hidden">
+<div style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--ln);font:500 12px Manrope;color:var(--cm)"><span style="flex:1">Showing 1–{{ rowCount }} of {{ rowCount }}</span><span>Sort</span><button onClick="{{ sortDate }}" style="{{ sortStyleD }}">Date {{ dateArrow }}</button><button onClick="{{ sortAmt }}" style="{{ sortStyleA }}">Amount {{ amtArrow }}</button></div>
+<sc-for list="{{ stmtRows }}" as="r" hint-placeholder-count="6"><button onClick="{{ r.open }}" style-hover="background:var(--ss)" style="display:flex;width:100%;align-items:center;gap:14px;padding:12px 16px 12px 0;border:0;border-top:1px solid var(--ln);background:transparent;animation:fadeUp .45s ease-out both;animation-delay:{{ r.delay }};color:var(--c);text-align:left;cursor:{{ r.cursor }};font-family:Manrope"><span style="width:3px;align-self:stretch;background:{{ r.rail }};margin-left:0"></span><span style="width:38px;height:38px;border-radius:8px;background:var(--ss);display:grid;place-items:center;color:{{ r.rail }};font-size:18px"><i class="{{ r.icon }}"></i></span><div style="flex:1;min-width:0"><div style="font:500 15px Manrope">{{ r.label }}</div><div style="font:400 12px Manrope;color:var(--cm)">{{ r.date }}</div></div><div style="font:600 15px Manrope;font-variant-numeric:tabular-nums;color:{{ r.rail }};text-align:right">{{ r.amount }}</div><sc-if value="{{ proposalRows }}" hint-placeholder-val="{{ true }}"><i class="ph ph-caret-right" style="color:var(--cm)"></i></sc-if></button></sc-for>
+</div>
+<div style="font:400 12px Manrope;color:var(--cm);display:flex;gap:8px;align-items:center"><span style="{{ tagProposed }}">Proposed</span> Row → detail needs transaction ids (approved, D-22).</div>
+</sc-if>
+</div>
+</sc-if>
+
+<!-- ===== DETAIL ===== -->
+<sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+<div style="animation:fadeUp .45s cubic-bezier(.2,.8,.2,1) both;display:flex;flex-direction:column;gap:16px;max-width:560px">
+<div style="font:400 14px Manrope;color:var(--cm)"><button onClick="{{ goStatement }}" style="{{ linkBtn }}">Statement</button> › Detail</div>
+<div style="{{ cardCss }};display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:12px"><span style="width:44px;height:44px;border-radius:10px;background:var(--ss);display:grid;place-items:center;color:{{ det.rail }};font-size:22px"><i class="{{ det.icon }}"></i></span><div style="font:600 18px Sora">{{ det.label }}</div></div>
+<div style="font:600 40px Sora;font-variant-numeric:tabular-nums;color:{{ det.rail }}">{{ det.amount }}</div>
+<div style="font:400 15px Manrope;color:var(--cm)">{{ det.date }}</div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="font:500 12px Manrope;padding:4px 10px;border-radius:999px;background:var(--ss);border:1px solid var(--ln)"><i class="ph ph-check"></i> Recorded</span><span style="font:400 13px 'SF Mono',monospace;color:var(--cm)">{{ det.id }}</span><button onClick="{{ copyId }}" aria-label="Copy transaction id" style="{{ iconBtn }}"><i class="ph ph-copy"></i></button></div>
+</div>
+<button onClick="{{ goStatement }}" style="{{ btnSCss }};align-self:flex-start">Back to statement</button>
+</div>
+</sc-if>
+
+<!-- ===== PIX ===== -->
+<sc-if value="{{ isPix }}" hint-placeholder-val="{{ false }}">
+<div style="animation:fadeUp .45s cubic-bezier(.2,.8,.2,1) both;display:flex;flex-direction:column;gap:18px;max-width:560px;width:100%;margin:0 auto">
+<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><span style="width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:26px;color:#2A1708;background:linear-gradient(135deg,#CEA45C,#5FA899);box-shadow:0 12px 30px -8px rgba(206,164,92,.6)"><i class="ph-bold ph-paper-plane-tilt"></i></span><div><h1 style="margin:0;font:600 30px/1.1 Sora;letter-spacing:-.01em">Send Pix</h1><div style="font:400 14px Manrope;color:var(--cm);margin-top:2px">Instant transfer with a Pix key</div></div><div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;padding:8px 14px;border-radius:12px;background:var(--ss);border:1px solid var(--ln)"><span style="font:600 10px Manrope;color:var(--cm);text-transform:uppercase;letter-spacing:.08em">Available balance</span><b style="font:600 18px Sora;font-variant-numeric:tabular-nums">{{ balFull }}</b></div></div>
+<div><div style="font:500 13px Manrope;color:var(--cm);margin-bottom:8px">Step {{ pixStep }} of 3 · {{ pixStepName }}</div><div style="display:flex;gap:6px"><sc-for list="{{ stepBars }}" as="b" hint-placeholder-count="3"><span style="flex:1;height:4px;border-radius:2px;background:{{ b }}"></span></sc-for></div></div>
+
+<sc-if value="{{ pix1 }}" hint-placeholder-val="{{ true }}"><div style="animation:fadeUp .35s cubic-bezier(.2,.8,.2,1) both;{{ cardCss }};display:flex;flex-direction:column;gap:16px">
+<div role="group" aria-label="Key type" style="display:flex;background:var(--ss);border:1px solid var(--ln);border-radius:10px;padding:3px;gap:2px"><sc-for list="{{ keyTypes }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div>
+<div><label for="pk" style="font:500 14px Manrope;display:block;margin-bottom:6px">Pix key</label><input id="pk" value="{{ pixKey }}" onChange="{{ inKey }}" placeholder="{{ keyPlaceholder }}" inputmode="{{ keyMode }}" style="{{ inpKey }}"><sc-if value="{{ keyErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:400 13px Manrope;color:var(--exp);margin-top:6px"><i class="ph-bold ph-warning-circle"></i> {{ keyErrText }}</div></sc-if><div style="font:400 13px Manrope;color:var(--cm);margin-top:6px">Check the key with the recipient before sending. {{ keyDemo }}</div></div>
+<button disabled="{{ !keyValid }}" onClick="{{ pixNext1 }}" style="{{ btnNext1 }}">Continue</button>
+</div></sc-if>
+
+<sc-if value="{{ pix2 }}" hint-placeholder-val="{{ false }}"><div style="animation:fadeUp .35s cubic-bezier(.2,.8,.2,1) both;{{ cardCss }};display:flex;flex-direction:column;gap:16px">
+<div><label for="pa" style="font:500 14px Manrope;display:block;margin-bottom:6px">Amount</label><div style="position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font:500 22px Manrope;color:var(--cm)">R$</span><input id="pa" value="{{ amount }}" onChange="{{ inAmount }}" placeholder="0.00" inputmode="decimal" style="{{ inpMoney }}"></div>
+<div style="font:400 13px Manrope;color:var(--cm);margin-top:6px">Available balance <b style="font-variant-numeric:tabular-nums">{{ balFull }}</b> · <button onClick="{{ useAll }}" style="{{ linkBtn }}">Use full balance</button></div>
+<sc-if value="{{ overBal }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 13px Manrope;color:var(--w);margin-top:6px"><i class="ph-bold ph-warning"></i> The amount can't exceed your available balance.</div></sc-if><sc-if value="{{ zeroErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 13px Manrope;color:var(--exp);margin-top:6px"><i class="ph-bold ph-warning-circle"></i> Enter an amount greater than zero.</div></sc-if></div>
+<div style="display:flex;gap:10px"><button onClick="{{ pixBack }}" style="{{ btnS }}">Back</button><button disabled="{{ !amtValid }}" onClick="{{ pixNext2 }}" style="{{ btnNext2Css }};flex:1">Review</button></div>
+</div></sc-if>
+
+<sc-if value="{{ pix3 }}" hint-placeholder-val="{{ false }}"><div style="animation:fadeUp .35s cubic-bezier(.2,.8,.2,1) both;display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ pixFieldErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="{{ alertErr }}"><i class="ph-bold ph-warning-circle"></i>{{ pixFieldErr }}</div></sc-if>
+<div style="{{ receipt }}"><sc-for list="{{ reviewLines }}" as="l" hint-placeholder-count="4"><div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;font:400 15px Manrope"><span style="color:var(--cm)">{{ l.k }}</span><span style="font-weight:600;font-variant-numeric:tabular-nums">{{ l.v }}</span></div></sc-for></div>
+<div style="display:flex;gap:10px"><button onClick="{{ pixBack }}" style="{{ btnS }}">Back</button><button onClick="{{ confirmPix }}" style="{{ btnConfirmCss }};flex:1"><sc-if value="{{ pending }}" hint-placeholder-val="{{ false }}"><i class="ph-bold ph-spinner" style="animation:spin .8s linear infinite"></i></sc-if>Confirm and send</button></div>
+<div style="font:400 12px Manrope;color:var(--cm)">Confirmation needs an explicit click.</div>
+</div></sc-if>
+</div>
+</sc-if>
+
+<!-- ===== DEPOSIT ===== -->
+<sc-if value="{{ isDeposit }}" hint-placeholder-val="{{ false }}">
+<div style="animation:fadeUp .45s cubic-bezier(.2,.8,.2,1) both;display:flex;flex-direction:column;gap:18px;max-width:600px;width:100%;margin:0 auto">
+<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><span style="width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:26px;color:#2A1708;background:linear-gradient(135deg,#CEA45C,#5FA899);box-shadow:0 12px 30px -8px rgba(206,164,92,.6)"><i class="ph-bold ph-barcode"></i></span><div><h1 style="margin:0;font:600 30px/1.1 Sora;letter-spacing:-.01em">Deposit</h1><div style="font:400 14px Manrope;color:var(--cm);margin-top:2px">Add money online with a boleto</div></div></div>
+<sc-if value="{{ noBoleto }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-direction:column;gap:18px">
+<div style="{{ alertInfo }}"><i class="ph ph-info"></i>Online deposits are paid with a boleto. Pay it at your bank or in any banking app.</div>
+<div style="{{ cardStyle }};display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ depPresets }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div>
+<div><label for="da" style="font:500 14px Manrope;display:block;margin-bottom:6px">Amount</label><div style="position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font:500 22px Manrope;color:var(--cm)">R$</span><input id="da" value="{{ amount }}" onChange="{{ inAmount }}" placeholder="0.00" inputmode="decimal" style="{{ inpMoney }}"></div><sc-if value="{{ zeroErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 13px Manrope;color:var(--exp);margin-top:6px"><i class="ph-bold ph-warning-circle"></i> Enter an amount greater than zero.</div></sc-if><div style="font:400 13px Manrope;color:var(--cm);margin-top:6px">Credited to your account after the boleto is paid.</div></div>
+<button disabled="{{ !depValid }}" onClick="{{ genBoleto }}" style="{{ btnDep }}"><i class="ph-bold ph-barcode"></i>Generate boleto</button>
+<span style="{{ tagProposed }}">Proposed · client-side demo</span>
+</div></div></sc-if>
+<sc-if value="{{ hasBoleto }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:16px;animation:fadeUp .5s cubic-bezier(.2,.8,.2,1) both">
+<div style="background:#F8FAFC;color:#0F172A;border-radius:16px;overflow:hidden;box-shadow:0 30px 70px -24px rgba(0,0,0,.6)">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 22px;background:linear-gradient(135deg,#34695F,#1B1410);color:#FBF1DE"><b style="font:700 16px Manrope">Maia Bank</b><span style="font:600 11px Manrope;letter-spacing:.12em">BOLETO · DEMO</span></div>
+<div style="padding:22px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap"><div><div style="font:600 11px Manrope;letter-spacing:.08em;text-transform:uppercase;color:#4B5A70">Amount</div><div style="font:600 36px Sora;font-variant-numeric:tabular-nums;letter-spacing:-.02em">{{ bol.amount }}</div></div><span style="display:inline-flex;align-items:center;gap:6px;font:600 12px Manrope;padding:6px 12px;border-radius:999px;background:#FEF3C7;color:#92400E"><span style="width:8px;height:8px;border-radius:50%;background:#D97706;animation:pulse 1.4s ease-in-out infinite"></span>Awaiting payment</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px"><sc-for list="{{ bol.fields }}" as="x" hint-placeholder-count="4"><div><div style="font:600 11px Manrope;letter-spacing:.08em;text-transform:uppercase;color:#4B5A70">{{ x.k }}</div><div style="font:500 15px Manrope;margin-top:2px">{{ x.v }}</div></div></sc-for></div>
+<div style="border-top:2px dashed #CBD5E1"></div>
+<div style="font:500 14px 'SF Mono',ui-monospace,monospace;letter-spacing:.02em;word-break:break-all;line-height:1.6">{{ bol.line }}</div>
+<div style="display:flex;height:56px;align-items:stretch;overflow:hidden"><sc-for list="{{ bol.bars }}" as="x" hint-placeholder-count="40"><span style="{{ x }}"></span></sc-for></div>
+</div></div>
+<div style="display:flex;gap:10px;flex-wrap:wrap"><button onClick="{{ copyLine }}" style="{{ btnS }}"><i class="ph ph-copy"></i>Copy digitable line</button><button onClick="{{ payBoleto }}" style="{{ btnConfirmCss }};flex:1"><sc-if value="{{ pending }}" hint-placeholder-val="{{ false }}"><i class="ph-bold ph-spinner" style="animation:spin .8s linear infinite"></i></sc-if>Simulate payment</button></div>
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button onClick="{{ backBoleto }}" style="{{ btnGhost }}">New amount</button><span style="font:400 12px Manrope;color:var(--cm)">Demo only. This is not a real payment slip.</span></div>
+</div></sc-if>
+</div>
+</sc-if>
+
+<!-- ===== RECHARGE ===== -->
+<sc-if value="{{ isRecharge }}" hint-placeholder-val="{{ false }}">
+<div style="animation:fadeUp .45s cubic-bezier(.2,.8,.2,1) both;display:flex;flex-direction:column;gap:18px;max-width:560px;width:100%;margin:0 auto">
+<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><span style="width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:26px;color:#2A1708;background:linear-gradient(135deg,#CEA45C,#5FA899);box-shadow:0 12px 30px -8px rgba(206,164,92,.6)"><i class="ph-bold ph-device-mobile"></i></span><div><h1 style="margin:0;font:600 30px/1.1 Sora;letter-spacing:-.01em">Mobile recharge</h1><div style="font:400 14px Manrope;color:var(--cm);margin-top:2px">Top up any prepaid number</div></div><div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;padding:8px 14px;border-radius:12px;background:var(--ss);border:1px solid var(--ln)"><span style="font:600 10px Manrope;color:var(--cm);text-transform:uppercase;letter-spacing:.08em">Available balance</span><b style="font:600 18px Sora;font-variant-numeric:tabular-nums">{{ balFull }}</b></div></div>
+<div style="{{ cardCss }};display:flex;flex-direction:column;gap:16px">
+<div><div style="font:500 14px Manrope;margin-bottom:8px">Carrier</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px"><sc-for list="{{ carriers }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.go }}" aria-pressed="{{ o.on }}" style-hover="border-color:var(--a);color:var(--c)" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div>
+<div><label for="ph" style="font:500 14px Manrope;display:block;margin-bottom:6px">Phone number</label><input id="ph" value="{{ phone }}" onChange="{{ inPhone }}" inputmode="tel" placeholder="(11) 91234-5678" style="{{ inp }}"><sc-if value="{{ phoneErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:400 13px Manrope;color:var(--exp);margin-top:6px"><i class="ph-bold ph-warning-circle"></i> Check the phone number</div></sc-if></div>
+<div><label for="ra" style="font:500 14px Manrope;display:block;margin-bottom:6px">Amount</label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><sc-for list="{{ rechargePresets }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for><span style="{{ tagProposedCss }};align-self:center">Proposed presets</span></div><div style="position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font:500 22px Manrope;color:var(--cm)">R$</span><input id="ra" value="{{ amount }}" onChange="{{ inAmount }}" placeholder="0.00" inputmode="decimal" style="{{ inpMoney }}"></div><div style="font:400 13px Manrope;color:var(--cm);margin-top:6px">Available balance <b>{{ balFull }}</b></div><sc-if value="{{ overBal }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 13px Manrope;color:var(--w);margin-top:6px"><i class="ph-bold ph-warning"></i> The amount can't exceed your available balance.</div></sc-if><sc-if value="{{ zeroErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 13px Manrope;color:var(--exp);margin-top:6px"><i class="ph-bold ph-warning-circle"></i> Enter an amount greater than zero.</div></sc-if></div>
+<button disabled="{{ !recValid }}" onClick="{{ openReview }}" style="{{ btnRec }}">Review recharge</button>
+</div></div>
+</sc-if>
+
+<!-- ===== WITHDRAW ===== -->
+<sc-if value="{{ isWithdraw }}" hint-placeholder-val="{{ false }}">
+<div style="animation:fadeUp .45s cubic-bezier(.2,.8,.2,1) both;display:flex;flex-direction:column;gap:18px;max-width:560px;width:100%;margin:0 auto">
+<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><span style="width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:26px;color:#2A1708;background:linear-gradient(135deg,#CEA45C,#5FA899);box-shadow:0 12px 30px -8px rgba(206,164,92,.6)"><i class="ph-bold ph-money"></i></span><div><h1 style="margin:0;font:600 30px/1.1 Sora;letter-spacing:-.01em">ATM withdrawal</h1><div style="font:400 14px Manrope;color:var(--cm);margin-top:2px">Cash from your own account</div></div><div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;padding:8px 14px;border-radius:12px;background:var(--ss);border:1px solid var(--ln)"><span style="font:600 10px Manrope;color:var(--cm);text-transform:uppercase;letter-spacing:.08em">Available balance</span><b style="font:600 18px Sora;font-variant-numeric:tabular-nums">{{ balFull }}</b></div></div>
+<div style="{{ alertInfo }}"><i class="ph ph-info"></i>Withdrawals are made from your own account.</div>
+<div style="{{ cardCss }};display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ wdPresets }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for><span style="{{ tagProposedCss }};align-self:center">Proposed presets</span></div>
+<div><label for="wa" style="font:500 14px Manrope;display:block;margin-bottom:6px">Amount</label><div style="position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font:500 22px Manrope;color:var(--cm)">R$</span><input id="wa" value="{{ amount }}" onChange="{{ inAmount }}" placeholder="0.00" inputmode="decimal" style="{{ inpMoney }}"></div><div style="font:400 13px Manrope;color:var(--cm);margin-top:6px">Available balance <b>{{ balFull }}</b> · <button onClick="{{ useAll }}" style="{{ linkBtn }}">Use full balance</button></div><sc-if value="{{ overBal }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 13px Manrope;color:var(--w);margin-top:6px"><i class="ph-bold ph-warning"></i> The amount can't exceed your available balance.</div></sc-if><sc-if value="{{ zeroErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 13px Manrope;color:var(--exp);margin-top:6px"><i class="ph-bold ph-warning-circle"></i> Enter an amount greater than zero.</div></sc-if></div>
+<button disabled="{{ !wdValid }}" onClick="{{ openReview }}" style="{{ btnWd }}">Review withdrawal</button>
+</div></div>
+</sc-if>
+
+<!-- ===== RESULT ===== -->
+<sc-if value="{{ isResult }}" hint-placeholder-val="{{ false }}">
+<div style="animation:fadeUp .45s cubic-bezier(.2,.8,.2,1) both;max-width:560px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:18px;align-items:stretch" role="status">
+<div style="{{ cardCss }};display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center;padding:32px 20px">
+<span style="position:relative;display:grid;place-items:center"><span style="{{ ringStyle }}"></span><span style="{{ resIcon }}"><i class="{{ res.icon }}"></i></span></span>
+<h1 style="margin:0;font:600 24px Sora">{{ res.title }}</h1>
+<div style="font:400 15px/1.5 Manrope;color:var(--cm);max-width:400px">{{ res.body }}</div>
+<sc-if value="{{ res.hasLines }}" hint-placeholder-val="{{ true }}"><div style="{{ receiptCss }};width:100%;box-sizing:border-box;text-align:left"><sc-for list="{{ res.lines }}" as="l" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;font:400 15px Manrope"><span style="color:var(--cm)">{{ l.k }}</span><span style="font-weight:600;font-variant-numeric:tabular-nums">{{ l.v }}</span></div></sc-for></div></sc-if>
+<sc-if value="{{ res.ok }}" hint-placeholder-val="{{ true }}"><div style="font:400 12px Manrope;color:var(--cm)">Recorded on this device at {{ res.time }}</div></sc-if>
+<sc-if value="{{ res.details }}" hint-placeholder-val="{{ false }}"><div style="font:400 12px 'SF Mono',monospace;color:var(--cm)">Details: {{ res.details }}</div></sc-if>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<sc-if value="{{ res.ok }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-direction:column;gap:10px"><button onClick="{{ goStatement }}" style="{{ btnP }}">View statement</button><button onClick="{{ newOp }}" style="{{ btnS }}">{{ res.newLabel }}</button><button onClick="{{ goHome }}" style="{{ btnGhost }}">Back to Home</button></div></sc-if>
+<sc-if value="{{ res.fail }}" hint-placeholder-val="{{ false }}"><button onClick="{{ editTry }}" style="{{ btnP }}">Edit and try again</button></sc-if>
+<sc-if value="{{ res.unc }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px"><button onClick="{{ goStatement }}" style="{{ btnP }}">Open statement</button><button onClick="{{ goHome }}" style="{{ btnS }}">Back</button></div></sc-if>
+</div></div>
+</sc-if>
+
+<!-- ===== ASSISTANT ===== -->
+<sc-if value="{{ isAssistant }}" hint-placeholder-val="{{ false }}">
+<div style="animation:fadeUp .45s cubic-bezier(.2,.8,.2,1) both;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span style="width:40px;height:40px;border-radius:10px;background:var(--ss);display:grid;place-items:center;color:var(--a);font-size:22px"><i class="ph ph-sparkle"></i></span><h1 style="margin:0;font:600 24px Sora">Maia Assistant</h1><span style="{{ soonBadge }}">Coming soon</span><span style="{{ tagFuture }}">Future concept</span></div>
+<div style="{{ alertInfo }}"><i class="ph ph-info"></i>This is a preview of a future feature. Responses below are examples.</div>
+<div style="{{ assistGrid }}">
+<sc-if value="{{ isDesk }}" hint-placeholder-val="{{ true }}"><aside style="{{ cardCss }};padding:12px;display:flex;flex-direction:column;gap:4px;align-self:start"><div style="font:500 12px Manrope;color:var(--cm);padding:4px 8px">Conversations · Example</div><div style="padding:10px;border-radius:8px;background:var(--ss);font:500 14px Manrope">Spending last month</div><div style="padding:10px;border-radius:8px;font:400 14px Manrope;color:var(--cm)">Recharging a phone</div></aside></sc-if>
+<section style="{{ cardCss }};display:flex;flex-direction:column;gap:14px;min-height:420px">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ chat }}" as="m" hint-placeholder-count="3"><div style="{{ m.wrap }}"><div style="{{ m.bubble }}"><div style="font:400 15px/1.5 Manrope">{{ m.text }}</div><sc-if value="{{ m.link }}" hint-placeholder-val="{{ false }}"><button onClick="{{ m.open }}" style="{{ btnSCss }};height:36px;margin-top:10px;font-size:13px">{{ m.linkLabel }}<i class="ph ph-arrow-right"></i></button></sc-if><div style="font:500 11px Manrope;color:var(--cm);margin-top:8px"><sc-if value="{{ m.ai }}" hint-placeholder-val="{{ false }}"><span>Example · AI-generated · may be inaccurate</span></sc-if></div></div></div></sc-for>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ suggestions }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div>
+<div style="position:relative"><input disabled="{{ true }}" placeholder="Assistant is coming soon" onFocus="{{ tipOn }}" onClick="{{ tipOn }}" aria-label="Message (disabled)" style="{{ inpCss }};opacity:.6;cursor:not-allowed"><sc-if value="{{ tip }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;right:12px;top:-34px;background:var(--so);border:1px solid var(--ln);border-radius:6px;padding:4px 10px;font:500 12px Manrope">Coming soon</span></sc-if></div>
+<div><button onClick="{{ notify }}" style="{{ btnS }}"><i class="ph ph-bell"></i>Notify me</button></div>
+</section>
+<sc-if value="{{ isDesk }}" hint-placeholder-val="{{ true }}"><aside style="{{ cardCss }};align-self:start;display:flex;flex-direction:column;gap:10px"><div style="font:600 15px Manrope">What I can help with</div><div style="font:400 14px/1.5 Manrope;color:var(--cm)">Summarize a period · Explain a transaction type · Guide you to a screen · Explain an error in plain language</div><div style="font:400 12px Manrope;color:var(--cm);border-top:1px dashed var(--ln);padding-top:10px">I never move money. Actions open an existing screen.</div></aside></sc-if>
+</div></div>
+</sc-if>
+
+<!-- ===== SYSTEM ===== -->
+<sc-if value="{{ isSys }}" hint-placeholder-val="{{ false }}">
+<div style="{{ cardCss }};max-width:480px;margin:40px auto;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center"><i class="ph ph-compass" style="font-size:32px;color:var(--a)"></i><h1 style="margin:0;font:600 22px Sora">Page not found</h1><div style="color:var(--cm);font:400 15px Manrope">This page doesn't exist.</div><button onClick="{{ goHome }}" style="{{ btnP }}">Back to Home</button></div>
+</sc-if>
+
+</div>
+</main>
+</div>
+
+<footer style="padding:12px {{ padX }}px;border-top:1px solid var(--ln);font:400 12px Manrope;color:var(--cm);text-align:center;margin-bottom:{{ footPad }}px">Demo environment · test data only. Not a real bank.</footer>
+
+<sc-if value="{{ isMob }}" hint-placeholder-val="{{ false }}">
+<nav aria-label="Primary" style="position:sticky;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--br);border-top:1px solid var(--ln);z-index:10">
+<sc-for list="{{ bottomItems }}" as="n" hint-placeholder-count="4"><button onClick="{{ n.go }}" style="{{ n.style }}"><i class="{{ n.icon }}" style="font-size:22px"></i>{{ n.label }}</button></sc-for>
+</nav>
+</sc-if>
+</div>
+</sc-if>
+
+<!-- ===== OVERLAYS ===== -->
+<sc-if value="{{ more }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;background:rgba(14,9,7,.6);z-index:40;display:flex;align-items:flex-end" onClick="{{ closeAll }}"><div style="width:100%;background:var(--so);border-radius:16px 16px 0 0;padding:16px;display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--ln)" onClick="{{ stop }}"><div style="width:40px;height:4px;border-radius:2px;background:var(--li);margin:0 auto 10px"></div><sc-for list="{{ moreItems }}" as="n" hint-placeholder-count="6"><button onClick="{{ n.go }}" style="{{ menuItem }};height:52px"><i class="{{ n.icon }}" style="font-size:20px"></i>{{ n.label }}<sc-if value="{{ n.soon }}" hint-placeholder-val="{{ false }}"><span style="{{ soonBadge }}">Soon</span></sc-if></button></sc-for></div></div>
+</sc-if>
+
+<sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;background:rgba(14,9,7,.6);z-index:40;display:grid;place-items:center;padding:16px"><div role="dialog" aria-modal="true" style="width:100%;max-width:440px;background:var(--so);border:1px solid var(--ln);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:16px;box-shadow:0 24px 60px rgba(0,0,0,.5)"><h2 style="margin:0;font:600 20px Sora">Review {{ opLabel }}</h2><div style="{{ receipt }}"><sc-for list="{{ reviewLines }}" as="l" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;font:400 15px Manrope"><span style="color:var(--cm)">{{ l.k }}</span><span style="font-weight:600;font-variant-numeric:tabular-nums">{{ l.v }}</span></div></sc-for></div><div style="display:flex;gap:10px;justify-content:flex-end"><button onClick="{{ closeAll }}" style="{{ btnS }}">Back</button><button onClick="{{ confirmOp }}" style="{{ btnConfirm }}"><sc-if value="{{ pending }}" hint-placeholder-val="{{ false }}"><i class="ph-bold ph-spinner" style="animation:spin .8s linear infinite"></i></sc-if>Confirm</button></div></div></div>
+</sc-if>
+
+<sc-if value="{{ isSignout }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;background:rgba(14,9,7,.6);z-index:40;display:grid;place-items:center;padding:16px"><div role="dialog" aria-modal="true" style="width:100%;max-width:400px;background:var(--so);border:1px solid var(--ln);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:16px"><h2 style="margin:0;font:600 20px Sora">Sign out of Maia Bank?</h2><div style="display:flex;gap:10px;justify-content:flex-end"><button onClick="{{ closeAll }}" style="{{ btnS }}">Cancel</button><button onClick="{{ doSignout }}" style="{{ btnP }}">Sign out</button></div></div></div>
+</sc-if>
+
+<sc-if value="{{ isExpired }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;background:rgba(14,9,7,.6);z-index:40;display:grid;place-items:center;padding:16px"><div role="alertdialog" aria-modal="true" style="width:100%;max-width:400px;background:var(--so);border:1px solid var(--ln);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:12px"><h2 style="margin:0;font:600 20px Sora">Session expired</h2><div style="color:var(--cm);font:400 15px/1.5 Manrope">Your session expired. Sign in again to continue. Your entries are kept.</div><div style="display:flex;justify-content:flex-end"><button onClick="{{ closeAll }}" style="{{ btnP }}">Sign in</button></div></div></div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}"><div role="status" style="position:absolute;left:50%;bottom:{{ toastBottom }}px;transform:translateX(-50%);z-index:60;background:var(--so);border:1px solid var(--li);border-radius:10px;padding:12px 18px;font:500 14px Manrope;box-shadow:0 12px 32px rgba(0,0,0,.4)">{{ toast }}</div></sc-if>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { screen:'landing', theme:'dark', bp:'desktop', period:30, filter:'ALL', sortBy:'date', sortDir:-1, data:'ok', sim:'success',
+    pixStep:1, keyType:'cpf', pixKey:'', amount:'', agency:'', account:'', carrier:'VIVO', phone:'', dialog:null, more:false, menu:false,
+    pending:false, res:null, hide:false, showTable:false, detail:null, toast:null, bal:0, redirecting:false, signinError:false,
+    accErr:false, phoneErr:false, pixFieldErr:'', chat:[], tip:false, lastOp:'pix' };
+  BAL = 12480.50;
+  TX = [
+    ['t01','PIX',-250,1],['t02','DEPOSIT',1800,2],['t03','PHONE_RECHARGE',-30,4],['t04','WITHDRAW',-200,6],['t05','PIX',-89.9,7],
+    ['t06','DEPOSIT',3200,12],['t07','PIX',-640,15],['t08','WITHDRAW',-100,21],['t09','PHONE_RECHARGE',-50,27],['t10','DEPOSIT',2500,38],
+    ['t11','PIX',-1200,52],['t12','DEPOSIT',950,64],['t13','WITHDRAW',-500,80]].map(a=>({id:'TX-'+a[0].slice(1).padStart(6,'0')+'-9F2',type:a[1],amt:a[2],ago:a[3]}));
+  TI = { DEPOSIT:{l:'Deposit',i:'ph-bold ph-arrow-down-left'}, PIX:{l:'Pix sent',i:'ph-bold ph-paper-plane-tilt'}, PHONE_RECHARGE:{l:'Mobile recharge',i:'ph-bold ph-device-mobile'}, WITHDRAW:{l:'ATM withdrawal',i:'ph-bold ph-money'} };
+  fmt(n){ return 'R$ '+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  num(n){ return Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  dstr(ago,t){ const d=new Date(2026,10,2-ago); const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return M[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear()+', '+(t||['09:12','14:35','11:08','16:50'][ago%4]); }
+  set(o){ this.setState(o); }
+  go = (s) => { const o={screen:s,dialog:null,more:false,menu:false,pending:false,pixStep:1,pixKey:'',amount:'',agency:'',account:'',phone:'',accErr:false,phoneErr:false,pixFieldErr:'',tip:false,boleto:null}; if(['pix','deposit','recharge','withdraw'].includes(s)) o.lastOp=s; this.setState(o); if(s==='home' && !this._counted) this.countUp(); else if(s==='home') this.setState({bal:this.BAL}); };
+  countUp(){ this._counted=true; let i=0; const t=setInterval(()=>{ i++; const p=1-Math.pow(1-i/24,3); this.setState({bal:this.BAL*p}); if(i>=24)clearInterval(t); },30); }
+  toastMsg(m){ this.setState({toast:m}); clearTimeout(this._tt); this._tt=setTimeout(()=>this.setState({toast:null}),2400); }
+  mask(t,v){ const d=v.replace(/\D/g,''); if(t==='cpf'){ const x=d.slice(0,11); return x.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})\.(\d{3})(\d)/,'$1.$2.$3').replace(/(\d{3})\.(\d{3})\.(\d{3})(\d)/,'$1.$2.$3-$4'); } if(t==='phone') return this.pmask(v); return v; }
+  pmask(v){ const d=v.replace(/\D/g,'').slice(0,11); if(d.length<3) return d; if(d.length<8) return '('+d.slice(0,2)+') '+d.slice(2); return '('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7); }
+  cpfOk(s){ const d=s.replace(/\D/g,''); if(d.length!==11||/^(\d)\1+$/.test(d))return false; const c=n=>{let t=0;for(let i=0;i<n;i++)t+=+d[i]*(n+1-i);const r=(t*10)%11;return r===10?0:r;}; return c(9)===+d[9]&&c(10)===+d[10]; }
+  keyOk(){ const {keyType:t,pixKey:k}=this.state; if(t==='cpf')return this.cpfOk(k); if(t==='email')return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(k); const d=k.replace(/\D/g,''); return d.length===11&&d[2]==='9'; }
+  amtNum(){ const v=parseFloat((this.state.amount||'').replace(/,/g,'')); return isNaN(v)?0:v; }
+  rows(){ const {period,filter,sortBy,sortDir}=this.state; let r=this.TX.filter(t=>t.ago<=period&&(filter==='ALL'||t.type===filter)); r=[...r].sort((a,b)=> sortBy==='date'? (a.ago-b.ago)*-sortDir*-1 : (a.amt-b.amt)*sortDir); if(sortBy==='date') r=[...r].sort((a,b)=>sortDir<0?a.ago-b.ago:b.ago-a.ago); return r; }
+  vm(t,open){ const inc=t.amt>0; return {id:t.id,label:this.TI[t.type].l,icon:this.TI[t.type].i,rail:inc?'var(--inc)':'var(--exp)',amount:(inc?'+ ':'− ')+this.fmt(t.amt),date:this.dstr(t.ago),open:open,cursor:'pointer'}; }
+  opLabel(){ return {pix:'Pix',deposit:'deposit',recharge:'recharge',withdraw:'withdrawal'}[this.state.screen==='result'?this.state.lastOp:this.state.screen]||'operation'; }
+  reviewLines(){ const s=this.state, m=s.screen, a=this.fmt(this.amtNum()); const k=s.keyType; if(m==='pix'){ const raw=s.pixKey; const shown=k==='cpf'?'•••.'+raw.slice(4,7)+'.•••-'+raw.slice(-2):k==='phone'?raw.slice(0,5)+' •••••-'+raw.slice(-4):raw; return [{k:'Key type',v:{cpf:'CPF',email:'Email',phone:'Phone'}[k]},{k:'Key',v:shown},{k:'Amount',v:a},{k:'From',v:'Your account'}]; } if(m==='deposit') return [{k:'Method',v:'Boleto'},{k:'Amount',v:a}]; if(m==='recharge') return [{k:'Carrier',v:s.carrier},{k:'Phone',v:s.phone},{k:'Amount',v:a}]; return [{k:'Amount',v:a},{k:'From',v:'Your account'}]; }
+  submit(){ const s=this.state, op=s.screen, lines=this.reviewLines(); this.setState({pending:true}); setTimeout(()=>{ const now=new Date(); const time=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0'); const sim=this.state.sim;
+    if(sim==='business'){ if(op==='pix'){ this.setState({pending:false,pixFieldErr:'We couldn\'t send this Pix. Your balance was not changed.'}); return; } if(op==='recharge'){ this.setState({pending:false,dialog:null,phoneErr:true}); return; } this.setState({pending:false,dialog:null,res:{fail:true,icon:'ph-bold ph-x',title:'We couldn\'t complete this',body:'The amount can\'t exceed your available balance.',details:'Operation not performed, there is not enough balance in the account.',lines,hasLines:true}, screen:'result',lastOp:op}); return; }
+    if(sim==='uncertain'){ this.setState({pending:false,dialog:null,screen:'result',lastOp:op,res:{unc:true,icon:'ph-bold ph-warning',title:'We couldn\'t confirm this operation',body:'Check your statement before trying again so you don\'t pay twice.',lines:[],hasLines:false}}); return; }
+    const T={pix:['Pix sent','Your Pix was sent.','New Pix'],deposit:['Deposit registered','The deposit was registered.','New deposit'],recharge:['Recharge requested','Your operator will apply the credit shortly.','New recharge'],withdraw:['Withdrawal recorded','The withdrawal was recorded.','New withdrawal']}[op];
+    this.setState({pending:false,dialog:null,screen:'result',lastOp:op,res:{ok:true,icon:'ph-bold ph-check',title:T[0],body:T[1],newLabel:T[2],time,lines:lines.filter(l=>l.k!=='From'),hasLines:true}}); },900); }
+  btn(on,extra){ return Object.assign({height:'40px',padding:'0 14px',borderRadius:'8px',border:'1px solid '+(on?'var(--a)':'var(--ln)'),background:on?'var(--ss)':'transparent',color:on?'var(--a)':'var(--c)',font:'500 14px Manrope',cursor:'pointer',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:'6px'},extra||{}); }
+  bolVm(b){ return {amount:this.fmt(b.v),line:b.line,fields:[{k:'Beneficiary',v:'Maia Bank (demo)'},{k:'Payer',v:'Your account'},{k:'Due date',v:'Nov 5, 2026'},{k:'Document no.',v:b.doc}],bars:b.bars.map((w,i)=>({width:(w*1.6)+'px',flex:'none',marginRight:(i%3===0?2:1)+'px',background:i%2?'transparent':'#0F172A'}))}; }
+  skl(h){ return {height:h+'px',borderRadius:'12px',border:'1px solid var(--ln)',background:'linear-gradient(90deg,var(--sr) 25%,var(--so) 50%,var(--sr) 75%)',backgroundSize:'200% 100%',animation:'shimmer 1.5s linear infinite'}; }
+  spark(){ const p=this.state.period,n=Math.min(p,30),pts=[]; for(let i=n;i>=0;i--){ const day=Math.round(i*p/n); pts.push(this.BAL-this.TX.filter(t=>t.ago<day).reduce((a,t)=>a+t.amt,0)); } const mn=Math.min(...pts),r=(Math.max(...pts)-mn)||1; const line=pts.map((v,i)=>(i?'L':'M')+((i/(pts.length-1))*300).toFixed(1)+' '+(68-((v-mn)/r)*50).toFixed(1)).join(' '); return {line,area:line+' L300 80 L0 80 Z'}; }
+  P(dis){ return {height:'48px',padding:'0 20px',borderRadius:'8px',border:0,background:dis?'var(--a)':'linear-gradient(135deg,var(--a),var(--a2))',boxShadow:dis?'none':'0 10px 26px -8px rgba(206,164,92,.65),inset 0 1px 0 rgba(255,255,255,.35)',color:'var(--oa)',font:'600 15px Manrope',cursor:dis?'not-allowed':'pointer',opacity:dis?.4:1,display:'inline-flex',alignItems:'center',justifyContent:'center',gap:'8px'}; }
+  S(){ return {height:'48px',padding:'0 20px',borderRadius:'8px',border:'1px solid var(--li)',background:'transparent',color:'var(--c)',font:'500 15px Manrope',cursor:'pointer',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:'8px'}; }
+  tb(on){ return {padding:'5px 12px',borderRadius:'6px',border:'1px solid '+(on?'#CEA45C':'#3A2820'),background:on?'#2B1D12':'transparent',color:on?'#E3C58A':'#B8A794',font:'500 12px Manrope',cursor:'pointer'}; }
+  seg(on){ return {flex:1,height:'38px',border:0,borderRadius:'7px',background:on?'linear-gradient(135deg,rgba(206,164,92,.24),rgba(73,131,121,.2))':'transparent',color:on?'var(--c)':'var(--cm)',font:'500 14px Manrope',cursor:'pointer',boxShadow:on?'0 0 0 1px rgba(206,164,92,.55),0 6px 16px -6px rgba(206,164,92,.55)':'none'}; }
+  renderVals(){
+    const s=this.state, set=(o)=>()=>this.setState(o), go=(x)=>()=>this.go(x);
+    const dark=s.theme==='dark', mob=s.bp==='mobile', desk=s.bp==='desktop', tab=s.bp==='tablet';
+    const V=dark?{'--s':'#110C09','--sr':'#1B1410','--ss':'#150F0C','--so':'#251B15','--br':'#0D0907','--ln':'#2E221B','--li':'#6F5C4E','--c':'#F5EEE2','--cm':'#B3A28F','--a':'#D4AE6A','--oa':'#24160A','--inc':'#7CC4B3','--exp':'#F08A66','--w':'#E8C979','--a2':'#C5BE8B'}:{'--s':'#F6F2EA','--sr':'#FFFFFF','--ss':'#EFE9DC','--so':'#FFFFFF','--br':'#2B1A12','--ln':'#E4DBC9','--li':'#8C7A64','--c':'#26180F','--cm':'#65513F','--a':'#8A6314','--oa':'#FFF8EE','--inc':'#2F6B60','--exp':'#B9340B','--w':'#7A4B00','--a2':'#2F6B60'};
+    const sc=s.screen, inApp=!['landing','signin'].includes(sc);
+    const rows=this.rows(); const inP=this.TX.filter(t=>t.ago<=s.period&&t.amt>0).reduce((a,t)=>a+t.amt,0), outP=this.TX.filter(t=>t.ago<=s.period&&t.amt<0).reduce((a,t)=>a-t.amt,0);
+    const hidden=s.hide; const H=(v)=>hidden?'••••••':v;
+    const empty=s.data==='empty', ok=s.data==='ok', st=(k)=>s.data===k;
+    const opScreens=['pix','deposit','recharge','withdraw'];
+    const over=this.amtNum()>this.BAL;
+    const nav=[['home','Home','ph ph-house'],['statement','Statement','ph ph-list-bullets'],['pix','Pix','ph ph-paper-plane-tilt'],['deposit','Deposit','ph ph-arrow-line-down'],['recharge','Recharge','ph ph-device-mobile'],['withdraw','Withdraw','ph ph-money'],['assistant','Assistant','ph ph-sparkle']];
+    const navItems=nav.map(n=>{const on=sc===n[0]||(n[0]==='statement'&&sc==='detail'); return {label:n[1],icon:n[2],go:go(n[0]),soon:n[0]==='assistant'&&desk,showLabel:desk,style:{display:'flex',alignItems:'center',gap:'12px',height:'44px',padding:desk?'0 12px':'0',justifyContent:desk?'flex-start':'center',border:0,borderRadius:'8px',background:on?'linear-gradient(90deg,rgba(206,164,92,.24),rgba(206,164,92,.02))':'transparent',boxShadow:on?'inset 3px 0 0 #CEA45C':'none',color:on?(dark?'#CEA45C':'#E3C58A'):'#E6D8C0',font:'500 14px Manrope',cursor:'pointer',position:'relative'}};});
+    const bn=[['home','Home','ph ph-house'],['statement','Statement','ph ph-list-bullets'],['pix','Pix','ph ph-paper-plane-tilt']];
+    const bottomItems=bn.map(n=>({label:n[1],icon:n[2],go:go(n[0]),style:{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'2px',minHeight:'56px',border:0,background:'transparent',color:sc===n[0]?'#CEA45C':'#E6D8C0',font:'500 11px Manrope',cursor:'pointer'}})).concat([{label:'More',icon:'ph ph-dots-three-outline',go:set({more:true}),style:{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'2px',minHeight:'56px',border:0,background:'transparent',color:'#E6D8C0',font:'500 11px Manrope',cursor:'pointer'}}]);
+    const moreItems=[['deposit','Deposit','ph ph-arrow-line-down'],['recharge','Recharge','ph ph-device-mobile'],['withdraw','Withdraw','ph ph-money'],['assistant','Assistant','ph ph-sparkle']].map(n=>({label:n[1],icon:n[2],go:go(n[0]),soon:n[0]==='assistant'})).concat([{label:dark?'Light theme':'Dark theme',icon:dark?'ph ph-sun':'ph ph-moon',go:()=>this.setState({theme:dark?'light':'dark',more:false})},{label:'Sign out',icon:'ph ph-sign-out',go:()=>this.setState({more:false,dialog:'signout'})}]);
+    const opt=(arr,cur,key)=>arr.map(a=>({label:a[1],go:set({[key]:a[0]}),style:this.tb(cur===a[0])}));
+    const seq=(arr,cur,key,fn)=>arr.map(a=>({label:a[1],go:fn?()=>fn(a[0]):set({[key]:a[0]}),style:this.seg(cur===a[0])}));
+    const chipP=(on)=>this.btn(on);
+    const stepBars=[1,2,3].map(i=>i<=s.pixStep?'var(--a)':'var(--ln)');
+    const res=s.res||{lines:[]};
+    const chat=s.chat.length?s.chat:[{from:'a',text:'Hi, I\'m Maia Assistant. Here is what a conversation could look like.',ai:true}];
+    const chatVm=chat.map(m=>({text:m.text,ai:m.from==='a',link:!!m.link,linkLabel:m.linkLabel,open:()=>m.link&&this.go(m.link),wrap:{display:'flex',justifyContent:m.from==='a'?'flex-start':'flex-end'},bubble:{animation:'fadeUp .35s ease-out both',maxWidth:'80%',padding:'12px 14px',borderRadius:'12px',background:m.from==='a'?'var(--ss)':'var(--a)',color:m.from==='a'?'var(--c)':'var(--oa)',border:m.from==='a'?'1px solid var(--ln)':'0'}}));
+    const ask=(q,a,link,ll)=>()=>this.setState({chat:[...chat,{from:'u',text:q},{from:'a',text:a,link,linkLabel:ll}]});
+    const sug=[['Summarize my last 30 days','Example: In the last 30 days you had R$ 7,500.00 in and R$ 1,309.90 out. (Sample figures.)'],['How do I recharge a phone?','Example: Choose a carrier, enter the number and amount, then review. I can open it for you.','recharge','Open Recharge'],['What does “Recharge requested” mean?','Example: It means the request was sent. Your operator applies the credit shortly; it isn\'t confirmed yet.'],['Take me to Send Pix','Example: Sure — here\'s a link to Send Pix. I can\'t send money for you.','pix','Open Send Pix']];
+    const keyMeta={cpf:['000.000.000-00','numeric','Try 529.982.247-25'],email:['name@example.com','email',''],phone:['(11) 91234-5678','tel','']}[s.keyType];
+    const keyErr=!!s.pixKey&&!this.keyOk()&&(s.keyType!=='cpf'||s.pixKey.replace(/\D/g,'').length===11)&&(s.keyType!=='phone'||s.pixKey.replace(/\D/g,'').length>=11)&&(s.keyType!=='email'||s.pixKey.length>5);
+    const amtValid=this.amtNum()>0&&!over, depValid=this.amtNum()>0, phoneDigits=s.phone.replace(/\D/g,''), recValid=this.amtNum()>0&&!over&&phoneDigits.length===11;
+    const opStyle=(v)=>({}); 
+    const css=o=>Object.entries(o).map(([k,v])=>k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())+':'+v).join(';');
+    const cardO={background:dark?'linear-gradient(160deg,rgba(37,27,21,.92),rgba(27,20,16,.92))':'linear-gradient(160deg,#FFFDF8,#F8F1E4)',border:'1px solid var(--ln)',borderRadius:'16px',padding:'22px',backdropFilter:'blur(12px)',boxShadow:dark?'inset 0 1px 0 rgba(255,255,255,.06),0 18px 40px -18px rgba(0,0,0,.6)':'0 12px 32px -14px rgba(63,38,28,.18)'};
+    const sp=this.spark();
+    const pad=mob?16:32;
+    const inpBase={height:'48px',width:'100%',boxSizing:'border-box',padding:'0 14px',borderRadius:'8px',border:'1px solid var(--li)',background:'var(--ss)',color:'var(--c)',font:'16px Manrope'};
+    const balDisp=this.state.bal;
+    const frameW={mobile:360,tablet:768,desktop:1280}[s.bp];
+    const preset=(list,fn)=>list.map(v=>({label:'R$ '+v,go:()=>this.setState({amount:String(v)}),style:this.btn(this.amtNum()===v)}));
+    return {
+      rootStyle:Object.assign({background:dark?'#0E0907':'#E6DCC8',minHeight:'100vh',fontFamily:'Manrope, sans-serif',color:'var(--c)'},V),
+      frameStyle:{width:frameW+'px',maxWidth:'none',margin:'0 auto',background:dark?'radial-gradient(900px 520px at 88% -8%,rgba(206,164,92,.16),transparent 60%),radial-gradient(700px 520px at -8% 28%,rgba(73,131,121,.14),transparent 60%),var(--s)':'radial-gradient(900px 520px at 88% -8%,rgba(143,102,24,.12),transparent 60%),radial-gradient(700px 520px at -8% 28%,rgba(73,131,121,.10),transparent 60%),var(--s)',isolation:'isolate',border:'1px solid var(--ln)',borderRadius:'16px',overflow:'hidden',position:'relative',boxShadow:'0 20px 60px rgba(0,0,0,.35)',color:'var(--c)',fontFamily:'Manrope, sans-serif'},
+      bpOpts:opt([['mobile','Mobile 360'],['tablet','Tablet 768'],['desktop','Desktop 1280']],s.bp,'bp'),
+      themeOpts:opt([['dark','Dark'],['light','Light']],s.theme,'theme'),
+      dataOpts:opt([['ok','Success'],['loading','Loading'],['empty','Empty'],['error','Error']],s.data,'data'),
+      outOpts:opt([['success','Success'],['business','Business failure'],['uncertain','Uncertain']],s.sim,'sim'),
+      jumpOpts:[['landing','Landing'],['signin','Sign in'],['home','Home'],['statement','Statement'],['pix','Pix'],['deposit','Deposit'],['recharge','Recharge'],['withdraw','Withdraw'],['assistant','Assistant']].map(a=>({label:a[1],go:()=>a[0]==='landing'||a[0]==='signin'?this.setState({screen:a[0],redirecting:false,signinError:false}):this.go(a[0]),style:this.tb(sc===a[0])}))
+        .concat([{label:'Session expired',go:set({dialog:'expired'}),style:this.tb(false)},{label:'Not found',go:set({screen:'sys'}),style:this.tb(sc==='sys')}]),
+      isLanding:sc==='landing',isSignin:sc==='signin',inApp,isHome:sc==='home',isStatement:sc==='statement',isDetail:sc==='detail',isPix:sc==='pix',isDeposit:sc==='deposit',isRecharge:sc==='recharge',isWithdraw:sc==='withdraw',isResult:sc==='result'&&!!s.res,isAssistant:sc==='assistant',isSys:sc==='sys',
+      isMob:mob,isDesk:desk,showRail:!mob,showChip:!mob,padX:pad,padY:mob?20:28,footPad:0,
+      railStyle:{width:desk?'220px':'72px',flex:'none',background:'linear-gradient(180deg,var(--br),#0E0907)',padding:'16px 12px',display:'flex',flexDirection:'column',gap:'4px',borderRight:'1px solid var(--ln)'},
+      navItems,bottomItems,moreItems,soonBadge:{font:'600 10px Manrope',letterSpacing:'.04em',textTransform:'uppercase',padding:'2px 7px',borderRadius:'999px',background:'rgba(206,164,92,.16)',color:dark?'#E3C58A':'#0369A1',border:'1px solid rgba(206,164,92,.4)',alignSelf:'flex-start'},
+      chipStyle:{display:'inline-flex',gap:'6px',alignItems:'center',font:'500 12px Manrope',padding:'5px 10px',borderRadius:'999px',border:'1px solid var(--ln)',background:'var(--ss)',color:'var(--cm)',whiteSpace:'nowrap'},
+      tagProposed:{display:'inline-block',font:'600 10px Manrope',letterSpacing:'.05em',textTransform:'uppercase',padding:'2px 8px',borderRadius:'999px',border:'1px dashed var(--w)',color:'var(--w)',alignSelf:'center'},
+      tagFuture:{display:'inline-block',font:'600 10px Manrope',letterSpacing:'.05em',textTransform:'uppercase',padding:'2px 8px',borderRadius:'999px',border:'1px dashed var(--li)',color:'var(--cm)'},
+      iconBtn:{width:'44px',height:'44px',borderRadius:'8px',border:'1px solid var(--ln)',background:'transparent',color:'var(--c)',fontSize:'20px',cursor:'pointer',display:'grid',placeItems:'center'},
+      menuItem:{display:'flex',alignItems:'center',gap:'12px',width:'100%',height:'44px',padding:'0 12px',border:0,borderRadius:'8px',background:'transparent',color:'var(--c)',font:'500 14px Manrope',cursor:'pointer',textAlign:'left'},
+      linkBtn:{border:0,background:'transparent',color:'var(--a)',font:'500 14px Manrope',cursor:'pointer',padding:'6px 0'},
+      cardStyle:cardO,cardCss:css(cardO),sparkLine:sp.line,sparkArea:sp.area,btnHeroP:Object.assign(this.P(false),{background:'#FBF1DE',color:'#3F261C',boxShadow:'0 10px 26px -8px rgba(0,0,0,.45)'}),
+      heroBalCss:'position:relative;isolation:isolate;overflow:hidden;border-radius:20px;padding:26px 26px 70px;display:flex;flex-direction:column;gap:6px;color:#FBF1DE;--c:#FBF1DE;--cm:#C9DDD6;--li:rgba(234,244,255,.5);--ln:rgba(234,244,255,.2);--ss:rgba(255,255,255,.1);background:radial-gradient(500px 260px at 90% 0%,rgba(206,164,92,.4),transparent 60%),linear-gradient(135deg,#34695F 0%,#1F3D37 50%,#1B1410 100%);box-shadow:0 30px 70px -24px rgba(206,164,92,.5),inset 0 1px 0 rgba(255,255,255,.2)',
+      btnSCss:css(this.S()),btnNext2Css:css(this.P(!amtValid)),btnConfirmCss:css(this.P(s.pending)),tagProposedCss:css({display:'inline-block',font:'600 10px Manrope',letterSpacing:'.05em',textTransform:'uppercase',padding:'2px 8px',borderRadius:'999px',border:'1px dashed var(--w)',color:'var(--w)',alignSelf:'center'}),receiptCss:css({border:'1.5px dashed var(--li)',borderRadius:'12px',padding:'14px 18px',background:'var(--sr)'}),inpCss:css(inpBase),
+      tile:{background:'linear-gradient(160deg,var(--ss),var(--sr))',border:'1px solid var(--ln)',borderRadius:'12px',padding:'14px 16px',display:'flex',flexDirection:'column',gap:'4px',transition:'transform .25s ease-out,border-color .25s'},
+      receipt:{border:'1.5px dashed var(--li)',borderRadius:'12px',padding:'14px 18px',background:'var(--sr)'},
+      alertErr:{display:'flex',gap:'8px',alignItems:'center',padding:'12px 14px',borderRadius:'8px',border:'1px solid var(--exp)',color:'var(--exp)',font:'500 14px Manrope',textAlign:'left',width:'100%',boxSizing:'border-box'},
+      alertInfo:{display:'flex',gap:'8px',alignItems:'center',padding:'12px 14px',borderRadius:'8px',border:'1px solid var(--ln)',background:'var(--ss)',color:'var(--c)',font:'400 14px Manrope'},
+      btnP:this.P(false),btnPFull:Object.assign(this.P(false),{width:'100%'}),btnS:this.S(),btnGhost:Object.assign(this.S(),{border:0,color:'var(--cm)'}),
+      btnNext1:Object.assign(this.P(!this.keyOk()),{}),btnNext2:this.P(!amtValid),btnDep:this.P(!depValid),btnRec:this.P(!recValid),btnWd:this.P(!(amtValid)),btnConfirm:this.P(s.pending),
+      inp:inpBase,inpKey:Object.assign({},inpBase,{borderColor:keyErr?'var(--exp)':'var(--li)'}),inpMoney:Object.assign({},inpBase,{paddingLeft:'52px',font:'600 22px Sora',fontVariantNumeric:'tabular-nums',borderColor:over?'var(--w)':'var(--li)'}),
+      heroGrid:{display:'grid',gridTemplateColumns:desk?'1.1fr 1fr':'1fr',gap:'32px',padding:mob?'32px 20px':'48px 32px',alignItems:'center'},heroSize:mob?40:desk?64:52,
+      heroCard:{position:'relative',background:'linear-gradient(160deg,var(--so),var(--sr))',border:'1px solid var(--ln)',borderRadius:'20px',padding:'28px',boxShadow:'0 30px 80px -20px rgba(206,164,92,.35)',animation:'fadeUp .8s cubic-bezier(.2,.8,.2,1) both'},
+      valueGrid:{display:'grid',gridTemplateColumns:desk?'repeat(3,1fr)':'1fr',gap:'16px',padding:mob?'0 20px 32px':'0 32px 48px'},
+      values:[{icon:'ph ph-paper-plane-tilt',t:'Send Pix in seconds',b:'Pick a key, enter the amount, review. Nothing moves until you confirm.'},{icon:'ph ph-list-bullets',t:'A statement you can read',b:'Money in, money out and your balance for any period — marked with icons, not just color.'},{icon:'ph ph-device-mobile',t:'Top up, deposit, withdraw',b:'Recharge a phone, add money with a boleto or take cash from your own account.'}],
+      goSignin:set({screen:'signin',redirecting:false,signinError:false}),
+      doSignin:()=>{ this.setState({redirecting:true,signinError:false}); setTimeout(()=>this.go('home'),1100); },
+      failSignin:(e)=>{ e.preventDefault(); this.setState({signinError:true,redirecting:false}); },
+      redirecting:s.redirecting,notRedirecting:!s.redirecting,signinError:s.signinError,
+      toggleTheme:()=>this.setState({theme:dark?'light':'dark',menu:false}),themeIcon:dark?'ph ph-sun':'ph ph-moon',themeLabel:dark?'Light theme':'Dark theme',
+      toggleMenu:()=>this.setState({menu:!s.menu}),menu:s.menu,askSignout:set({dialog:'signout',menu:false}),doSignout:()=>this.setState({screen:'signin',dialog:null,redirecting:false}),
+      closeAll:set({dialog:null,more:false,pending:false}),stop:(e)=>e.stopPropagation(),more:s.more,
+      isSignout:s.dialog==='signout',isExpired:s.dialog==='expired',isReview:s.dialog==='review',
+      goHome:go('home'),goStatement:go('statement'),goPix:go('pix'),goDeposit:go('deposit'),goRecharge:go('recharge'),goWithdraw:go('withdraw'),goAssistant:go('assistant'),
+      setOk:set({data:'ok'}),stOk:ok,stLoading:st('loading'),stError:st('error'),stEmpty:empty&&sc==='home',
+      skel180:this.skl(180),skel56:this.skl(56),
+      periodOpts:[[7,'7 days'],[30,'30 days'],[90,'90 days']].map(a=>({label:a[1],go:set({period:a[0]}),style:this.seg(s.period===a[0])})),
+      periodOpts2:[[7,'Last 7 days'],[30,'Last 30 days'],[90,'Last 90 days']].map(a=>({label:a[1],go:set({period:a[0]}),style:this.btn(s.period===a[0])})),
+      homeGrid:{display:'grid',gridTemplateColumns:desk?'5fr 7fr':'1fr',gap:'16px'},homeGrid2:{display:'grid',gridTemplateColumns:desk?'7fr 5fr':'1fr',gap:'16px'},
+      balSize:desk?52:44,balText:H(this.num(balDisp)),eyeIcon:hidden?'ph ph-eye-slash':'ph ph-eye',toggleHide:set({hide:!hidden}),
+      inText:H(this.fmt(inP)),outText:H(this.fmt(outP)),netText:H((inP-outP<0?'− ':'+ ')+this.fmt(inP-outP)),balFull:H(this.fmt(this.BAL)),
+      inBar:{flex:inP,background:'linear-gradient(90deg,#2F6B60,#6FB8A8)',transition:'flex .6s ease-out'},outBar:{flex:outP,background:'linear-gradient(90deg,#B9340B,#EE7A55)',transition:'flex .6s ease-out'},chartAlt:'Money in '+this.fmt(inP)+', money out '+this.fmt(outP),
+      showTable:s.showTable,toggleTable:set({showTable:!s.showTable}),tableLabel:s.showTable?'Show chart':'Show as table',
+      recentRows:(rows.length?this.rows().slice(0,5):this.TX.slice(0,5)).map((t,i)=>Object.assign(this.vm(t),{delay:(i*60)+'ms'})),
+      typeChips:[['ALL','All'],['DEPOSIT','Deposit'],['PIX','Pix'],['PHONE_RECHARGE','Recharge'],['WITHDRAW','Withdrawal']].map(a=>({label:a[1],on:s.filter===a[0],go:set({filter:a[0]}),style:this.btn(s.filter===a[0],{borderRadius:'999px'})})),
+      stmtEmpty:(ok&&rows.length===0)||(empty&&sc==='statement'),stmtList:ok&&rows.length>0,rowCount:rows.length,
+      stmtRows:rows.map((t,i)=>Object.assign(this.vm(t,()=>this.setState({screen:'detail',detail:t.id})),{delay:(i*40)+'ms'})),proposalRows:true,
+      sortDate:()=>this.setState({sortBy:'date',sortDir:s.sortBy==='date'?-s.sortDir:-1}),sortAmt:()=>this.setState({sortBy:'amount',sortDir:s.sortBy==='amount'?-s.sortDir:-1}),
+      sortStyleD:Object.assign(this.btn(s.sortBy==='date'),{height:'30px',padding:'0 10px',fontSize:'12px'}),sortStyleA:Object.assign(this.btn(s.sortBy==='amount'),{height:'30px',padding:'0 10px',fontSize:'12px'}),
+      dateArrow:s.sortBy==='date'?(s.sortDir<0?'↓':'↑'):'',amtArrow:s.sortBy==='amount'?(s.sortDir<0?'↓':'↑'):'',
+      det:this.vm(this.TX.find(t=>t.id===s.detail)||this.TX[0]),copyId:()=>this.toastMsg('Transaction id copied'),
+      pix1:s.pixStep===1,pix2:s.pixStep===2,pix3:s.pixStep===3,pixStep:s.pixStep,pixStepName:['Key','Amount','Review'][s.pixStep-1],stepBars,
+      keyTypes:[['cpf','CPF'],['email','Email'],['phone','Phone']].map(a=>({label:a[1],go:set({keyType:a[0],pixKey:''}),style:this.seg(s.keyType===a[0])})),
+      pixKey:s.pixKey,inKey:(e)=>this.setState({pixKey:this.mask(s.keyType,e.target.value)}),keyPlaceholder:keyMeta[0],keyMode:keyMeta[1],keyDemo:keyMeta[2],
+      keyErr,keyErrText:{cpf:'Enter a valid CPF.',email:'Enter a valid email address.',phone:'Enter an area code and a 9-digit number starting with 9.'}[s.keyType],keyValid:this.keyOk(),
+      pixNext1:()=>this.setState({pixStep:2}),pixNext2:()=>this.setState({pixStep:3,pixFieldErr:''}),pixBack:()=>this.setState({pixStep:s.pixStep-1}),
+      confirmPix:()=>!s.pending&&this.submit(),amount:s.amount,inAmount:(e)=>this.setState({amount:e.target.value.replace(/[^0-9.]/g,'').replace(/(\..*)\./g,'$1')}),amtValid,overBal:over&&this.amtNum()>0,
+      reviewLines:this.reviewLines(),pixFieldErr:s.pixFieldErr,pending:s.pending,opLabel:this.opLabel(),
+      agency:s.agency,account:s.account,inAgency:(e)=>this.setState({agency:e.target.value.replace(/\D/g,'')}),inAccount:(e)=>this.setState({account:e.target.value.replace(/\D/g,''),accErr:false}),accErr:s.accErr,depValid,
+      openReview:set({dialog:'review'}),confirmOp:()=>!s.pending&&this.submit(),
+      carriers:['VIVO','CLARO','TIM','ALGAR'].map(c=>({label:c,on:s.carrier===c,go:set({carrier:c}),style:{height:'52px',borderRadius:'10px',border:'1.5px solid '+(s.carrier===c?'var(--a)':'var(--ln)'),background:s.carrier===c?'var(--ss)':'transparent',color:s.carrier===c?'var(--a)':'var(--c)',font:'700 14px Manrope',letterSpacing:'.06em',cursor:'pointer'}})),
+      phone:s.phone,inPhone:(e)=>this.setState({phone:this.pmask(e.target.value),phoneErr:false}),phoneErr:s.phoneErr,recValid,
+      rechargePresets:preset([15,20,30,50]),wdPresets:preset([50,100,200,500]),wdValid:amtValid,
+      res,resIcon:{width:'64px',height:'64px',borderRadius:'50%',display:'grid',placeItems:'center',fontSize:'30px',animation:'pop .5s cubic-bezier(.2,.9,.3,1.3) both',position:'relative',background:res.ok?'var(--inc)':res.fail?'var(--exp)':'var(--w)',color:'#2A1708',boxShadow:'0 0 44px -4px '+(res.ok?'var(--inc)':res.fail?'var(--exp)':'var(--w)')},ringStyle:{position:'absolute',inset:0,borderRadius:'50%',border:'2px solid '+(res.ok?'var(--inc)':res.fail?'var(--exp)':'var(--w)'),animation:'ring 1.6s ease-out 2'},
+      newOp:()=>this.go(s.lastOp),editTry:()=>this.setState({screen:s.lastOp,res:null,pixStep:s.lastOp==='pix'?3:1}),
+      chat:chatVm,suggestions:sug.map(a=>({label:a[0],go:ask(a[0],a[1],a[2],a[3]),style:this.btn(false,{borderRadius:'999px',height:'36px',fontSize:'13px'})})),
+      assistGrid:{display:'grid',gridTemplateColumns:desk?'220px 1fr 260px':'1fr',gap:'16px'},tip:s.tip,tipOn:()=>{this.setState({tip:true});setTimeout(()=>this.setState({tip:false}),1800);},
+      zeroErr:s.amount!==''&&this.amtNum()<=0,useAll:()=>this.setState({amount:String(this.BAL)}),depPresets:preset([100,250,500,1000]),
+      noBoleto:!s.boleto,hasBoleto:!!s.boleto,bol:s.boleto?this.bolVm(s.boleto):{fields:[],bars:[]},
+      genBoleto:()=>{ const v=this.amtNum(); const seed=Math.round(v*100); const bars=[]; let x=seed+7; for(let i=0;i<64;i++){ x=(x*1103515245+12345)&0x7fffffff; bars.push(1+(x%4)); } this.setState({boleto:{v,bars,doc:'BOL-2026-'+String(4200+(seed%800)).padStart(5,'0'),line:'23793.38128 60000.000003 00000.000400 1 '+String(seed).padStart(14,'0')}}); },
+      copyLine:()=>this.toastMsg('Digitable line copied'),payBoleto:()=>!s.pending&&this.submit(),backBoleto:()=>this.setState({boleto:null}),
+      bgIcon:({home:'ph-bold ph-bank',statement:'ph-bold ph-list-bullets',detail:'ph-bold ph-receipt',pix:'ph-bold ph-paper-plane-tilt',deposit:'ph-bold ph-barcode',recharge:'ph-bold ph-device-mobile',withdraw:'ph-bold ph-money',assistant:'ph-bold ph-sparkle',result:'ph-bold ph-check-circle',landing:'ph-bold ph-wave-sine',signin:'ph-bold ph-lock-simple',sys:'ph-bold ph-compass'})[sc]||'ph-bold ph-bank',bgIconSize:mob?340:520,
+      notify:()=>this.toastMsg('Thanks — this is a demo.'),toast:s.toast,toastBottom:mob?80:32
+    };
+  }
+}
+</script>
+</body>
+</html>

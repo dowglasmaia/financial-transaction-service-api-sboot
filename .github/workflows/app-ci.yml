@@ -1,0 +1,62 @@
+name: app-ci
+
+# Isolated pipeline for the frontend (app-financial-transaction-service).
+# The Angular project is created by spec FE-02; until then the job is skipped.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app-financial-transaction-service/**'
+      - '.github/workflows/app-ci.yml'
+  pull_request:
+    paths:
+      - 'app-financial-transaction-service/**'
+      - '.github/workflows/app-ci.yml'
+
+concurrency:
+  group: app-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: app-financial-transaction-service
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect Angular project
+        id: detect
+        working-directory: .
+        run: |
+          if [ -f app-financial-transaction-service/package.json ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "Angular project not created yet (spec FE-02) - skipping."
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.detect.outputs.exists == 'true'
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: app-financial-transaction-service/package-lock.json
+
+      - name: Install
+        if: steps.detect.outputs.exists == 'true'
+        run: npm ci
+
+      - name: Build
+        if: steps.detect.outputs.exists == 'true'
+        run: npm run build
+
+      # Enable when FE-02 chooses the test runner and adds the scripts:
+      # - name: Unit tests
+      #   run: npm test -- --watch=false
