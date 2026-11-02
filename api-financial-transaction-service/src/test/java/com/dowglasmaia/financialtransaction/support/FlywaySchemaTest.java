@@ -1,0 +1,77 @@
+package com.dowglasmaia.financialtransaction.support;
+
+import com.dowglasmaia.financialtransaction.entity.Account;
+import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+/** Spec BE-02: the schema comes from Flyway, Hibernate only validates, and the constraints exist in the database. */
+class FlywaySchemaTest extends AbstractIntegrationTest {
+
+    @Autowired JdbcTemplate jdbc;
+    @Autowired Environment env;
+
+    @Test
+    void flywayAppliedTheBaselineMigration() {
+        List<String> versions = jdbc.queryForList(
+              "select version from flyway_schema_history where success = true order by installed_rank", String.class);
+        assertThat(versions).contains("1");
+    }
+
+    @Test
+    void hibernateOnlyValidatesTheSchema() {
+        assertThat(env.getProperty("spring.jpa.hibernate.ddl-auto")).isEqualTo("validate");
+    }
+
+    @Test
+    void theDatabaseRejectsANegativeBalance() {
+        assertThatThrownBy(() -> jdbc.update("update account set balance = -0.01 where number = ?", SEED_ACCOUNT))
+              .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    void anAccountNumberIsUniquePerAgency() {
+        Account duplicate = Account.builder().agency(seedAgency()).user(seedAccount().getUser())
+              .number(SEED_ACCOUNT).balance(BigDecimal.ZERO).build();
+        assertThatThrownBy(() -> accountRepository.saveAndFlush(duplicate))
+              .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    void ledgerRowsMustReferenceAnExistingAgencyWhenOneIsGiven() {
+        assertThatThrownBy(() -> jdbc.update(
+              "insert into transaction (id, date_hour, amount, account_id, agency_id, transaction_type) values (?,?,?,?,?,?)",
+              "fk-test", OffsetDateTime.now(), new BigDecimal("1.00"), seedAccount().getId(), "no-such-agency",
+              TransactionTypeEnum.DEPOSIT.name())).isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    void ledgerMoneyTypeAndDateAreMandatory() {
+        assertThatThrownBy(() -> jdbc.update(
+              "insert into transaction (id, date_hour, amount, account_id, agency_id, transaction_type) values (?,?,?,?,?,?)",
+              "null-amount", OffsetDateTime.now(), null, seedAccount().getId(), null, "DEPOSIT"))
+              .isInstanceOf(DataIntegrityViolationException.class);
+        assertThatThrownBy(() -> jdbc.update(
+              "insert into transaction (id, date_hour, amount, account_id, agency_id, transaction_type) values (?,?,?,?,?,?)",
+              "bad-type", OffsetDateTime.now(), new BigDecimal("1.00"), seedAccount().getId(), null, "TRANSFER"))
+              .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    void theStatementIndexExists() {
+        Integer count = jdbc.queryForObject(
+              "select count(*) from pg_indexes where tablename = 'transaction' and indexname = 'idx_transaction_account_date'",
+              Integer.class);
+        assertThat(count).isEqualTo(1);
+    }
+}

@@ -1,6 +1,6 @@
 # SPEC-MONO-01 — Monorepo restructure and isolated CI
 
-**Status:** Done except the items still unticked · **Depends on:** none · **Parallel with:** none (runs first)
+**Status:** Done (PR #1 merged 2026-11-02) · **Depends on:** none · **Parallel with:** none (runs first)
 **Read first:** `../memory/contexto-tecnico.md`. Protocol: `../shared/como-executar.md`.
 
 ## Objective
@@ -25,8 +25,10 @@ Turn the repository into a monorepo with two independent applications — backen
   > ✅ 2026-11-02 16:00 +0000 — YAML parses. **Not run on GitHub yet.**
 - [x] Add `.github/workflows/app-ci.yml` (path filter `app-financial-transaction-service/**`, Node 22, `npm ci` + `npm run build`, skipped while `package.json` is absent).
   > ✅ 2026-11-02 16:00 +0000 — YAML parses. **Not run on GitHub yet.**
-- [ ] Push to GitHub and confirm `api-ci` runs only for API changes and `app-ci` only for app changes (open a trivial PR touching each folder).
-- [ ] Confirm `api-ci` result: if existing tests fail on `main`, record it as the baseline for BE-01 (do not fix here).
+- [x] Push to GitHub and confirm `api-ci` runs for API changes (done on PR #1). Path-filter isolation in the other direction remains unproven (PR #1 touched both folders, both ran).
+  > ✅ 2026-11-02 — PR #1: `api-ci` and `app-ci` both triggered (the PR changed API and `.spec/`/root files); `app-ci` skipped its steps because the Angular project does not exist yet.
+- [x] Confirm `api-ci` result.
+  > ✅ 2026-11-02 — green on 062cf0b after the `mvnw` exec-bit fix (BE-01).
 - [x] Fix the IDE Maven reference (IntelliJ `.idea/` pointed to the old root `pom.xml`).
   > ✅ 2026-11-02 — `.idea/misc.xml` `originalFiles` → `$PROJECT_DIR$/api-financial-transaction-service/pom.xml`; `.idea/encodings.xml` source path updated. `.idea/` is git-ignored (local only). Verification: file contents read back. The IDE must still *Reload All Maven Projects* (human).
 - [x] Docker references: `Dockerfile` paths are relative to its build context (unchanged and correct); compose context points at the API folder; added `api-financial-transaction-service/.dockerignore`; API README run command now says to run from the repo root.
@@ -35,7 +37,7 @@ Turn the repository into a monorepo with two independent applications — backen
 
 ## Acceptance
 - [x] `git diff --stat -M` shows only renames for the API files (no content edits to moved files).
-- [ ] Both workflows trigger independently on GitHub (path filters verified).
+- [ ] Both workflows trigger independently on GitHub (path filters verified) — to be proven by the first PR that touches only one app folder (FE-02 or BE-02).
 - [x] `docker compose build` builds the API image from the new folder (local run, exit 0). Full `up` with PostgreSQL/Kafka not run.
 
 ## Notes

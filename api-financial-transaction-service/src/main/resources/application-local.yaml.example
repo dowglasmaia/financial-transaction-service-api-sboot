@@ -1,0 +1,15 @@
+# Copy to application-local.yaml (git-ignored) and run with SPRING_PROFILES_ACTIVE=local.
+# Values below are examples for a throw-away local database - never commit real credentials.
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/transactions
+    username: transactions
+    password: change-me
+  jpa:
+    show-sql: true
+  kafka:
+    bootstrap-servers: localhost:9092
+api:
+  client:
+    maiabank:
+      url: http://localhost:8089/api/v1/transactions
