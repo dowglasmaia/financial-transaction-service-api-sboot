@@ -15,23 +15,44 @@ Produce the clickable prototype, templates and tokens for every real flow plus t
 - [x] Send `designer-brief.md` to the designer agent
   > ✅ 2026-11-02 16:00 +0000 — prototype delivered and committed to the repo at `prototype/Maia Bank UI prototype/`. Verification: files present (`Maia Bank.dc.html`, `support.js`, `_ds/nocturne-*`). Not yet reviewed against brief §13.
 - [ ] Review foundations + contrast report
+  > ⏳ 2026-11-02 17:30 +0000 — Parcial: palette/typography/radius extracted from the HTML (see notes); contrast not measured. Falta: measured contrast report in both themes. Próxima ação: FE-02 measures it when the tokens are implemented, or the owner reviews visually.
 - [ ] Review components and screens S-01..S-11, flows F-0..F-9 against brief §13
+  > ⏳ 2026-11-02 17:30 +0000 — Parcial: static review done, checklist table above completed (pass/fail per item) and divergence list written. Falta: visual/interactive review by the owner in the originating design tool.
 - [ ] Approve handoff package
+  > ⛔ 2026-11-02 17:30 +0000 — Bloqueio: the package is incomplete (no tokens JSON, copy deck, accessibility annotations, component-states sheet). Para desbloquear: owner decides to request the missing artifacts or to accept extraction from the HTML in FE-02.
 
 ## Acceptance
 - [ ] Brief §13 checklist fully ticked
 - [ ] Human sign-off recorded
 
 ## Minimal validation (required to close this spec)
-- [ ] Checklist §13 completed with pass/fail per item
-- [ ] Divergence list written (seed for `docs/prototype-deviations.md`)
+- [x] Checklist §13 completed with pass/fail per item
+  > ✅ 2026-11-02 17:30 +0000 — table above (static review; caveats stated per item).
+- [x] Divergence list written (seed for `docs/prototype-deviations.md`)
+  > ✅ 2026-11-02 17:30 +0000 — 7 items under *Review notes*; FE-02 copies them into `docs/prototype-deviations.md` when the app folder exists.
 - [ ] Written sign-off from the owner
+  > ⛔ 2026-11-02 17:30 +0000 — Not executed: only the owner can sign off after reviewing the prototype visually.
 
 ## Stop and ask
 - Design approval (human)
 
 ## Skills
 ui-ux-pro-max, angular-tailwind-ui-specialist
+
+## Checklist §13 results (static review by the agent — owner must confirm visually)
+| # | Item (designer-brief §13) | Result | Evidence / note |
+|---|---|---|---|
+| 1 | Every [REAL] endpoint reachable via a flow; no screen without endpoint or [PROPOSAL] tag | **Partial** | Pix, Recharge, Withdraw, Statement, Detail map to real endpoints. **Deposit is a boleto flow** (client-side demo) that does not call `POST /deposit` as designed → Tier-2 proposal (divergence 1). Proposed/Coming-soon tags exist for boleto, presets, assistant. |
+| 2 | All states (loading/empty/success/error + uncertain outcome) for S-02…S-09 | **Pass (logic)** | Prototype controls: data = Success/Loading/Empty/Error; outcome = Success/Business failure/Uncertain. Per-screen visual coverage not verified. |
+| 3 | Dark and light pass contrast; both reviewed at 3 breakpoints | **Not verified** | `theme` (dark/light) and `bp` (desktop/tablet/mobile) states exist; no contrast measurement or visual check possible here. |
+| 4 | No invented features; proposals visibly tagged | **Pass (with note)** | Presets, hide-balance, boleto, assistant are tagged "Proposed"/"Coming soon". |
+| 5 | Copy matches §10, English only | **Mostly pass** | Strings inspected (e.g. "Current balance", "No activity yet", "Make a deposit to get started.", "Confirm and send", "The amount can't exceed your available balance.") match; a full line-by-line comparison of §10 was not done. |
+| 6 | Components documented with all states; tokens exported | **Fail** | No tokens JSON, component-states sheet, copy-deck file or accessibility annotations in `prototype/` (brief §1.5, §12). |
+| 7 | Browser experience only (no native-app patterns) | **Pass (static)** | No native patterns found; mobile uses a responsive "More" menu. |
+| 8 | Landing/sign-in and AI Assistant concept exist, tagged Future/Proposed, no endpoint, no money movement | **Pass** | Screens `landing`, `signin`, `assistant`; assistant labelled "Coming soon". |
+| 9 | "Demo environment · test data only" on every screen; polished modern online-bank feel | **Partial** | Chip present in the header/landing/footer text; polish and per-screen presence cannot be judged without rendering. |
+
+**Visual review attempt:** a second attempt to open the prototype in the built-in browser was denied by the tool (local server origin not allowed); the first attempt rendered unfilled `{{ }}` templates. No interactive review has been possible in this environment.
 
 ## Review notes (draft by the agent, 2026-11-02 — static analysis; owner must confirm)
 **How it was reviewed:** the prototype file (`Maia Bank.dc.html` + `support.js`) was read and its logic inspected. It does **not render outside its original design-canvas host** (opened from `file://` and from a local web server the `{{ }}` templates stay unrendered), so no interactive/visual review was possible here. **The owner must review it visually in the tool that produced it.**
@@ -55,5 +76,5 @@ ui-ux-pro-max, angular-tailwind-ui-specialist
 ## Notes
 The frontend agent is **not limited to the prototype**: it may propose and apply improvements under the rules in `memory/contexto-tecnico.md` (*Frontend agent autonomy*). Review here should produce the initial list of known divergences (see that section).
 
-## Result
-_Filled on completion: result, checks run, accepted limitations._
+## Result (pending sign-off)
+Static review completed: checklist §13 with 9 items (3 pass, 3 partial/mostly, 1 not verifiable, 1 fail: incomplete handoff package, 1 pass-with-note) and a 7-item divergence list (biggest: deposit modelled as a boleto vs the real `POST /deposit`). **Not done:** visual/interactive review and contrast measurement (not possible here), owner sign-off. Accepted limitation proposal: FE-02 extracts tokens/copy from the HTML and measures contrast itself.
