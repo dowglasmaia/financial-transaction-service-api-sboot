@@ -13,6 +13,9 @@ public interface AccountRepository extends JpaRepository<Account, String> {
 
     Optional<Account> findByNumber(String number);
 
+    /** The caller's account: one account per user (decision D-25). */
+    Optional<Account> findFirstByUserIdOrderByNumberAsc(String userId);
+
     @Query("SELECT a FROM Account a WHERE a.agency.id = :agencyId AND a.number = :number")
     Optional<Account> findByAgencyAndNumber(@Param("agencyId") String agencyId, @Param("number") String number);
 
