@@ -1,6 +1,6 @@
 # SPEC-FE-02 — Angular foundation: scaffold, core, design system
 
-**Status:** Implemented and verified locally; PR + `app-ci` pending (owner) · **Depends on:** BE-02, FE-01 · **Parallel with:** BE-04
+**Status:** Done (PR #5 merged 2026-11-02; app-ci green) · **Depends on:** BE-02, FE-01 · **Parallel with:** BE-04
 **Read first:** `../memory/produto.md`, `../memory/contexto-tecnico.md` (incl. *Frontend agent autonomy*) and the visual/flow reference `../../prototype/Maia Bank UI prototype/` (open `Maia Bank.dc.html`). Protocol: `../shared/como-executar.md` (tick a task only after verification + evidence line).
 
 ## Objective
@@ -38,8 +38,8 @@ Create the Angular 21 project and the shared base every module uses.
 ## Minimal validation (required to close this spec)
 - [x] `cd app-financial-transaction-service && npm ci && npm run build` succeeds
   > ✅ 2026-11-02 17:59 +0000 — EXECUTED (see acceptance item above).
-- [ ] `app-ci` runs and is green on the PR
-  > ⛔ 2026-11-02 17:59 +0000 — Not executed: needs the PR (owner opens it). `app-ci` now runs `npm ci`, `npm run build` and `npm test`. Para desbloquear: green `app-ci` on the PR.
+- [x] `app-ci` runs and is green on the PR
+  > ✅ 2026-11-02 — `app-ci` success on the PR (48230d5, public Actions API) and on `main` (f8850e9). Earlier note kept: ⛔ 2026-11-02 17:59 +0000 — Not executed: needs the PR (owner opens it). `app-ci` now runs `npm ci`, `npm run build` and `npm test`. Para desbloquear: green `app-ci` on the PR.
 - [x] `/design` route shows tokens and components in dark and light
   > ✅ 2026-11-02 17:59 +0000 — EXECUTED in the built-in browser against `ng serve` (dev server stopped afterwards): tokens grid, typography, buttons, form fields, chips, alerts, balance/KPI/ledger, loading and empty states rendered in both themes; theme persisted via `localStorage`.
 - [x] No `any`, no HTTP outside `data-access`
@@ -56,4 +56,4 @@ angular-frontend-scaffold, angular-tailwind-ui-specialist, angular-architect
 Portfolio credit footer replicated from `check-in-api-kotlin/app-check-in-api-angular` (`SiteFooterComponent` + `app-tag`), 9 new unit tests (69 total, green), initial bundle 434.76 kB, visually checked in dark and light. Logged as deviation #8/#9.
 
 ## Result
-Angular 21 foundation in place: scaffold (skill), runtime config, typed HTTP boundary (request id → auth → error), design tokens in two themes with a contrast test, theme service, 12 shared UI pieces, shell and a `/design` living style guide; Vitest runner with 60 tests. Executed: clean `npm ci` + build, unit tests, visual check of `/design` in dark and light. **Open:** `app-ci` on GitHub (PR by the owner), axe-core run (FE-05), OpenAPI type generation (after BE-06), formal sign-off of the prototype (FE-01). **Needs the owner's OK:** new dependencies (`@phosphor-icons/web`, `vitest`, `jsdom`, `@types/node`) and the decisions Vitest / no chart library. Deviations from the prototype are in `app-financial-transaction-service/docs/prototype-deviations.md`.
+Angular 21 foundation in place: scaffold (skill), runtime config, typed HTTP boundary (request id → auth → error), design tokens in two themes with a contrast test, theme service, 12 shared UI pieces, shell and a `/design` living style guide; Vitest runner with 60 tests. Executed: clean `npm ci` + build, unit tests, visual check of `/design` in dark and light. **Closed:** PR #5 merged, `app-ci` green. **Carried over:** axe-core run (FE-05), OpenAPI type generation (after BE-06), formal sign-off of the prototype (FE-01). **Needs the owner's OK:** new dependencies (`@phosphor-icons/web`, `vitest`, `jsdom`, `@types/node`) and the decisions Vitest / no chart library. Deviations from the prototype are in `app-financial-transaction-service/docs/prototype-deviations.md`.

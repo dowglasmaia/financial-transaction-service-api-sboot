@@ -22,8 +22,8 @@ SDD: nothing is implemented without an approved spec. All are **Draft**. A spec 
 |---|---|---|---|
 | [MONO-01](mono-01-monorepo.md) | Monorepo restructure + isolated CI | — | — |
 | [BE-01](be-01-safety-net.md) | Safety net: CI + characterization tests | — | FE-01 |
-| [BE-02](be-02-foundation-config-db.md) | Foundation: profiles, secrets, Flyway | BE-01 | Done (PR #1 merged 2026-11-02; api-ci green on 062cf0b) |
-| [BE-03](be-03-money-integrity.md) | Money integrity: transactions, atomic balance, Pix, recharge | BE-02 | Implemented + verified locally; PR/CI pending (owner) |
+| [BE-02](be-02-foundation-config-db.md) | Foundation: profiles, secrets, Flyway | BE-01 | FE-01 |
+| [BE-03](be-03-money-integrity.md) | Money integrity: transactions, atomic balance, Pix, recharge | BE-02 | none (touches the same services as BE-04) |
 | [BE-04](be-04-auth-and-ownership.md) | Okta authentication, CurrentUser, ownership | BE-03 | FE-02 |
 | [BE-05](be-05-behaviour-fixes.md) | Dates, validation and error handling | BE-04 | none |
 | [BE-06](be-06-api-contract-and-evolution.md) | OpenAPI contract, generator, new endpoints | BE-05 | none |
@@ -51,15 +51,15 @@ BE-02 rotate committed DB credentials · BE-04/FE-03 create the Okta org/app/use
 |---|---|
 | MONO-01 | Done (merged in PR #1, 2026-11-02) |
 | BE-01 | Done (PR #1 merged 2026-11-02; api-ci green on 062cf0b) |
-| BE-02 | Implemented + verified locally; PR/CI pending (owner) |
+| BE-02 | Done (PR #3 merged 2026-11-02; api-ci green on 567c8ab). Owner still owes the rotation of the old DB credential |
 | BE-03 | Draft |
 | BE-04 | Draft |
 | BE-05 | Draft |
 | BE-06 | Draft |
 | BE-07 | Draft |
 | BE-08 | Draft |
-| FE-01 | Review documented; owner sign-off pending |
-| FE-02 | Implemented + verified locally; PR/CI pending (owner) |
+| FE-01 | Review merged (PR #4); owner visual sign-off still pending |
+| FE-02 | Done (PR #5 merged 2026-11-02; app-ci green on 48230d5). Carried over: axe run → FE-05, OpenAPI type generation → FE-03 |
 | FE-03 | Draft |
 | FE-04 | Draft |
 | FE-05 | Draft |
