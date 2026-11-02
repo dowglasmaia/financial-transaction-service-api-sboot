@@ -58,7 +58,7 @@ BE-02 rotate committed DB credentials · BE-04/FE-03 create the Okta org/app/use
 | BE-06 | Draft |
 | BE-07 | Draft |
 | BE-08 | Draft |
-| FE-01 | In progress (approved 2026-11-02; owner sign-off pending) |
+| FE-01 | Review documented; owner sign-off pending |
 | FE-02 | Draft |
 | FE-03 | Draft |
 | FE-04 | Draft |
