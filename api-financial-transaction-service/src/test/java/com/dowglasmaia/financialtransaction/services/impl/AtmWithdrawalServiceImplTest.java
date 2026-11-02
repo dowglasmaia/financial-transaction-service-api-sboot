@@ -55,12 +55,23 @@ class AtmWithdrawalServiceImplTest {
     }
 
     @Test
-    void nonCardWithdrawalDebitsTheAccountNumberFromTheRequestButLogsTheActingAccount() { // characterizes F-05
-        var request = withdrawRequestBuild("9999", "0211", new BigDecimal("80.00"));
+    void nonCardWithdrawalOnTheCallersOwnAccountDebitsItAndLogsIt() {
+        var request = withdrawRequestBuild("2022", "0211", new BigDecimal("80.00"));
 
         service.makeAtmWithdrawal(request);
 
-        verify(addAmountService).debit(eq("9999"), eq(new BigDecimal("80.00")));
+        verify(addAmountService).debitById("acting-id", new BigDecimal("80.00"));
         verify(transactionService).save(eq(TransactionTypeEnum.WITHDRAW), eq("acting-id"), eq(new BigDecimal("80.00")), eq("agency-id"));
+    }
+
+    @Test
+    void nonCardWithdrawalOnAnotherAccountNumberIsNotFoundAndDebitsNothing() { // F-05 fixed by BE-04
+        var request = withdrawRequestBuild("9999", "0211", new BigDecimal("80.00"));
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> service.makeAtmWithdrawal(request))
+              .isInstanceOf(com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption.class)
+              .hasMessage("Account not found.");
+
+        verifyNoMoreInteractions(addAmountService, transactionService);
     }
 }

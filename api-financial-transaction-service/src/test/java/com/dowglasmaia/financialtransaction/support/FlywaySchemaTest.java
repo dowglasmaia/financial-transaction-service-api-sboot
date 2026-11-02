@@ -102,6 +102,18 @@ class FlywaySchemaTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void anIdentityProviderSubjectCanLinkToOnlyOneUser() { // V3: usuario.external_subject is unique
+        assertThat(jdbc.queryForObject("select count(*) from information_schema.columns where table_name = 'usuario' and column_name = 'external_subject'", Integer.class)).isEqualTo(1);
+        jdbc.update("insert into usuario (id, name, \"cpf\", email, external_subject) values ('u-sub-1','A','00000000001','a1@example.test','auth0|dup')");
+        try {
+            assertThatThrownBy(() -> jdbc.update("insert into usuario (id, name, \"cpf\", email, external_subject) values ('u-sub-2','B','00000000002','b1@example.test','auth0|dup')"))
+                  .isInstanceOf(DataIntegrityViolationException.class);
+        } finally {
+            jdbc.update("delete from usuario where id in ('u-sub-1','u-sub-2')");
+        }
+    }
+
+    @Test
     void theOutboxTableExists() {
         assertThat(jdbc.queryForObject("select count(*) from information_schema.tables where table_name = 'outbox_event'", Integer.class)).isEqualTo(1);
     }

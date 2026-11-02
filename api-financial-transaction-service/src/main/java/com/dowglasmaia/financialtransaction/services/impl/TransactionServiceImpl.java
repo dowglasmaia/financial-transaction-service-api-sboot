@@ -80,7 +80,8 @@ public class TransactionServiceImpl implements TransactionService {
         var endDate = DateConverter.convertStringToOffsetDateTime(finalDate);
         log.info("endDate: {}", endDate);
 
-        var transactionsEntity = transactionRepository.findByStatusAndDateHourBetween(TransactionStatusEnum.COMPLETED, startDate, endDate);
+        var transactionsEntity = transactionRepository.findByStatusAndAccountIdAndDateHourBetween(
+              TransactionStatusEnum.COMPLETED, accountEntity.getId(), startDate, endDate);
 
         var transactionsResponse = toTransactionsResponse(transactionsEntity);
 
@@ -91,7 +92,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public TransactionResponseDTO findById(String id){
-        var transaction = transactionRepository.findById(id)
+        Account account = findAccountByNumberAndUserIdService.findByNumberAndUserId();
+
+        var transaction = transactionRepository.findByIdAndAccountId(id, account.getId())
               .orElseThrow(() -> new ObjectNotFoundExeption("Transaction not found", HttpStatus.FOUND));
 
         return toTransactionRequest(transaction);

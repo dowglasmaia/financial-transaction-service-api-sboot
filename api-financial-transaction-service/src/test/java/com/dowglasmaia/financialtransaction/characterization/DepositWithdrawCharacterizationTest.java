@@ -106,16 +106,15 @@ class DepositWithdrawCharacterizationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void nonCardWithdrawalDebitsAnyAccountByNumberButWritesLedgerOnTheCaller() throws Exception { // characterizes F-05; BE-04 fixes
-        Account other = createOtherAccount("9999", new BigDecimal("1000.00"));
+    void nonCardWithdrawalOnAnotherCustomersAccountIsRejectedAndNothingMoves() throws Exception { // F-05 fixed by BE-04
+        createOtherAccount("9999", new BigDecimal("1000.00"));
         post("/atm-withdrawal", "{\"amount\":100.00,\"agency\":\"0211\",\"numberAccount\":\"9999\"}")
-              .andExpect(status().isNoContent());
+              .andExpect(status().isNotFound())
+              .andExpect(jsonPath("$.message").value("Account not found."));
 
-        assertThat(sameValue(new BigDecimal("900.00"), balanceOf("9999"))).isTrue();
+        assertThat(sameValue(new BigDecimal("1000.00"), balanceOf("9999"))).isTrue();
         assertThat(sameValue(SEED_BALANCE, balanceOf(SEED_ACCOUNT))).isTrue();
-        Transaction row = transactionRepository.findAll().get(0);
-        assertThat(row.getAccountId()).isEqualTo(seedAccount().getId()); // the caller, not the debited account
-        assertThat(row.getAccountId()).isNotEqualTo(other.getId());
+        assertThat(transactionRepository.count()).isZero();
     }
 
     @Test
