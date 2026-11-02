@@ -9,12 +9,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
 @Slf4j
 @Service
 public class AddAmountServiceImpl implements AddAmountService {
+
+    static final String INSUFFICIENT_BALANCE = "Operation not performed, there is not enough balance in the account.";
 
     private final AccountRepository accountRepository;
 
@@ -24,22 +28,23 @@ public class AddAmountServiceImpl implements AddAmountService {
     }
 
     @Override
-    public void addAmountToAccount(String accountNumber, BigDecimal amount){
-        log.info("Start AddAmountToAccount at account:{}", accountNumber);
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void debit(String accountNumber, BigDecimal amount){
+        log.info("Start debit at account:{}", accountNumber);
 
-        Account accountEntity = accountRepository.findByNumber(accountNumber)
+        Account account = accountRepository.findByNumber(accountNumber)
               .orElseThrow(() -> new ObjectNotFoundExeption("Account not found.", HttpStatus.FOUND));
 
+        debitById(account.getId(), amount);
+    }
 
-        if (accountEntity.getBalance().compareTo(amount) > 0) {
-            var originalBalance = accountEntity.getBalance();
-            var newBalance = originalBalance.subtract(amount);
-
-            accountEntity.setBalance(newBalance);
-            accountRepository.save(accountEntity);
-        } else {
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void debitById(String accountId, BigDecimal amount){
+        // One atomic statement: the balance check and the update cannot be separated by another request.
+        if (accountRepository.debit(accountId, amount) == 0) {
             log.error("Operation not performed, there is not enough balance in the account.");
-            throw new UnprocessableEntityExeption("Operation not performed, there is not enough balance in the account.", HttpStatus.UNPROCESSABLE_ENTITY);
+            throw new UnprocessableEntityExeption(INSUFFICIENT_BALANCE, HttpStatus.UNPROCESSABLE_ENTITY);
         }
     }
 }

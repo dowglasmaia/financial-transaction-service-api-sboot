@@ -1,67 +1,73 @@
 package com.dowglasmaia.financialtransaction.services.impl;
 
+import com.dowglasmaia.financialtransaction.config.kafka.KafkaAdminConfig;
 import com.dowglasmaia.financialtransaction.entity.Account;
+import com.dowglasmaia.financialtransaction.entity.OutboxEvent;
+import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;
-import com.dowglasmaia.financialtransaction.repository.AccountRepository;
+import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
 import com.dowglasmaia.financialtransaction.services.RechargeMobileService;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
+import com.dowglasmaia.financialtransaction.services.client.account.AddAmountService;
 import com.dowglasmaia.financialtransaction.services.client.account.FindAccountByNumberAndUserIdService;
 import com.dowglasmaia.financialtransaction.utils.PhoneValidator;
 import com.dowglasmaia.provider.model.MobileRechargeRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
 
 @Slf4j
 @Service
 public class RechargeMobileServiceImpl implements RechargeMobileService {
 
-    private final KafkaTemplate<String, MobileRechargeRequestDTO> mobileRechargeRequesKafkaTemplate;
+    /** Same serializer the Kafka producer used before the outbox, so the payload bytes are identical. */
+    private static final JsonSerializer<MobileRechargeRequestDTO> PAYLOAD_SERIALIZER = new JsonSerializer<>();
+
+    private final OutboxEventRepository outboxEventRepository;
     private final FindAccountByNumberAndUserIdService findAccountByNumberAndUserIdService;
     private final TransactionService transactionService;
-    private final AccountRepository accountRepository;
+    private final AddAmountService addAmountService;
 
     @Autowired
-    public RechargeMobileServiceImpl(KafkaTemplate<String, MobileRechargeRequestDTO> mobileRechargeRequesKafkaTemplate,
+    public RechargeMobileServiceImpl(OutboxEventRepository outboxEventRepository,
                                      FindAccountByNumberAndUserIdService findAccountByNumberAndUserIdService,
                                      TransactionService transactionService,
-                                     AccountRepository accountRepository
+                                     AddAmountService addAmountService
     ){
-        this.mobileRechargeRequesKafkaTemplate = mobileRechargeRequesKafkaTemplate;
+        this.outboxEventRepository = outboxEventRepository;
         this.findAccountByNumberAndUserIdService = findAccountByNumberAndUserIdService;
         this.transactionService = transactionService;
-        this.accountRepository = accountRepository;
+        this.addAmountService = addAmountService;
     }
 
+    /**
+     * Debit, ledger row and the Kafka event (as an outbox row) are written in ONE transaction; the outbox relay
+     * publishes the event afterwards (at-least-once). A failure anywhere rolls everything back.
+     */
     @Override
+    @Transactional
     public void makeRecharge(MobileRechargeRequestDTO request){
         validatePhoneNumber(request);
 
-        var account = validateAndUpdateBalanceAccount(request.getAmount());
+        Account account = findAccountByNumberAndUserIdService.findByNumberAndUserId();
 
-        mobileRechargeRequesKafkaTemplate.send("recharge-mobile-topic", request);
+        addAmountService.debitById(account.getId(), request.getAmount());
 
-        transactionService.save(request, account.getNumber(), request.getAmount(), null);
+        transactionService.save(TransactionTypeEnum.PHONE_RECHARGE, account.getId(), request.getAmount(), null);
+
+        outboxEventRepository.save(OutboxEvent.builder()
+              .topic(KafkaAdminConfig.RECHARGE_MOBILE_TOPIC)
+              .payload(new String(PAYLOAD_SERIALIZER.serialize(KafkaAdminConfig.RECHARGE_MOBILE_TOPIC, request), StandardCharsets.UTF_8))
+              .payloadType(MobileRechargeRequestDTO.class.getName())
+              .createdAt(OffsetDateTime.now())
+              .build());
     }
-
-    private Account validateAndUpdateBalanceAccount(BigDecimal amoutReacharge){
-        Account accountEntity = findAccountByNumberAndUserIdService.findByNumberAndUserId();
-
-        if (accountEntity.getBalance().compareTo(amoutReacharge) > 0) {
-            var newBalance = accountEntity.getBalance().subtract(amoutReacharge);
-            accountEntity.setBalance(newBalance);
-            return accountRepository.save(accountEntity);
-
-        } else {
-            log.error("Operation not performed, there is not enough balance in the account.");
-            throw new UnprocessableEntityExeption("Operation not performed, there is not enough balance in the account.", HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-    }
-
 
     private void validatePhoneNumber(MobileRechargeRequestDTO request){
         String phoneNumber = String.valueOf(request.getAreaCode()) + request.getPhoneNumber();

@@ -7,6 +7,7 @@ import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import com.dowglasmaia.financialtransaction.entity.User;
 import com.dowglasmaia.financialtransaction.repository.AccountRepository;
 import com.dowglasmaia.financialtransaction.repository.AgencyRepository;
+import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
 import com.dowglasmaia.financialtransaction.repository.TransactionRepository;
 import com.dowglasmaia.financialtransaction.repository.UserRepository;
 import com.dowglasmaia.financialtransaction.services.client.maiaBank.MaiaBankClient;
@@ -27,7 +28,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -51,17 +51,9 @@ public abstract class AbstractIntegrationTest {
     protected static final BigDecimal SEED_BALANCE = new BigDecimal("5000.00");
     protected static final String INSUFFICIENT = "Operation not performed, there is not enough balance in the account.";
 
-    private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:14.12-alpine3.18");
-
-    static {
-        POSTGRES.start();
-    }
-
     @DynamicPropertySource
     static void database(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
-        registry.add("spring.datasource.username", POSTGRES::getUsername);
-        registry.add("spring.datasource.password", POSTGRES::getPassword);
+        SharedPostgres.register(registry);
     }
 
     @Autowired protected MockMvc mvc;
@@ -70,6 +62,7 @@ public abstract class AbstractIntegrationTest {
     @Autowired protected AgencyRepository agencyRepository;
     @Autowired protected UserRepository userRepository;
     @Autowired protected TransactionRepository transactionRepository;
+    @Autowired protected OutboxEventRepository outboxEventRepository;
 
     @MockBean protected MaiaBankClient maiaBankClient;
 
@@ -79,6 +72,7 @@ public abstract class AbstractIntegrationTest {
     @BeforeEach
     void resetToSeed() {
         transactionRepository.deleteAll();
+        outboxEventRepository.deleteAll();
         Account seed = seedAccount();
         seed.setBalance(SEED_BALANCE);
         accountRepository.save(seed);
@@ -86,6 +80,7 @@ public abstract class AbstractIntegrationTest {
 
     @AfterEach
     void removeExtras() {
+        transactionRepository.deleteAll(); // the ledger references the accounts (foreign key)
         accountRepository.deleteAll(extraAccounts);
         userRepository.deleteAll(extraUsers);
         extraAccounts.clear();

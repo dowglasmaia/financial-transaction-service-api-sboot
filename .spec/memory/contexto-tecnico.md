@@ -32,22 +32,25 @@ Schema is owned by **Flyway** (`db/migration/V1__baseline.sql`; Hibernate `ddl-a
 | ID | Defect [CODE] | Fixed in |
 |---|---|---|
 | F-01 | No auth; identity = startup singleton from test seed (`DBService`) | BE-04 |
-| F-02 | No `@Transactional` anywhere; balance/ledger/remote/Kafka commit separately; deposit swallows ledger failure | BE-03 |
-| F-03 | Read-modify-write on `balance`, no lock/`@Version`; Pix "restore balance" overwrites concurrent changes | BE-03 |
+| F-02 | ~~No `@Transactional` anywhere…~~ **fixed in BE-03** (one transaction per operation; Pix reserve/confirm/compensate) | BE-03 |
+| F-03 | ~~Read-modify-write on `balance`~~ **fixed in BE-03** (atomic conditional UPDATE) | BE-03 |
 | F-04 | Statement + sums unscoped (all accounts); `GET /transactions/{id}` no ownership | BE-04 |
 | F-05 | Non-card withdraw debits any account by number, ledger on caller | BE-04 |
 | F-06 | ~~Default profile `test` + `ddl-auto: create` wipes DB; DB credentials in tracked `application.yaml`~~ **fixed in BE-02** (old dev credential `maia/maiapw` stays in git history — treat as burned, rotate where reused) | BE-02 |
 | F-07 | Both statement dates → end-of-day UTC (initial day excluded); null date → NPE | BE-05 |
-| F-08 | Recharge ledger stores account **number** in `accountId` (others store id); Kafka publish is a dual write | BE-03 |
-| F-09 | Pix: `receiversPix()` is an empty POST; key-existence stub; `agencyId` null | BE-03 |
-| F-10 | `AddAmountService.addAmountToAccount` actually subtracts; balance rule duplicated 3× | BE-03 |
+| F-08 | ~~Recharge ledger stored the account number; Kafka dual write~~ **fixed in BE-03** (account id + transactional outbox) | BE-03 |
+| F-09 | Pix: `receiversPix()` is still an empty POST (needs the MaiaBank contract); key-existence stub; `agencyId` now recorded (BE-03) | open |
+| F-10 | ~~Balance rule duplicated, strict `>`~~ **fixed in BE-03** (single atomic rule, `>=`; method renamed `debit`) | BE-03 |
 | F-11 | Validators: `nonNull(b) && x==null \|\| x.isEmpty()` → NPE; CPF validator lacks length check; generated bean validation likely inert (javax; proven in BE-06) | BE-05 |
 | F-12 | Handler ignores `HttpStatus` in exceptions (uses `FOUND`); no generic/parse-error handler; `@EnableWebMvc` on advice; OpenAPI says 200/400/401, real 204/404/422 | BE-05 (handler), BE-06 (contract) |
 | F-14 | Lombok 1.18.24, compiler plugin 3.8.1, Sleuth BOM, protobuf 3.18.1, javax APIs, Boot 3.2.5 block Java 25 | BE-07 |
 | F-15/17/18 | OSIV on, EAGER `@ManyToOne`, no indexes/pagination; PII in logs; unpinned Docker tags, no CI | BE-01 (CI), BE-02 (indexes, tags), BE-06 (pagination), BE-08 (logs) |
 | F-19 | Dead code (`TransactionRequestDTO`, `AccountModel`, MapStruct), typos | BE-08 |
-| F-20 | `@CircuitBreaker` on Feign interface unverified; slow-call threshold 100 ms; no Feign timeouts | BE-03 |
+| F-20 | ~~`@CircuitBreaker` unverified; 100 ms slow call; no timeouts~~ **fixed/verified in BE-03** (stub test: breaker opens after 6 failures; timeouts 2 s/5 s; slow-call 2 s) | BE-03 |
 Tests today: 3 classes, weak (`AtmWithdrawalServiceImplTest` asserts nothing); no CI.
+
+## As built in BE-03 (money integrity)
+One conditional UPDATE enforces `balance >= amount` (`AccountRepository.debit`, used through `AddAmountService`). Deposit/withdraw/recharge = one `@Transactional` method; Pix = reserve (debit + `PENDING` ledger row) → MaiaBank → confirm/`COMPLETED` or compensate/`FAILED` (two short `TransactionTemplate` transactions, the remote call is never inside a transaction). Ledger has `status`; the statement counts only `COMPLETED`. Recharge event: `outbox_event` row written with the debit, `OutboxRelay` (`config.kafka`, every 1 s, at-least-once) publishes it to `recharge-mobile-topic` with the same JSON bytes and `__TypeId__` header. Flyway `V2`. Known gaps: no reconciliation of stuck `PENDING` Pix rows; relay has no `SKIP LOCKED`.
 
 ## Target design in one screen
 * Each money operation = one `@Transactional` service method; debit via atomic conditional update (`WHERE balance >= :amt`) or `@Version`; ledger written in the same transaction.

@@ -1,8 +1,8 @@
 package com.dowglasmaia.financialtransaction.services.impl;
 
 import com.dowglasmaia.financialtransaction.entity.Account;
+import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
-import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;
 import com.dowglasmaia.financialtransaction.repository.AccountRepository;
 import com.dowglasmaia.financialtransaction.services.DepositService;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -32,7 +33,9 @@ public class DepositServiceImpl implements DepositService {
         this.transactionService = transactionService;
     }
 
+    /** Credit + ledger row in ONE transaction: if the ledger cannot be written the credit is rolled back. */
     @Override
+    @Transactional
     public void makeDeposit(DepositRequestDTO request){
         log.info("Start makeDeposit at agency and at acoount: {},{}", request.getAgency(), request.getAccount());
 
@@ -42,20 +45,11 @@ public class DepositServiceImpl implements DepositService {
         Account accountEntity = accountRepository.findByAgencyAndNumber(agencyId, request.getAccount())
               .orElseThrow(() -> new ObjectNotFoundExeption("Account not found.", HttpStatus.FOUND));
 
-        var newBalance = accountEntity.getBalance().add(request.getAmount());
+        accountRepository.credit(accountEntity.getId(), request.getAmount());
 
-        accountEntity.setBalance(newBalance);
+        transactionService.save(TransactionTypeEnum.DEPOSIT, accountEntity.getId(), request.getAmount(), agencyId);
 
-        try {
-            accountRepository.save(accountEntity);
-
-            transactionService.save(request, accountEntity.getId(), request.getAmount(), agencyId);
-
-            log.info("Deposit successfully");
-        } catch (Exception e) {
-            log.error("Fail deposit at account {}: {}", request.getAccount(), e.getMessage());
-            throw new UnprocessableEntityExeption("Fail deposito at account " + request.getAccount(), HttpStatus.UNPROCESSABLE_ENTITY);
-        }
+        log.info("Deposit successfully");
     }
 
 }
