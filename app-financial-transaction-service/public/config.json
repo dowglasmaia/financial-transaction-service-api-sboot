@@ -1,0 +1,10 @@
+{
+  "apiBaseUrl": "/api",
+  "demoBanner": true,
+  "auth": {
+    "enabled": false,
+    "issuer": "",
+    "clientId": "",
+    "scopes": ["openid", "profile", "email", "transactions:read", "transactions:write"]
+  }
+}

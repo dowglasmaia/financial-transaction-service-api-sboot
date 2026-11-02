@@ -1,9 +1,148 @@
 @use 'tailwindcss';
 
-:root {
-  font-family: Inter, system-ui, sans-serif;
+/*
+ * Design tokens - single source of truth (spec FE-02). Extracted from the approved prototype
+ * (prototype/Maia Bank UI prototype) and measured for WCAG 2.2 AA (see tokens-contrast.spec.ts).
+ * Deviation: dark --line-input is #75634F (prototype #6F5C4E gave 2.87:1 on raised surfaces; needs 3:1).
+ * Never use hex values in templates: use the semantic Tailwind names (bg-surface, text-content, text-income...).
+ */
+
+/* theme:dark */
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --surface: #110c09;
+  --surface-raised: #1b1410;
+  --surface-sunken: #150f0c;
+  --surface-overlay: #251b15;
+  --brand: #0d0907;
+  --line: #2e221b;
+  --line-input: #75634f;
+  --content: #f5eee2;
+  --content-muted: #b3a28f;
+  --accent: #d4ae6a;
+  --accent-2: #c5be8b;
+  --on-accent: #24160a;
+  --income: #7cc4b3;
+  --expense: #f08a66;
+  --warning: #e8c979;
+  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.03) inset, 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  --shadow-overlay: 0 24px 60px -12px rgb(0 0 0 / 0.65);
+  --glow-accent: 0 10px 26px -8px rgb(212 174 106 / 0.55);
 }
 
-body {
-  margin: 0;
+/* theme:light */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --surface: #f6f2ea;
+  --surface-raised: #ffffff;
+  --surface-sunken: #efe9dc;
+  --surface-overlay: #ffffff;
+  --brand: #2b1a12;
+  --line: #e4dbc9;
+  --line-input: #8c7a64;
+  --content: #26180f;
+  --content-muted: #65513f;
+  --accent: #8a6314;
+  --accent-2: #2f6b60;
+  --on-accent: #fff8ee;
+  --income: #2f6b60;
+  --expense: #b9340b;
+  --warning: #7a4b00;
+  --shadow-card: 0 1px 2px rgb(38 24 15 / 0.06), 0 8px 24px -14px rgb(38 24 15 / 0.25);
+  --shadow-overlay: 0 24px 60px -16px rgb(38 24 15 / 0.35);
+  --glow-accent: 0 10px 26px -10px rgb(138 99 20 / 0.5);
+}
+
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-overlay: var(--surface-overlay);
+  --color-brand: var(--brand);
+  --color-line: var(--line);
+  --color-line-input: var(--line-input);
+  --color-content: var(--content);
+  --color-content-muted: var(--content-muted);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-on-accent: var(--on-accent);
+  --color-income: var(--income);
+  --color-expense: var(--expense);
+  --color-warning: var(--warning);
+
+  --font-sans: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Sora', 'Manrope', system-ui, sans-serif;
+
+  --radius-control: 8px;
+  --radius-card: 12px;
+
+  --shadow-card: var(--shadow-card);
+  --shadow-overlay: var(--shadow-overlay);
+  --shadow-glow: var(--glow-accent);
+
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@layer base {
+  html {
+    background: var(--surface);
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--surface);
+    color: var(--content);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-input) transparent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
