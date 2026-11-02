@@ -80,14 +80,14 @@ Finish: fill the spec's Result section, set its status in .spec/specs/README.md,
 
 ## BE-04 — be-04-auth-and-ownership
 
-**Human action before:** Finish Auth0 per `auth-auth0.md`: Post-Login Action attached to the Login flow, two test users, sign-ups disabled; give the agent each user's `sub` (the SPA app and API already exist).
+**Human action before:** Use the skill `auth-oidc-config` (inputs: `.claude/skills/auth-oidc-config/examples/financial-transaction.inputs.json`) and finish Auth0 per `auth-auth0.md`: Post-Login Action attached to the Login flow, two test users, sign-ups disabled; give the agent each user's `sub` (the SPA app and API already exist).
 
 ```text
 Execute SPEC-BE-04 (.spec/specs/be-04-auth-and-ownership.md).
 Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md.
 Process: follow .spec/spec-execution-flow.md section 1 (the loop) and the runbook for this spec in section 4. Tests first, one commit per task, tick a task only with an evidence line (.spec/shared/como-executar.md).
 Re-verify every `[VERIFY]` item in `auth-auth0.md` against current Auth0 docs and record the result.
-Use the mock JWKS issuer for tests; a real Auth0 login is a manual check.
+Run `auth-oidc-config` `check-inputs` and `verify-tenant` first and paste their output as evidence. Use the mock JWKS issuer for tests; a real Auth0 login is a manual check.
 Git: FIRST run `git checkout main && git pull origin main`, then create the branch `spec/be-04-auth-and-ownership` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually.
 Stay strictly in the spec scope; stop and ask at its 'Stop and ask' items.
 Minimal validation (you may NOT mark the spec Done until all pass; paste the real outputs in the PR):

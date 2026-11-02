@@ -1,0 +1,29 @@
+{
+  "provider": "auth0",
+  "tenantDomain": "dev-twljocmfwpvlxx1q.eu.auth0.com",
+  "spa": {
+    "name": "Transaction-app",
+    "applicationType": "spa",
+    "clientId": "Sy50My7UVdXFjIX7VCwm35LLyzNosKUr",
+    "callbackUrls": ["http://localhost:4200"],
+    "logoutUrls": ["http://localhost:4200"],
+    "webOrigins": ["http://localhost:4200"]
+  },
+  "api": {
+    "name": "Financial Transaction API",
+    "identifier": "https://api.financial-transaction.local",
+    "signingAlg": "RS256"
+  },
+  "roles": {
+    "claim": "https://financial-transaction/roles",
+    "allowed": ["customer"],
+    "defaultRole": "customer"
+  },
+  "backend": {
+    "corsOrigins": ["http://localhost:4200"]
+  },
+  "frontend": {
+    "apiBaseUrl": "http://localhost:8080"
+  },
+  "testUsers": []
+}

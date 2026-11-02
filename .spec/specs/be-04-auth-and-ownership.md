@@ -14,6 +14,7 @@ Replace the fake global identity with Auth0 JWT validation and make every read/w
 **Out of scope:** Auth0 dashboard setup (human); Frontend
 
 ## Tasks
+- [ ] Run skill `auth-oidc-config`: `check-inputs` -> `generate` -> follow `portal-checklist.md` -> `verify-tenant` (record the output)
 - [ ] HUMAN: Post-Login Action (roles claim) attached to the Login flow, two test users, sign-ups disabled; send both `sub` values (app + API already created; audience `https://api.financial-transaction.local`)
 - [ ] Dependencies + `SecurityFilterChain` + decoder/validators + converter
 - [ ] Method security per endpoint matrix
@@ -41,7 +42,7 @@ Replace the fake global identity with Auth0 JWT validation and make every read/w
 - Removing non-card withdraw entirely (contract change)
 
 ## Skills
-java-modern-engineering, java-persistence-performance
+auth-oidc-config, java-modern-engineering, java-persistence-performance
 
 ## Result
 _Filled on completion: result, checks run, accepted limitations._

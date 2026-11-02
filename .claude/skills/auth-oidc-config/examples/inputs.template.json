@@ -1,0 +1,32 @@
+{
+  "provider": "auth0",
+  "tenantDomain": "<tenant>.<region>.auth0.com",
+  "spa": {
+    "name": "<application name>",
+    "applicationType": "spa",
+    "clientId": "<public client id from Applications > Settings>",
+    "callbackUrls": ["http://localhost:4200"],
+    "logoutUrls": ["http://localhost:4200"],
+    "webOrigins": ["http://localhost:4200"]
+  },
+  "api": {
+    "name": "<API display name>",
+    "identifier": "https://api.<product>.local",
+    "signingAlg": "RS256"
+  },
+  "roles": {
+    "claim": "https://<product>/roles",
+    "allowed": ["customer"],
+    "defaultRole": "customer"
+  },
+  "backend": {
+    "corsOrigins": ["http://localhost:4200"]
+  },
+  "frontend": {
+    "apiBaseUrl": "http://localhost:8080"
+  },
+  "testUsers": [
+    { "label": "owner", "sub": "auth0|<user_id of the first test user>" },
+    { "label": "other", "sub": "auth0|<user_id of the second test user>" }
+  ]
+}

@@ -42,6 +42,7 @@ Vendor facts must be re-verified in the Auth0 dashboard/docs at implementation t
 The API never calls Auth0 per request: it validates JWTs locally against the cached JWKS. Without the `audience` parameter on `/authorize`, Auth0 returns an opaque token that the API cannot validate — the SPA must always send it.
 
 ## Auth0 configuration (human, in the dashboard)
+**Use the project skill `auth-oidc-config` (`.claude/skills/auth-oidc-config/`)**: validate the inputs, generate the backend/frontend config, the Action and a checklist with your values, then verify the tenant and a real token. Inputs for this project: `.claude/skills/auth-oidc-config/examples/financial-transaction.inputs.json`. The summary below is the same content in prose; the skill's generated files win if they differ.
 1. **Application** `Transaction-app`: type *Single Page Application*; Allowed Callback URLs `http://localhost:4200` (+ deployed URL); Allowed Logout URLs and Allowed Web Origins the same; *Cross-Origin Authentication* off; grant types Authorization Code + Refresh Token; **Refresh Token Rotation** on; Application Login URI optional.
 2. **API** `Financial Transaction API`: Identifier `https://api.financial-transaction.local` (immutable), RS256, *Allow Offline Access* on; Application Access: user-delegated = per-app authorization with `Transaction-app`, client access = no apps; no permissions defined (D-30). Access-token lifetime 15–60 min **[VERIFY default]**.
 3. **Post-Login Action** (deploy and attach to the *Login* flow). `event.authorization.roles` is empty when the user has no Auth0 role, so default to `customer` (the only role, D-21):
@@ -125,4 +126,4 @@ Done when: F-01 closed, `BR-04` replaced, all above pass, `git grep` shows no to
 - [ ] Re-verify every **[VERIFY]** item against current Auth0 docs.
 
 ## Skills used
-`java-modern-engineering` (security as correctness), `java-persistence-performance` (ownership on every query, Flyway for `external_subject`), `openapi-rest-contract` (security scheme), `angular-architect` (guards are UX not security), `angular-module-scaffold` (where auth plugs in), `ui-ux-pro-max` (session-expiry UX).
+`auth-oidc-config` (deterministic config generation + verification, project skill), `java-modern-engineering` (security as correctness), `java-persistence-performance` (ownership on every query, Flyway for `external_subject`), `openapi-rest-contract` (security scheme), `angular-architect` (guards are UX not security), `angular-module-scaffold` (where auth plugs in), `ui-ux-pro-max` (session-expiry UX).
