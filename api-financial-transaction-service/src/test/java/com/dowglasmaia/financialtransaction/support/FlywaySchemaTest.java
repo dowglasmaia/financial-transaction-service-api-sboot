@@ -74,4 +74,35 @@ class FlywaySchemaTest extends AbstractIntegrationTest {
               Integer.class);
         assertThat(count).isEqualTo(1);
     }
+
+    @Test
+    void migrationV2WasApplied() {
+        List<String> versions = jdbc.queryForList(
+              "select version from flyway_schema_history where success = true order by installed_rank", String.class);
+        assertThat(versions).contains("1", "2");
+    }
+
+    @Test
+    void ledgerRowsMustReferenceAnExistingAccount() { // V2 adds the foreign key (recharge stored the account number before BE-03)
+        assertThatThrownBy(() -> jdbc.update(
+              "insert into transaction (id, date_hour, amount, account_id, agency_id, transaction_type) values (?,?,?,?,?,?)",
+              "fk-account", OffsetDateTime.now(), new BigDecimal("1.00"), "2022", null, "PIX"))
+              .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    void ledgerStatusIsRestrictedAndDefaultsToCompleted() {
+        jdbc.update("insert into transaction (id, date_hour, amount, account_id, transaction_type) values (?,?,?,?,?)",
+              "status-default", OffsetDateTime.now(), new BigDecimal("1.00"), seedAccount().getId(), "PIX");
+        assertThat(jdbc.queryForObject("select status from transaction where id = 'status-default'", String.class)).isEqualTo("COMPLETED");
+        assertThatThrownBy(() -> jdbc.update(
+              "insert into transaction (id, date_hour, amount, account_id, transaction_type, status) values (?,?,?,?,?,?)",
+              "bad-status", OffsetDateTime.now(), new BigDecimal("1.00"), seedAccount().getId(), "PIX", "DONE"))
+              .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    void theOutboxTableExists() {
+        assertThat(jdbc.queryForObject("select count(*) from information_schema.tables where table_name = 'outbox_event'", Integer.class)).isEqualTo(1);
+    }
 }

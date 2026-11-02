@@ -90,19 +90,19 @@ class DepositWithdrawCharacterizationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void withdrawalOfTheExactBalanceIsRejected() throws Exception { // characterizes F-10 / BR-05 (strict '>'); BE-03 flips to '>='
-        post("/atm-withdrawal", "{\"amount\":5000.00}")
+    void withdrawalOfTheExactBalanceIsAllowed() throws Exception { // decision D-14: balance >= amount (was strict '>', F-10)
+        post("/atm-withdrawal", "{\"amount\":5000.00}").andExpect(status().isNoContent());
+        assertThat(sameValue(BigDecimal.ZERO, balanceOf(SEED_ACCOUNT))).isTrue();
+        assertThat(transactionRepository.count()).isEqualTo(1);
+    }
+
+    @Test
+    void withdrawalAboveBalanceIsRejectedAndNothingChanges() throws Exception {
+        post("/atm-withdrawal", "{\"amount\":5000.01}")
               .andExpect(status().isUnprocessableEntity())
               .andExpect(jsonPath("$.message").value(INSUFFICIENT));
         assertThat(sameValue(SEED_BALANCE, balanceOf(SEED_ACCOUNT))).isTrue();
         assertThat(transactionRepository.count()).isZero();
-    }
-
-    @Test
-    void withdrawalAboveBalanceIsRejected() throws Exception {
-        post("/atm-withdrawal", "{\"amount\":5000.01}")
-              .andExpect(status().isUnprocessableEntity())
-              .andExpect(jsonPath("$.message").value(INSUFFICIENT));
     }
 
     @Test

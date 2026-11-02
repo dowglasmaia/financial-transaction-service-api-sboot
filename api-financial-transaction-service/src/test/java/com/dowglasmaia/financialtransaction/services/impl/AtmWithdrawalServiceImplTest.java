@@ -1,6 +1,7 @@
 package com.dowglasmaia.financialtransaction.services.impl;
 
 import com.dowglasmaia.financialtransaction.entity.Account;
+import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
 import com.dowglasmaia.financialtransaction.services.client.account.AddAmountService;
 import com.dowglasmaia.financialtransaction.services.client.account.FindAccountByNumberAndUserIdService;
@@ -15,7 +16,6 @@ import java.math.BigDecimal;
 
 import static com.dowglasmaia.financialtransaction.mock.MockBuild.userAccountBuild;
 import static com.dowglasmaia.financialtransaction.mock.MockBuild.withdrawRequestBuild;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -49,8 +49,8 @@ class AtmWithdrawalServiceImplTest {
 
         service.makeAtmWithdrawal(request);
 
-        verify(addAmountService).addAmountToAccount("2022", new BigDecimal("150.00"));
-        verify(transactionService).save(request, "acting-id", new BigDecimal("150.00"), "agency-id");
+        verify(addAmountService).debitById("acting-id", new BigDecimal("150.00"));
+        verify(transactionService).save(TransactionTypeEnum.WITHDRAW, "acting-id", new BigDecimal("150.00"), "agency-id");
         verifyNoMoreInteractions(addAmountService);
     }
 
@@ -60,7 +60,7 @@ class AtmWithdrawalServiceImplTest {
 
         service.makeAtmWithdrawal(request);
 
-        verify(addAmountService).addAmountToAccount(eq("9999"), eq(new BigDecimal("80.00")));
-        verify(transactionService).save(any(), eq("acting-id"), eq(new BigDecimal("80.00")), eq("agency-id"));
+        verify(addAmountService).debit(eq("9999"), eq(new BigDecimal("80.00")));
+        verify(transactionService).save(eq(TransactionTypeEnum.WITHDRAW), eq("acting-id"), eq(new BigDecimal("80.00")), eq("agency-id"));
     }
 }

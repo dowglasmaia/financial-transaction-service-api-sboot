@@ -1,8 +1,10 @@
 package com.dowglasmaia.financialtransaction.characterization;
 
 import com.dowglasmaia.financialtransaction.entity.Transaction;
+import com.dowglasmaia.financialtransaction.entity.TransactionStatusEnum;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
+import com.dowglasmaia.provider.model.MobileRechargeRequestDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -10,14 +12,18 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -47,7 +53,8 @@ class PixRechargeCharacterizationTest extends AbstractIntegrationTest {
         Transaction row = transactionRepository.findAll().get(0);
         assertThat(row.getTransactionType()).isEqualTo(TransactionTypeEnum.PIX);
         assertThat(row.getAccountId()).isEqualTo(seedAccount().getId());
-        assertThat(row.getAgencyId()).isNull(); // characterizes F-09
+        assertThat(row.getAgencyId()).isEqualTo(seedAgency().getId()); // F-09 fixed: the agency is recorded
+        assertThat(row.getStatus()).isEqualTo(TransactionStatusEnum.COMPLETED);
     }
 
     @Test
@@ -71,11 +78,20 @@ class PixRechargeCharacterizationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void pixOfTheExactBalanceIsRejected() throws Exception { // characterizes F-10 / BR-05 (strict '>'); BE-03 flips to '>='
-        post("/send-pix", pix("82215344040", "cpf", "5000.00"))
+    void pixOfTheExactBalanceIsAllowed() throws Exception { // decision D-14: balance >= amount (was strict '>', F-10)
+        post("/send-pix", pix("82215344040", "cpf", "5000.00")).andExpect(status().isNoContent());
+        assertThat(sameValue(BigDecimal.ZERO, balanceOf(SEED_ACCOUNT))).isTrue();
+        verify(maiaBankClient, times(1)).receiversPix();
+    }
+
+    @Test
+    void pixAboveTheBalanceIsRejectedBeforeCallingMaiaBank() throws Exception {
+        post("/send-pix", pix("82215344040", "cpf", "5000.01"))
               .andExpect(status().isUnprocessableEntity())
               .andExpect(jsonPath("$.message").value(INSUFFICIENT));
         verify(maiaBankClient, never()).receiversPix();
+        assertThat(sameValue(SEED_BALANCE, balanceOf(SEED_ACCOUNT))).isTrue();
+        assertThat(transactionRepository.count()).isZero();
     }
 
     @Test
@@ -87,7 +103,10 @@ class PixRechargeCharacterizationTest extends AbstractIntegrationTest {
               .andExpect(jsonPath("$.message").value("Fail send Pix."));
 
         assertThat(sameValue(SEED_BALANCE, balanceOf(SEED_ACCOUNT))).isTrue();
-        assertThat(transactionRepository.count()).isZero();
+        // the reservation is kept for audit as FAILED; it never appears in the statement
+        List<Transaction> rows = transactionRepository.findAll();
+        assertThat(rows).hasSize(1);
+        assertThat(rows.get(0).getStatus()).isEqualTo(TransactionStatusEnum.FAILED);
     }
 
     @Test
@@ -114,15 +133,33 @@ class PixRechargeCharacterizationTest extends AbstractIntegrationTest {
 
         Transaction row = transactionRepository.findAll().get(0);
         assertThat(row.getTransactionType()).isEqualTo(TransactionTypeEnum.PHONE_RECHARGE);
-        assertThat(row.getAccountId()).isEqualTo(SEED_ACCOUNT);       // characterizes F-08: the NUMBER, not the id
-        assertThat(row.getAccountId()).isNotEqualTo(seedAccount().getId());
+        assertThat(row.getAccountId()).isEqualTo(seedAccount().getId()); // F-08 fixed: the account ID, like every other type
         assertThat(row.getAgencyId()).isNull();
 
-        JsonNode event = firstRechargeEvent();
+        String rawEvent = firstRechargeEventValue();
+        JsonNode event = json.readTree(rawEvent);
         assertThat(event.get("phoneNumber").asLong()).isEqualTo(998877665L);
         assertThat(event.get("areaCode").asInt()).isEqualTo(11);
         assertThat(event.get("carrier").asText()).isEqualTo("VIVO");
         assertThat(event.get("amount").decimalValue().compareTo(new BigDecimal("50"))).isZero();
+
+        // byte-identical to what the producer published before the outbox (same JsonSerializer, same request)
+        MobileRechargeRequestDTO sent = new MobileRechargeRequestDTO();
+        sent.setPhoneNumber(998877665);
+        sent.setAreaCode(11);
+        sent.setCarrier(MobileRechargeRequestDTO.CarrierEnum.VIVO);
+        sent.setAmount(new BigDecimal("50.00"));
+        byte[] legacyBytes = new JsonSerializer<MobileRechargeRequestDTO>().serialize(RECHARGE_TOPIC, sent);
+        assertThat(rawEvent.getBytes(StandardCharsets.UTF_8)).isEqualTo(legacyBytes);
+
+        // the outbox row is marked as published once the broker acknowledged it
+        await().atMost(Duration.ofSeconds(15)).untilAsserted(() -> {
+            var rows = outboxEventRepository.findAll();
+            assertThat(rows).hasSize(1);
+            assertThat(rows.get(0).getPublishedAt()).isNotNull();
+            assertThat(rows.get(0).getTopic()).isEqualTo(RECHARGE_TOPIC);
+            assertThat(rows.get(0).getPayload()).isEqualTo(rawEvent);
+        });
     }
 
     @Test
@@ -135,10 +172,19 @@ class PixRechargeCharacterizationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void rechargeOfTheExactBalanceIsRejected() throws Exception { // characterizes F-10 / BR-05
+    void rechargeOfTheExactBalanceIsAllowed() throws Exception { // decision D-14: balance >= amount (was strict '>', F-10)
         post("/recharge-mobile", "{\"phoneNumber\":998877665,\"areaCode\":11,\"carrier\":\"CLARO\",\"amount\":5000}")
+              .andExpect(status().isNoContent());
+        assertThat(sameValue(BigDecimal.ZERO, balanceOf(SEED_ACCOUNT))).isTrue();
+    }
+
+    @Test
+    void rechargeAboveTheBalanceIsRejectedAndWritesNothing() throws Exception {
+        post("/recharge-mobile", "{\"phoneNumber\":998877665,\"areaCode\":11,\"carrier\":\"CLARO\",\"amount\":5000.01}")
               .andExpect(status().isUnprocessableEntity())
               .andExpect(jsonPath("$.message").value(INSUFFICIENT));
+        assertThat(transactionRepository.count()).isZero();
+        assertThat(outboxEventRepository.count()).isZero();
     }
 
     @Test
@@ -154,14 +200,14 @@ class PixRechargeCharacterizationTest extends AbstractIntegrationTest {
               .andExpect(jsonPath("$.message").value("Invalid carrier"));
     }
 
-    private JsonNode firstRechargeEvent() throws Exception {
+    private String firstRechargeEventValue() throws Exception {
         Map<String, Object> props = KafkaTestUtils.consumerProps("be01-" + System.nanoTime(), "true", kafka);
         props.put("auto.offset.reset", "earliest");
         try (Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(
               props, new StringDeserializer(), new StringDeserializer()).createConsumer()) {
             kafka.consumeFromAnEmbeddedTopic(consumer, RECHARGE_TOPIC);
             ConsumerRecord<String, String> record = KafkaTestUtils.getSingleRecord(consumer, RECHARGE_TOPIC, Duration.ofSeconds(15));
-            return json.readTree(record.value());
+            return record.value();
         }
     }
 }
