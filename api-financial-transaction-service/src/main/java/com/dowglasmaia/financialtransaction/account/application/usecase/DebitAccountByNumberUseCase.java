@@ -2,7 +2,7 @@ package com.dowglasmaia.financialtransaction.account.application.usecase;
 
 import com.dowglasmaia.financialtransaction.account.application.port.AccountRepository;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
-import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundExeption;
 import java.math.BigDecimal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

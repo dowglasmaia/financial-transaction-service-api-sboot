@@ -10,7 +10,7 @@ import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurre
 import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAgencyUseCase;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
-import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundExeption;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

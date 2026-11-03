@@ -6,7 +6,7 @@ import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.transaction.application.port.RechargeEventPublisher;
 import com.dowglasmaia.financialtransaction.transaction.domain.MobileRecharge;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
-import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;
+import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityExeption;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

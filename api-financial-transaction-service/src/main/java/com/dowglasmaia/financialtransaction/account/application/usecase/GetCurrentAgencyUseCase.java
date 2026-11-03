@@ -1,7 +1,7 @@
 package com.dowglasmaia.financialtransaction.account.application.usecase;
 
 import com.dowglasmaia.financialtransaction.account.application.port.AgencyRepository;
-import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundExeption;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.exeptions;
+package com.dowglasmaia.financialtransaction.shared.error;
 
 import lombok.Getter;
 import lombok.Setter;

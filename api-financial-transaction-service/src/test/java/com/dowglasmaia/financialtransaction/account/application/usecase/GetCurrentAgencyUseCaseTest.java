@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.dowglasmaia.financialtransaction.account.application.port.AgencyRepository;
 import com.dowglasmaia.financialtransaction.account.domain.Agency;
-import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundExeption;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

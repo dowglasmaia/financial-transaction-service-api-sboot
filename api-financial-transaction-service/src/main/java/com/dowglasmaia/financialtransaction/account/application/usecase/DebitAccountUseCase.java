@@ -1,7 +1,7 @@
 package com.dowglasmaia.financialtransaction.account.application.usecase;
 
 import com.dowglasmaia.financialtransaction.account.application.port.AccountRepository;
-import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;
+import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityExeption;
 import java.math.BigDecimal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

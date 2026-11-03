@@ -4,7 +4,7 @@ import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurre
 import com.dowglasmaia.financialtransaction.transaction.application.port.TransactionRepository;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.transaction.domain.Transaction;
-import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundExeption;
 import org.springframework.stereotype.Service;
 
 /** One entry of the caller's account; an id that belongs to another account behaves as an unknown one. */

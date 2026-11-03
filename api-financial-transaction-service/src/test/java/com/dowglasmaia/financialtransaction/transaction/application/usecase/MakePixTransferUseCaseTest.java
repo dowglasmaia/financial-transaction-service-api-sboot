@@ -20,7 +20,7 @@ import com.dowglasmaia.financialtransaction.transaction.domain.PixKeyType;
 import com.dowglasmaia.financialtransaction.transaction.domain.PixTransfer;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
-import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;
+import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityExeption;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.InOrder;

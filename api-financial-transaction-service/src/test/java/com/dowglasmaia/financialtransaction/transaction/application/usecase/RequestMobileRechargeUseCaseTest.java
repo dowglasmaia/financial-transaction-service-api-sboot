@@ -11,7 +11,7 @@ import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.transaction.application.port.RechargeEventPublisher;
 import com.dowglasmaia.financialtransaction.transaction.domain.MobileRecharge;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
-import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;
+import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityExeption;
 import java.math.BigDecimal;
 import org.mockito.InOrder;
 import org.junit.jupiter.api.Test;

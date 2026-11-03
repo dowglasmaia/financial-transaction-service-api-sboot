@@ -9,7 +9,7 @@ import com.dowglasmaia.financialtransaction.transaction.application.port.PixGate
 import com.dowglasmaia.financialtransaction.transaction.domain.PixTransfer;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
-import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;
+import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityExeption;
 import java.math.BigDecimal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

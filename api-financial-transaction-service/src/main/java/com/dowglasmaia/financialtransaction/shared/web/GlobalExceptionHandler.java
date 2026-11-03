@@ -1,9 +1,9 @@
 package com.dowglasmaia.financialtransaction.shared.web;
 
 
-import com.dowglasmaia.financialtransaction.exeptions.ForbiddenExeption;
-import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
-import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ForbiddenExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundExeption;
+import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityExeption;
 import com.dowglasmaia.provider.model.ResponseErrorDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

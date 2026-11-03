@@ -2,7 +2,7 @@ package com.dowglasmaia.financialtransaction.account.application.usecase;
 
 import com.dowglasmaia.financialtransaction.account.application.port.CallerIdentity;
 import com.dowglasmaia.financialtransaction.account.application.port.UserRepository;
-import com.dowglasmaia.financialtransaction.exeptions.ForbiddenExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ForbiddenExeption;
 import org.springframework.stereotype.Service;
 
 /** True when the token subject is linked to a customer. */

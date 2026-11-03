@@ -8,7 +8,7 @@ import com.dowglasmaia.financialtransaction.account.application.port.AccountRepo
 import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.account.domain.Agency;
 import com.dowglasmaia.financialtransaction.account.domain.User;
-import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundExeption;
 import java.math.BigDecimal;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;

@@ -10,7 +10,7 @@ import com.dowglasmaia.financialtransaction.account.application.port.UserReposit
 import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.account.domain.Agency;
 import com.dowglasmaia.financialtransaction.account.domain.User;
-import com.dowglasmaia.financialtransaction.exeptions.ForbiddenExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ForbiddenExeption;
 import java.math.BigDecimal;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;

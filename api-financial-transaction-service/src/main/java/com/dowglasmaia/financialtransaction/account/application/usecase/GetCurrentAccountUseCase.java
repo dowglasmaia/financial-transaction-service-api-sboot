@@ -5,7 +5,7 @@ import com.dowglasmaia.financialtransaction.account.application.port.CallerIdent
 import com.dowglasmaia.financialtransaction.account.application.port.UserRepository;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.account.domain.User;
-import com.dowglasmaia.financialtransaction.exeptions.ForbiddenExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ForbiddenExeption;
 import org.springframework.stereotype.Service;
 
 /**
