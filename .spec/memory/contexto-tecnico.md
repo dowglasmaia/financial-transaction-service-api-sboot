@@ -10,7 +10,7 @@ Target: **Spring Boot 3.5.x → Java 21 → Java 25** (no Boot 4), openapi-gener
 ```
 api-financial-transaction-service/   Spring Boot API (Maven)      CI: .github/workflows/api-ci.yml
 app-financial-transaction-service/   Angular web app (created by FE-02)   CI: .github/workflows/app-ci.yml
-prototype/Maia Bank UI prototype/    approved UI/UX prototype (visual + flow reference)
+prototype/Maia Bank UI prototype/    UI/UX prototype: `Maia Bank v2.dc.html` is the CURRENT reference (D-32); `Maia Bank.dc.html` (v1) is history
 .spec/                               memory, specs, execution flow
 docker-compose.yml                   local stack (builds the API from its folder)
 ```
@@ -62,8 +62,22 @@ One conditional UPDATE enforces `balance >= amount` (`AccountRepository.debit`, 
 ## Decisions log (final)
 Auth0 free plan, tenant `dev-twljocmfwpvlxx1q.eu.auth0.com` (D-29, supersedes Okta; details in `auth-auth0.md`) · Boot 3.5.x via Java 21 then 25 · keep architecture/packages · `>=` balance rule · Pix behaviour kept (no local credit) · owner-only debits · English UI · visual identity = the approved prototype in `prototype/` (supersedes the earlier "Grafite Ciano" proposal; skills' stack assumptions ignored) · additive API (`/accounts/me`, row `id`) · manual user↔Auth0 linking, role `customer` only · disposable DB, clean Flyway V1 · no Kafka consumer, payload frozen · one account per user · GitHub Actions + Docker · web-only portfolio prototype · AI Assistant = future concept only.
 
+## Decisions added 2026-11-03 (vertical slices and visual v2)
+| # | Decision |
+|---|---|
+| D-31 | **Vertical slices.** From SL-00 on, each user-visible capability is one branch/PR carrying backend + frontend + e2e (`slice/<nn>-<slug>`); slices run strictly in order. BE-05, BE-06, FE-03, FE-04 are superseded by SL-01…SL-06 (mapping in `specs/README.md`). |
+| D-32 | **Visual reference = `Maia Bank v2.dc.html`** (deep navy surfaces, blue/cyan accents, glass cards, Manrope + Sora, Phosphor). Supersedes v1 (brown/gold) and the earlier Grafite Ciano. Implemented in SL-00. |
+| D-33 | **UI stays English; brand stays "Maia Bank".** v2's pt-BR copy, "Banco MaisVida" and "Login seguro via Okta" are translated/renamed ("Secure sign-in with Auth0"). |
+| D-34 | Dark is the default (v2 has no light theme); the light theme is **derived** from v2 hues and contrast-tested (D-17 kept). |
+| D-35 | v2 elements with no endpoint are not built: global search, notification bell, support-phone strip, "Learn more" link. The AI Assistant concept is dropped (v2 has none). |
+| D-36 | Recharge carriers are the backend enum `VIVO · CLARO · TIM · ALGAR`; v2's "Oi" becomes Algar. |
+| D-37 | Automated e2e signs in through a **mock OIDC provider** (compose profile `e2e`); the real Auth0 login is a manual owner check (SL-01 and FINAL-01). |
+| D-38 | Local ports: Postgres `localhost:5433` (5432 was taken), Kafka 9092, Kafdrop 19000, MaiaBank stub 8089, API 8088, app 4200. The build JDK is 21 (Lombok ≥ 1.18.42). |
+
 ## Frontend: prototype and agent autonomy
-**Reference:** `prototype/Maia Bank UI prototype/Maia Bank.dc.html` (design-canvas export with `support.js`; **do not copy its markup** — reimplement in Angular). Observed identity [INFERRED from the file, confirm when opening it]: warm dark-brown surfaces, gold accent (`#CEA45C`), teal/green status tones, Manrope + Sora fonts, Phosphor icons, "Demo environment · test data only" chip, prototype controls (data state, on-confirm outcome, screen jump). `_ds/nocturne-*` inside it is a bundled design-system export (blurple, Inter) that the main page does not appear to use — treat as non-authoritative.
+> **Current reference:** `prototype/Maia Bank UI prototype/Maia Bank v2.dc.html` (D-32…D-36). The next paragraph describes the **superseded v1** file and is kept for history; for tokens, screens and copy follow SL-00 and the v2 file.
+
+**Reference (superseded v1):** `prototype/Maia Bank UI prototype/Maia Bank.dc.html` (design-canvas export with `support.js`; **do not copy its markup** — reimplement in Angular). Observed identity [INFERRED from the file, confirm when opening it]: warm dark-brown surfaces, gold accent (`#CEA45C`), teal/green status tones, Manrope + Sora fonts, Phosphor icons, "Demo environment · test data only" chip, prototype controls (data state, on-confirm outcome, screen jump). `_ds/nocturne-*` inside it is a bundled design-system export (blurple, Inter) that the main page does not appear to use — treat as non-authoritative.
 Screens in the prototype: landing/sign-in, Home, Statement (+detail), Pix (3 steps), Deposit, Recharge, Withdrawal, result panel, AI Assistant concept (Coming soon).
 
 **The frontend agent is not limited to the prototype.** It is the starting point for look, flows and copy, not a cage. The agent has autonomy to propose and apply improvements to UX details, accessibility, responsiveness, performance, component structure, microcopy, motion, form ergonomics, empty/error states and edge cases the prototype missed.
@@ -73,7 +87,7 @@ Screens in the prototype: landing/sign-in, Home, Statement (+detail), Pix (3 ste
 * **Where prototype and backend disagree, the backend contract wins** and the agent proposes the reconciliation. Known case: the prototype's **Deposit is an online boleto flow** ("Proposed · client-side demo" with "Simulate payment"), while the real endpoint is `POST /transactions/deposit {agency, account, amount}` — a Tier-2 proposal is needed (e.g. boleto step is a UI simulation whose "payment" calls the real deposit for the caller's own account from `/accounts/me`).
 * Prototype palette/typography replace the earlier Grafite Ciano tokens as the starting point; the agent may refine them (contrast ≥ 4.5:1 text, ≥ 3:1 UI) and logs changes.
 
-## Frontend app (as built in FE-02)
+## Frontend app (as built in FE-02 — v1 look; tokens and components are replaced by SL-00)
 `app-financial-transaction-service/`: Angular 21 (zoneless, strict), Tailwind 4, Vitest (`npm test`), Phosphor icons, Manrope/Sora fonts. Tokens live only in `src/styles.scss` (dark default + light; semantic Tailwind names such as `bg-surface`, `text-content`, `text-income`) and are guarded by `core/theme/tokens-contrast.spec.ts`. Runtime config: `public/config.json` (`apiBaseUrl`, `auth`, `demoBanner`); dev proxy `/api → localhost:8088`. HTTP boundary: interceptors request-id → auth (dev-open) → api-error (typed `ApiError`). Shared UI in `src/app/shared/ui`, living style guide at `/design`. Prototype deviations: `docs/prototype-deviations.md`. No chart library (hand-made SVG).
 
 ## How the agent must work

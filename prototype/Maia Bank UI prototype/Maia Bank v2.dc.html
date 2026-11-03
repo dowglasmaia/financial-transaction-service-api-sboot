@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>body{margin:0}a{color:#38BDF8}a:hover{color:#7dd3fc;text-decoration:underline}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes floatY{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-12px) rotate(var(--r,0deg))}}
+@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,-30px)}}
+@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes ring{0%{transform:scale(.9);opacity:.8}100%{transform:scale(2.2);opacity:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes orbit{to{transform:rotate(360deg)}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes twinkle{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes sheen{0%{transform:translateX(-120%)}60%,100%{transform:translateX(220%)}}
+button{transition:transform .18s ease-out,filter .18s,box-shadow .25s,background .2s,border-color .2s}
+button:not(:disabled):hover{filter:brightness(1.12);transform:translateY(-2px)}
+button:not(:disabled):active{transform:scale(.97)}
+input{transition:box-shadow .2s,border-color .2s}input::placeholder{color:#6F7BA8}
+input:focus{border-color:#3B82F6!important;box-shadow:0 0 0 4px rgba(59,130,246,.22);outline:none}
+button:focus-visible{outline:2px solid #38BDF8;outline-offset:2px}
+::selection{background:rgba(59,130,246,.4)}*{scrollbar-width:thin;scrollbar-color:#2A3770 transparent}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}</style>
+</helmet>
+<div style="{{ rootStyle }}">
+<div style="position:sticky;top:0;z-index:80;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:10px 16px;background:#04071a;border-bottom:1px solid #1B2656;font:500 12px Manrope;color:#9AA6D1">
+<span style="color:#F1F4FF;font-weight:700">Controles do protótipo</span>
+<sc-for list="{{ bpOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
+<span style="width:1px;height:18px;background:#1B2656"></span><span>Dados</span>
+<sc-for list="{{ dataOpts }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
+<span style="width:1px;height:18px;background:#1B2656"></span><span>Ao confirmar</span>
+<sc-for list="{{ outOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
+<span style="width:1px;height:18px;background:#1B2656"></span><span>Ir para</span>
+<sc-for list="{{ jumpOpts }}" as="o" hint-placeholder-count="9"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
+</div>
+<div style="overflow:auto;padding:24px 16px 48px">
+<div style="{{ frameStyle }}">
+<div style="position:absolute;z-index:-1;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,.28),transparent 65%);top:80px;left:-160px;pointer-events:none;animation:drift 16s ease-in-out infinite"></div>
+<div style="position:absolute;z-index:-1;width:560px;height:560px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.26),transparent 65%);top:520px;right:-180px;pointer-events:none;animation:drift 20s ease-in-out infinite;animation-delay:-8s"></div>
+<i class="{{ bgIcon }}" style="position:absolute;z-index:-1;right:-60px;bottom:-60px;font-size:{{ bgIconSize }}px;line-height:1;color:#5B7CFF;opacity:.06;pointer-events:none;transform:rotate(-10deg)"></i>
+
+<!-- LANDING -->
+<sc-if value="{{ isLanding }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;min-height:800px">
+<section style="{{ landHero }}">
+<div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 78% 30%,rgba(124,92,255,.5),transparent 40%),radial-gradient(circle at 92% 18%,rgba(34,211,238,.28),transparent 30%),linear-gradient(180deg,#0A1450 0%,#14226F 55%,#3B2C86 100%)"></div>
+<sc-if value="{{ showSky }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;left:46%;right:0;bottom:0;height:60%;pointer-events:none">
+<sc-for list="{{ skyline }}" as="b" hint-placeholder-count="16"><span style="{{ b }}"></span></sc-for>
+<span style="position:absolute;left:0;right:0;bottom:0;height:26%;background:linear-gradient(180deg,rgba(255,170,80,.28),rgba(40,30,110,.9));filter:blur(.5px)"></span>
+<span style="position:absolute;left:30%;bottom:0;width:3px;height:100%;background:linear-gradient(180deg,#9DB4FF,transparent);opacity:.6;box-shadow:0 0 14px #7E9BFF"></span>
+</div></sc-if>
+<div style="position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:20px {{ padX }}px;gap:12px">
+<div style="{{ logoRow }}"><span style="{{ logoMark }}"><i class="ph-bold ph-plus"></i></span><span style="line-height:1.05">Banco<br><span style="color:#38BDF8">MaisVida</span></span></div>
+<div style="display:flex;gap:10px;align-items:center"><span style="{{ chipStyle }}"><i class="ph ph-flask"></i>Ambiente de demonstração</span><button onClick="{{ goSignin }}" style="{{ btnG }}">Entrar</button></div>
+</div>
+<div style="position:relative;z-index:2;padding:{{ heroPadY }}px {{ padX }}px;display:flex;flex-direction:column;gap:20px;max-width:760px;animation:fadeUp .8s cubic-bezier(.2,.8,.2,1) both">
+<span style="display:inline-flex;gap:10px;align-items:center;font:600 14px Manrope;color:#9DD8FF"><span style="width:34px;height:3px;border-radius:2px;background:#22D3EE"></span>Banco MaisVida</span>
+<h1 style="margin:0;font:700 {{ heroSize }}px/1.04 Sora;letter-spacing:-.03em;color:#fff">Sua vida financeira<br><span style="color:#22D3EE">mais simples</span> e segura</h1>
+<p style="margin:0;font:400 18px/1.55 Manrope;color:#C9D3FF;max-width:480px">Gerencie suas finanças, faça transações e acompanhe tudo em um só lugar.</p>
+<div><button onClick="{{ goSignin }}" style="{{ btnP }}"><i class="ph-bold ph-lock-simple"></i>Acessar minha conta<i class="ph-bold ph-arrow-right"></i></button></div>
+</div>
+<div style="{{ featStrip }}">
+<sc-for list="{{ features }}" as="f" hint-placeholder-count="3"><div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:0 14px;color:#10205E"><span style="{{ f.icoStyle }}"><i class="{{ f.icon }}"></i></span><b style="font:700 15px Sora">{{ f.t }}</b><span style="font:400 12px/1.4 Manrope;color:#4B5A8F">{{ f.b }}</span></div></sc-for>
+</div>
+</section>
+<div style="{{ statGrid }}">
+<div style="{{ tile }}"><span style="width:44px;height:44px;border-radius:12px;background:rgba(59,130,246,.18);display:grid;place-items:center;color:#60A5FA;font-size:22px"><i class="ph-bold ph-trend-up"></i></span><div><div style="font:500 13px Manrope;color:var(--cm)">Seu saldo</div><div style="font:700 22px Sora">R$ 4.250,00</div></div></div>
+<div style="{{ tile }}"><span style="width:44px;height:44px;border-radius:50%;background:#10B981;display:grid;place-items:center;color:#fff;font-size:22px"><i class="ph-bold ph-arrow-up"></i></span><div><div style="font:500 13px Manrope;color:var(--cm)">Entradas (30 dias)</div><div style="font:700 22px Sora">R$ 8.420,00</div><div style="font:600 12px Manrope;color:var(--inc)">↑ +12%</div></div></div>
+<div style="{{ tile }}"><span style="width:44px;height:44px;border-radius:50%;background:#EC4899;display:grid;place-items:center;color:#fff;font-size:22px"><i class="ph-bold ph-arrow-down"></i></span><div><div style="font:500 13px Manrope;color:var(--cm)">Saídas (30 dias)</div><div style="font:700 22px Sora">R$ 5.320,00</div><div style="font:600 12px Manrope;color:#F472B6">↑ +8%</div></div></div>
+<div style="{{ tile }}"><span style="width:44px;height:44px;border-radius:12px;background:rgba(34,211,238,.16);display:grid;place-items:center;color:#22D3EE;font-size:22px"><i class="ph-bold ph-bell-ringing"></i></span><div><div style="font:700 14px Sora">Novidade!</div><div style="font:400 12px/1.4 Manrope;color:var(--cm)">Agora você pode recarregar seu celular direto pelo app e site.</div></div></div>
+</div>
+<div style="padding:16px {{ padX }}px;font:400 12px Manrope;color:var(--cm);text-align:center">Ambiente de demonstração · dados de teste. Não é um banco real. “Banco MaisVida” é um nome fictício.</div>
+</div>
+</sc-if>
+
+<!-- SIGN IN -->
+<sc-if value="{{ isSignin }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:800px;display:grid;place-items:center;padding:24px;position:relative;overflow:hidden">
+<div style="position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(59,130,246,.35),transparent 45%),radial-gradient(circle at 85% 80%,rgba(139,92,246,.35),transparent 45%)"></div>
+<div style="{{ signCard }}">
+<span style="{{ logoMarkBig }}"><i class="ph-bold ph-plus"></i></span>
+<h1 style="margin:0;font:700 26px Sora">Bem-vindo de volta</h1>
+<p style="margin:0;color:var(--cm);font:400 15px/1.5 Manrope">Entre para ver seu saldo e movimentar seu dinheiro.</p>
+<sc-if value="{{ signinError }}" hint-placeholder-val="{{ false }}"><div role="alert" style="{{ alertErr }}"><i class="ph-bold ph-warning-circle"></i>Não foi possível entrar. Tente novamente.</div></sc-if>
+<button onClick="{{ doSignin }}" style="{{ btnPFull }}"><sc-if value="{{ redirecting }}" hint-placeholder-val="{{ false }}"><i class="ph-bold ph-spinner" style="animation:spin .8s linear infinite"></i>Redirecionando…</sc-if><sc-if value="{{ notRedirecting }}" hint-placeholder-val="{{ true }}">Entrar</sc-if></button>
+<div style="font:400 13px Manrope;color:var(--cm)"><i class="ph ph-lock-simple"></i> Login seguro via Okta</div>
+<a href="#" onClick="{{ failSignin }}" style="font:400 12px Manrope">Ver estado de erro</a>
+</div></div>
+</sc-if>
+
+<!-- APP -->
+<sc-if value="{{ inApp }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;min-height:900px">
+<sc-if value="{{ showRail }}" hint-placeholder-val="{{ true }}">
+<aside style="{{ railStyle }}">
+<div style="{{ logoRow }};padding:4px 6px 18px"><span style="{{ logoMark }}"><i class="ph-bold ph-plus"></i></span><sc-if value="{{ isDesk }}" hint-placeholder-val="{{ true }}"><span style="line-height:1.05">Banco<br><span style="color:#38BDF8">MaisVida</span></span></sc-if></div>
+<nav aria-label="Principal" style="display:flex;flex-direction:column;gap:4px">
+<sc-for list="{{ navItems }}" as="n" hint-placeholder-count="6"><button onClick="{{ n.go }}" aria-label="{{ n.label }}" style-hover="background:rgba(59,130,246,.14);color:#fff" style="{{ n.style }}"><i class="{{ n.icon }}" style="font-size:21px"></i><sc-if value="{{ isDesk }}" hint-placeholder-val="{{ true }}"><span>{{ n.label }}</span></sc-if></button></sc-for>
+</nav>
+<div style="flex:1"></div>
+<sc-if value="{{ isDesk }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-direction:column;gap:14px">
+<div style="{{ secCard }}"><span style="width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:24px;color:#34D399;background:rgba(16,185,129,.14);border:1px solid rgba(16,185,129,.4)"><i class="ph-fill ph-shield-check"></i></span><b style="font:700 14px/1.3 Sora;text-align:center">Sua segurança em primeiro lugar</b><span style="font:600 12px Manrope;color:#38BDF8">Saiba mais →</span></div>
+<div style="display:flex;gap:10px;align-items:center;padding:10px 6px;color:#C9D3FF"><i class="ph ph-headset" style="font-size:26px;color:#60A5FA"></i><div style="font:400 12px/1.4 Manrope"><b style="color:#fff;font-weight:600">Suporte 24h</b><br>0800 123 4567</div></div>
+</div></sc-if>
+</aside>
+</sc-if>
+
+<div style="flex:1;min-width:0;display:flex;flex-direction:column">
+<header style="{{ topbar }}">
+<sc-if value="{{ isMob }}" hint-placeholder-val="{{ false }}"><div style="{{ logoRow }}"><span style="{{ logoMark }}"><i class="ph-bold ph-plus"></i></span></div></sc-if>
+<sc-if value="{{ showSearch }}" hint-placeholder-val="{{ true }}"><label style="flex:1;max-width:520px;display:flex;align-items:center;gap:10px;height:46px;padding:0 16px;border-radius:14px;background:rgba(18,28,71,.8);border:1px solid var(--ln);color:var(--cm)"><i class="ph ph-magnifying-glass" style="font-size:20px"></i><input placeholder="Buscar por transação, serviço..." aria-label="Buscar" style="flex:1;background:transparent;border:0;color:var(--c);font:500 14px Manrope;outline:none;min-width:0"></label></sc-if>
+<div style="flex:1"></div>
+<button aria-label="Notificações" style="{{ iconBtn }}"><i class="ph ph-bell" style="font-size:22px"></i><span style="position:absolute;top:4px;right:4px;min-width:17px;height:17px;border-radius:9px;background:#EF4444;color:#fff;font:700 10px/17px Manrope;text-align:center">3</span></button>
+<button aria-label="Menu da conta" onClick="{{ toggleMenu }}" style="{{ userBtn }}"><span style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3B82F6,#8B5CF6);display:grid;place-items:center;font:700 13px Sora;color:#fff">DM</span><sc-if value="{{ showSearch }}" hint-placeholder-val="{{ true }}"><span style="font:600 14px Manrope">Dowglas Maia</span></sc-if><i class="ph ph-caret-down"></i></button>
+<sc-if value="{{ menu }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;right:{{ padX }}px;top:68px;z-index:30;background:var(--so);border:1px solid var(--ln);border-radius:14px;padding:8px;width:240px;box-shadow:0 18px 40px rgba(0,0,0,.5)"><div style="padding:8px 12px;font:500 13px/1.5 Manrope;color:var(--cm)">Agência 0001 · Conta 12345-6<br><span style="font-size:11px">Proposto: de GET /accounts/me</span></div><button onClick="{{ askSignout }}" style="{{ menuItem }}"><i class="ph ph-sign-out"></i>Sair</button></div></sc-if>
+</header>
+
+<main style="flex:1;min-width:0;padding:{{ padY }}px {{ padX }}px {{ padB }}px">
+<div style="max-width:1240px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:20px">
+
+<!-- HOME -->
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:20px;animation:fadeUp .5s cubic-bezier(.2,.8,.2,1) both">
+<div style="{{ grid75 }}">
+<section style="{{ heroS }}">
+<div style="position:absolute;right:-60px;top:-60px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(34,211,238,.35),transparent 65%);pointer-events:none"></div>
+<div style="position:relative;z-index:2;display:flex;flex-direction:column;gap:12px;max-width:{{ heroTextW }}px">
+<span style="{{ tagGreen }}"><span style="width:7px;height:7px;border-radius:50%;background:#34D399;box-shadow:0 0 8px #34D399"></span>Conta ativa</span>
+<h2 style="margin:0;font:700 {{ h2Size }}px/1.1 Sora">Olá, Dowglas!</h2>
+<h1 style="margin:0;font:700 {{ h1Size }}px/1.12 Sora;letter-spacing:-.02em">Sua vida <span style="color:#38BDF8">financeira</span> mais simples e <span style="color:#38BDF8">segura</span></h1>
+<p style="margin:0;font:400 15px/1.5 Manrope;color:#C9D3FF">Realize suas transações, acompanhe seus gastos e tenha total controle.</p>
+<div style="margin-top:6px"><button onClick="{{ goPix }}" style="{{ btnP }}">Explorar serviços<i class="ph-bold ph-arrow-right"></i></button></div>
+</div>
+<sc-if value="{{ showPhone }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;right:34px;top:14px;z-index:1;--r:12deg;transform:rotate(12deg);animation:floatY 6s ease-in-out infinite">
+<div style="width:176px;height:350px;border-radius:32px;padding:6px;background:linear-gradient(145deg,#A9B6FF,#3B3F9E 40%,#C7D0FF);box-shadow:0 30px 60px -10px rgba(59,130,246,.75),0 0 90px rgba(99,102,241,.55)">
+<div style="width:100%;height:100%;border-radius:26px;background:radial-gradient(circle at 50% 30%,#3B7BFF,#0B1E8F 55%,#1A0F5C);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative;overflow:hidden">
+<span style="position:absolute;top:9px;width:56px;height:16px;border-radius:10px;background:#050a1c"></span>
+<span style="position:absolute;top:0;bottom:0;width:60px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent);animation:sheen 4s ease-in-out infinite"></span>
+<span style="width:58px;height:58px;border-radius:16px;display:grid;place-items:center;font-size:30px;color:#fff;background:linear-gradient(135deg,#22D3EE,#6366F1);box-shadow:0 10px 30px rgba(34,211,238,.5);margin-bottom:8px"><i class="ph-bold ph-plus"></i></span>
+<b style="font:700 15px Sora;color:#fff">Banco</b><b style="font:700 15px Sora;color:#7DD3FC">MaisVida</b></div></div></div></sc-if>
+</section>
+
+<section style="{{ cardS }}">
+<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><span style="{{ icoPurple }}"><i class="ph-bold ph-device-mobile"></i></span><div style="flex:1;min-width:140px"><div style="font:700 20px Sora">Recarga de Celular</div><div style="font:400 14px Manrope;color:var(--cm)">Rápida, fácil e segura</div></div><span style="{{ tagPurple }}"><i class="ph-fill ph-lightning"></i>Recarga online</span></div>
+<div><div style="font:600 13px Manrope;margin-bottom:8px">Operadora</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"><sc-for list="{{ carriers }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.go }}" aria-pressed="{{ o.on }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div>
+<div><label for="phq" style="font:600 13px Manrope;display:block;margin-bottom:8px">Número do celular</label><div style="position:relative"><i class="ph ph-phone" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--cm);font-size:18px"></i><input id="phq" value="{{ phone }}" onChange="{{ inPhone }}" inputmode="tel" placeholder="(XX) 9 9999-9999" style="{{ inpIcon }}"></div></div>
+<div><div style="font:600 13px Manrope;margin-bottom:8px">Valor da recarga</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"><sc-for list="{{ rechargePresets }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div>
+<button onClick="{{ quickRecharge }}" style="{{ btnPFull }}"><i class="ph-fill ph-lightning"></i>Recarregar agora</button>
+</section>
+</div>
+
+<div style="{{ grid75 }}">
+<section style="{{ cardS }}">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><div style="display:flex;gap:10px;align-items:center;font:700 18px Sora"><i class="ph-fill ph-chart-bar" style="color:#38BDF8;font-size:24px"></i>Seu resumo financeiro</div>
+<div role="group" aria-label="Período" style="display:flex;background:rgba(5,9,30,.6);border:1px solid var(--ln);border-radius:12px;padding:3px;gap:2px"><sc-for list="{{ periodOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div>
+<sc-if value="{{ stLoading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:12px"><div style="{{ skel70 }}"></div><div style="{{ skel180 }}"></div></div></sc-if>
+<sc-if value="{{ stError }}" hint-placeholder-val="{{ false }}"><div role="alert" style="{{ alertErr }};flex-direction:column;align-items:flex-start"><b>Não foi possível carregar seu resumo.</b><span style="font-weight:400;color:var(--cm)">Algo deu errado. Tente novamente. · ID req_7f3a91c2</span><button onClick="{{ setOk }}" style="{{ btnS }}">Tentar novamente</button></div></sc-if>
+<sc-if value="{{ stEmptyHome }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:40px 10px"><b style="font:700 18px Sora">Nenhuma movimentação ainda</b><div style="color:var(--cm);margin:6px 0 18px;font:400 14px Manrope">Faça um depósito para começar.</div><button onClick="{{ goDeposit }}" style="{{ btnP }}">Fazer depósito</button></div></sc-if>
+<sc-if value="{{ stOk }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-direction:column;gap:18px">
+<div style="{{ gridTiles }}">
+<div style="{{ miniTile }}"><span style="width:46px;height:46px;border-radius:50%;background:#10B981;display:grid;place-items:center;color:#fff;font-size:22px;flex:none"><i class="ph-bold ph-arrow-up"></i></span><div><div style="font:500 12px Manrope;color:var(--cm)">Entradas</div><div style="font:700 20px Sora;font-variant-numeric:tabular-nums">{{ inText }}</div></div></div>
+<div style="{{ miniTile }}"><span style="width:46px;height:46px;border-radius:50%;background:#C026D3;display:grid;place-items:center;color:#fff;font-size:22px;flex:none"><i class="ph-bold ph-arrow-down"></i></span><div><div style="font:500 12px Manrope;color:var(--cm)">Saídas</div><div style="font:700 20px Sora;font-variant-numeric:tabular-nums">{{ outText }}</div></div></div>
+<div style="{{ miniTile }}"><span style="width:46px;height:46px;border-radius:14px;background:#2563EB;display:grid;place-items:center;color:#fff;font-size:22px;flex:none"><i class="ph-bold ph-wallet"></i></span><div><div style="font:500 12px Manrope;color:var(--cm);display:flex;gap:6px;align-items:center">Saldo atual<button aria-label="Ocultar ou mostrar valores" onClick="{{ toggleHide }}" style="background:transparent;border:0;color:var(--cm);cursor:pointer;padding:0;font-size:15px"><i class="{{ eyeIcon }}"></i></button></div><div style="font:700 20px Sora;color:#38BDF8;font-variant-numeric:tabular-nums">{{ balText }}</div></div></div>
+</div>
+<div role="img" aria-label="{{ chartAlt }}" style="position:relative;padding-left:34px">
+<div style="position:absolute;left:0;top:0;height:200px;display:flex;flex-direction:column;justify-content:space-between;font:500 11px Manrope;color:var(--cm)"><span>10k</span><span>5k</span><span>0</span></div>
+<svg viewBox="0 0 600 200" preserveAspectRatio="none" style="width:100%;height:200px;display:block;overflow:visible"><defs><linearGradient id="gi" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38BDF8" stop-opacity=".35"></stop><stop offset="1" stop-color="#38BDF8" stop-opacity="0"></stop></linearGradient><linearGradient id="go" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A855F7" stop-opacity=".4"></stop><stop offset="1" stop-color="#A855F7" stop-opacity="0"></stop></linearGradient></defs>
+<line x1="0" y1="0" x2="600" y2="0" stroke="rgba(130,150,255,.14)"></line><line x1="0" y1="100" x2="600" y2="100" stroke="rgba(130,150,255,.14)"></line><line x1="0" y1="200" x2="600" y2="200" stroke="rgba(130,150,255,.14)"></line>
+<path d="{{ areaOut }}" fill="url(#go)"></path><path d="{{ areaIn }}" fill="url(#gi)"></path>
+<path d="{{ lineOut }}" pathLength="1" vector-effect="non-scaling-stroke" style="fill:none;stroke:#A855F7;stroke-width:3;stroke-linecap:round;stroke-dasharray:1;animation:draw 1.6s ease-out both"></path>
+<path d="{{ lineIn }}" pathLength="1" vector-effect="non-scaling-stroke" style="fill:none;stroke:#38BDF8;stroke-width:3;stroke-linecap:round;stroke-dasharray:1;animation:draw 1.6s ease-out both"></path></svg>
+<div style="display:flex;justify-content:space-between;font:500 11px Manrope;color:var(--cm);margin-top:8px"><sc-for list="{{ xLabels }}" as="x" hint-placeholder-count="7"><span>{{ x }}</span></sc-for></div></div>
+<div style="display:flex;justify-content:center;gap:22px;font:500 13px Manrope"><span style="display:flex;gap:8px;align-items:center"><span style="width:10px;height:10px;border-radius:50%;background:#38BDF8"></span>Entradas</span><span style="display:flex;gap:8px;align-items:center"><span style="width:10px;height:10px;border-radius:50%;background:#A855F7"></span>Saídas</span><button onClick="{{ toggleTable }}" style="background:transparent;border:0;color:#60A5FA;font:600 12px Manrope;cursor:pointer">{{ tableLabel }}</button></div>
+<sc-if value="{{ showTable }}" hint-placeholder-val="{{ false }}"><table style="width:100%;border-collapse:collapse;font:400 14px Manrope"><tr style="color:var(--cm);text-align:left"><th style="padding:6px 0;font-weight:500">Série</th><th style="text-align:right;font-weight:500">Valor</th></tr><tr><td style="padding:6px 0">Entradas</td><td style="text-align:right">{{ inText }}</td></tr><tr><td style="padding:6px 0">Saídas</td><td style="text-align:right">{{ outText }}</td></tr></table></sc-if>
+</div></sc-if>
+</section>
+
+<section style="{{ depCard }}">
+<div style="position:absolute;right:-70px;bottom:-70px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(16,185,129,.35),transparent 65%);pointer-events:none"></div>
+<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:relative"><span style="{{ icoGreen }}"><i class="ph-bold ph-bank"></i></span><div style="flex:1;min-width:140px"><div style="font:700 20px Sora">Depósito Digital</div><div style="font:400 14px/1.4 Manrope;color:#A7D9C6">Deposite de forma fácil e receba seu boleto para pagamento</div></div><span style="{{ tagGreen }}"><i class="ph-fill ph-shield-check"></i>100% seguro</span></div>
+<div style="display:flex;gap:18px;align-items:center;position:relative;flex-wrap:wrap">
+<div style="position:relative;width:150px;height:170px;flex:none;margin:0 auto"><span style="position:absolute;inset:14px -6px;border-radius:50%;border:2px solid rgba(52,211,153,.7);transform:rotate(-18deg);box-shadow:0 0 24px rgba(52,211,153,.5)"></span>
+<div style="position:absolute;left:18px;top:6px;width:104px;padding:10px;border-radius:8px;background:linear-gradient(160deg,#F4F7FF,#C9D3F2);color:#0F1B4D;transform:rotate(-9deg);box-shadow:0 18px 30px rgba(0,0,0,.45);animation:floatY 5s ease-in-out infinite;--r:-9deg"><b style="font:800 17px Sora">BOLETO</b><div style="height:4px;border-radius:2px;background:#8D99C4;margin:7px 0 4px"></div><div style="height:4px;width:70%;border-radius:2px;background:#B3BDDF"></div><div style="display:flex;height:34px;margin-top:10px;gap:1.5px"><sc-for list="{{ miniBars }}" as="b" hint-placeholder-count="24"><span style="{{ b }}"></span></sc-for></div></div>
+<span style="position:absolute;right:0;bottom:8px;width:42px;height:42px;border-radius:50%;background:#10B981;display:grid;place-items:center;color:#fff;font-size:22px;box-shadow:0 0 24px #10B981;animation:pop .6s both"><i class="ph-bold ph-check"></i></span></div>
+<div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:10px"><label for="dq" style="font:600 14px Manrope">Informe o valor do depósito</label><div style="position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font:600 16px Sora;color:var(--cm)">R$</span><input id="dq" value="{{ depAmt }}" onChange="{{ inDep }}" inputmode="decimal" style="{{ inpMoneySm }}"></div></div></div>
+<div style="{{ infoBox }}"><i class="ph-fill ph-info" style="color:#60A5FA;font-size:22px"></i>Após a confirmação, você receberá seu boleto para pagamento.</div>
+<sc-if value="{{ depZero }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 13px Manrope;color:var(--exp)"><i class="ph-bold ph-warning-circle"></i> Informe um valor maior que zero.</div></sc-if>
+<button disabled="{{ depDisabled }}" onClick="{{ genBoleto }}" style="{{ btnGreen }}"><i class="ph-fill ph-file-text"></i>Gerar boleto</button>
+</section>
+</div>
+
+<section style="{{ cardS }}">
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="display:flex;gap:10px;align-items:center;font:700 18px Sora"><i class="ph-bold ph-list-bullets" style="color:#38BDF8;font-size:24px"></i>Últimas transações</span><button onClick="{{ goStatement }}" style="{{ linkBtn }}">Ver todas →</button></div>
+<sc-if value="{{ recentHas }}" hint-placeholder-val="{{ true }}"><div>
+<sc-for list="{{ recentRows }}" as="r" hint-placeholder-count="5"><button onClick="{{ r.open }}" style-hover="background:rgba(59,130,246,.08)" style="{{ r.rowStyle }}"><span style="{{ r.icoStyle }}"><i class="{{ r.icon }}"></i></span><div style="flex:1;min-width:0"><div style="font:600 15px Manrope;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.label }}</div><div style="font:400 12px Manrope;color:var(--cm)">{{ r.date }}</div></div><div style="font:700 15px Sora;font-variant-numeric:tabular-nums;color:{{ r.color }}">{{ r.amount }}</div><i class="ph ph-caret-right" style="color:var(--cm)"></i></button></sc-for></div></sc-if>
+<sc-if value="{{ recentNone }}" hint-placeholder-val="{{ false }}"><div style="color:var(--cm);font:400 14px Manrope;padding:20px 0;text-align:center">Nada por aqui ainda.</div></sc-if>
+</section>
+</div>
+</sc-if>
+
+<!-- STATEMENT -->
+<sc-if value="{{ isStatement }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px;animation:fadeUp .45s cubic-bezier(.2,.8,.2,1) both">
+<div><h1 style="margin:0;font:700 30px/1.1 Sora">Transações</h1><div style="font:400 14px Manrope;color:var(--cm);margin-top:4px">Tudo o que entrou e saiu da sua conta.</div></div>
+<div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ periodOpts2 }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div>
+<div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ typeChips }}" as="o" hint-placeholder-count="5"><button onClick="{{ o.go }}" aria-pressed="{{ o.on }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div>
+<sc-if value="{{ stOk }}" hint-placeholder-val="{{ true }}"><div style="{{ gridTiles }}"><div style="{{ tile }}"><div style="font:500 12px Manrope;color:var(--cm)">Entradas</div><div style="font:700 22px Sora;color:var(--inc)">+ {{ inText }}</div></div><div style="{{ tile }}"><div style="font:500 12px Manrope;color:var(--cm)">Saídas</div><div style="font:700 22px Sora;color:var(--exp)">− {{ outText }}</div></div><div style="{{ tile }}"><div style="font:500 12px Manrope;color:var(--cm)">Saldo atual</div><div style="font:700 22px Sora">{{ balFull }}</div></div></div></sc-if>
+<sc-if value="{{ stLoading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:8px"><div style="{{ skel56 }}"></div><div style="{{ skel56 }}"></div><div style="{{ skel56 }}"></div><div style="{{ skel56 }}"></div></div></sc-if>
+<sc-if value="{{ stError }}" hint-placeholder-val="{{ false }}"><div role="alert" style="{{ alertErr }};flex-direction:column;align-items:flex-start"><b>Algo deu errado. Tente novamente.</b><button onClick="{{ setOk }}" style="{{ btnS }}">Tentar novamente</button></div></sc-if>
+<sc-if value="{{ stmtEmpty }}" hint-placeholder-val="{{ false }}"><div style="{{ cardS }};text-align:center;padding:48px 20px"><b style="font:700 18px Sora">Nenhuma transação neste período</b><div style="margin-top:14px"><button onClick="{{ setOk }}" style="{{ btnS }}">Mudar período</button></div></div></sc-if>
+<sc-if value="{{ stmtList }}" hint-placeholder-val="{{ true }}">
+<div style="{{ cardFlat }}">
+<div style="display:flex;align-items:center;gap:8px;padding:12px 18px;border-bottom:1px solid var(--ln);font:500 12px Manrope;color:var(--cm);flex-wrap:wrap"><span style="flex:1">Mostrando {{ rowCount }} de {{ rowCount }}</span><span>Ordenar</span><button onClick="{{ sortDate }}" style="{{ sortStyleD }}">Data {{ dateArrow }}</button><button onClick="{{ sortAmt }}" style="{{ sortStyleA }}">Valor {{ amtArrow }}</button></div>
+<sc-for list="{{ stmtRows }}" as="r" hint-placeholder-count="6"><button onClick="{{ r.open }}" style-hover="background:rgba(59,130,246,.08)" style="{{ r.rowStyle }}"><span style="{{ r.icoStyle }}"><i class="{{ r.icon }}"></i></span><div style="flex:1;min-width:0"><div style="font:600 15px Manrope;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.label }}</div><div style="font:400 12px Manrope;color:var(--cm)">{{ r.date }}</div></div><div style="font:700 15px Sora;font-variant-numeric:tabular-nums;color:{{ r.color }}">{{ r.amount }}</div><i class="ph ph-caret-right" style="color:var(--cm)"></i></button></sc-for>
+</div>
+<div style="font:400 12px Manrope;color:var(--cm);display:flex;gap:8px;align-items:center"><span style="{{ tagProposed }}">Proposto</span>Abrir detalhe exige id da transação (aprovado, D-22).</div>
+</sc-if>
+</div>
+</sc-if>
+
+<!-- DETAIL -->
+<sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px;max-width:600px;animation:fadeUp .45s both">
+<div style="font:400 14px Manrope;color:var(--cm)"><button onClick="{{ goStatement }}" style="{{ linkBtn }}">Transações</button> › Detalhe</div>
+<div style="{{ cardS }}">
+<div style="display:flex;align-items:center;gap:14px"><span style="{{ det.icoStyle }}"><i class="{{ det.icon }}"></i></span><div style="font:700 18px Sora">{{ det.label }}</div></div>
+<div style="font:700 42px Sora;font-variant-numeric:tabular-nums;color:{{ det.color }}">{{ det.amount }}</div>
+<div style="font:400 15px Manrope;color:var(--cm)">{{ det.date }}</div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="{{ tagGreen }}"><i class="ph-bold ph-check"></i>Registrada</span><span style="font:400 13px 'SF Mono',monospace;color:var(--cm)">{{ det.id }}</span><button onClick="{{ copyId }}" aria-label="Copiar id" style="{{ iconBtn }}"><i class="ph ph-copy"></i></button></div>
+</div>
+<button onClick="{{ goStatement }}" style="{{ btnS }};align-self:flex-start">Voltar às transações</button>
+</div>
+</sc-if>
+
+<!-- PIX -->
+<sc-if value="{{ isPix }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:20px;animation:fadeUp .45s both">
+<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><span style="{{ icoCyan }}"><i class="ph-bold ph-diamonds-four"></i></span><div><h1 style="margin:0;font:700 30px/1.1 Sora">Enviar Pix</h1><div style="font:400 14px Manrope;color:var(--cm);margin-top:4px">Transferência na hora, com chave Pix</div></div><div style="{{ balPill }}"><span style="font:700 10px Manrope;color:var(--cm);text-transform:uppercase;letter-spacing:.08em">Saldo disponível</span><b style="font:700 18px Sora;font-variant-numeric:tabular-nums">{{ balFull }}</b></div></div>
+<div style="{{ gridSide }}">
+<sc-if value="{{ showSide }}" hint-placeholder-val="{{ true }}"><section style="{{ cardS }};overflow:hidden;position:relative;min-height:420px">
+<sc-for list="{{ pixSteps }}" as="s" hint-placeholder-count="3"><div style="display:flex;gap:12px;align-items:center;font:600 14px Manrope;color:{{ s.color }}"><span style="{{ s.dot }}">{{ s.n }}</span>{{ s.t }}</div></sc-for>
+<div style="position:absolute;left:50%;bottom:-30px;margin-left:-70px;--r:-8deg;transform:rotate(-8deg);animation:floatY 6s ease-in-out infinite"><div style="width:140px;height:250px;border-radius:28px;padding:5px;background:linear-gradient(145deg,#A9B6FF,#3B3F9E 40%,#C7D0FF);box-shadow:0 30px 60px -10px rgba(59,130,246,.7),0 0 70px rgba(34,211,238,.4)"><div style="width:100%;height:100%;border-radius:23px;background:radial-gradient(circle at 50% 35%,#1E6BFF,#0B1E8F 60%,#1A0F5C);display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:50px;box-sizing:border-box"><i class="ph-fill ph-diamonds-four" style="font-size:44px;color:#34E3D0;filter:drop-shadow(0 0 12px #34E3D0)"></i><b style="font:600 20px Sora;color:#fff;letter-spacing:.04em">PIX</b></div></div></div>
+</section></sc-if>
+<section style="{{ cardS }}">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div style="font:600 13px Manrope;color:var(--cm)">Etapa {{ pixStep }} de 3 · {{ pixStepName }}</div><span style="font:600 12px Manrope;color:#34D399"><i class="ph-fill ph-shield-check"></i> Seguro e protegido</span></div>
+<div style="display:flex;gap:6px"><sc-for list="{{ stepBars }}" as="b" hint-placeholder-count="3"><span style="flex:1;height:5px;border-radius:3px;background:{{ b }};transition:background .4s"></span></sc-for></div>
+<sc-if value="{{ pix1 }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-direction:column;gap:16px;animation:fadeUp .35s both">
+<div role="group" aria-label="Tipo de chave" style="display:flex;background:rgba(5,9,30,.6);border:1px solid var(--ln);border-radius:12px;padding:3px;gap:2px"><sc-for list="{{ keyTypes }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div>
+<div><label for="pk" style="font:700 15px Sora;display:block;margin-bottom:8px">Quem vai receber?</label><input id="pk" value="{{ pixKey }}" onChange="{{ inKey }}" placeholder="{{ keyPlaceholder }}" inputmode="{{ keyMode }}" style="{{ inpKey }}"><sc-if value="{{ keyErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 13px Manrope;color:var(--exp);margin-top:6px"><i class="ph-bold ph-warning-circle"></i> {{ keyErrText }}</div></sc-if><div style="font:400 13px Manrope;color:var(--cm);margin-top:6px">Confira a chave com quem vai receber. {{ keyDemo }}</div></div>
+<button disabled="{{ keyDisabled }}" onClick="{{ pixNext1 }}" style="{{ btnNext1 }}">Continuar</button></div></sc-if>
+<sc-if value="{{ pix2 }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:14px;animation:fadeUp .35s both">
+<label for="pa" style="font:700 15px Sora">Valor</label>
+<div style="position:relative"><span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font:600 22px Sora;color:var(--cm)">R$</span><input id="pa" value="{{ amount }}" onChange="{{ inAmount }}" placeholder="0,00" inputmode="decimal" style="{{ inpMoney }}"></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ pixPresets }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for><button onClick="{{ useAll }}" style="{{ chipBtn }}">Usar saldo total</button></div>
+<div style="font:400 13px Manrope;color:var(--cm)">Saldo disponível <b style="color:var(--c)">{{ balFull }}</b></div>
+<sc-if value="{{ overBal }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 13px Manrope;color:#FBBF24"><i class="ph-bold ph-warning"></i> O valor não pode ser maior que o saldo disponível.</div></sc-if>
+<sc-if value="{{ zeroErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 13px Manrope;color:var(--exp)"><i class="ph-bold ph-warning-circle"></i> Informe um valor maior que zero.</div></sc-if>
+<div style="display:flex;gap:10px"><button onClick="{{ pixBack }}" style="{{ btnS }}">Voltar</button><button disabled="{{ amtDisabled }}" onClick="{{ pixNext2 }}" style="{{ btnNext2 }}">Revisar</button></div></div></sc-if>
+<sc-if value="{{ pix3 }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:14px;animation:fadeUp .35s both">
+<sc-if value="{{ pixFieldErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="{{ alertErr }}"><i class="ph-bold ph-warning-circle"></i>{{ pixFieldErr }}</div></sc-if>
+<div style="{{ receipt }}"><sc-for list="{{ reviewLines }}" as="l" hint-placeholder-count="4"><div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;font:400 15px Manrope"><span style="color:var(--cm)">{{ l.k }}</span><span style="font-weight:700;font-variant-numeric:tabular-nums">{{ l.v }}</span></div></sc-for></div>
+<div style="display:flex;gap:10px"><button onClick="{{ pixBack }}" style="{{ btnS }}">Voltar</button><button onClick="{{ confirmPix }}" style="{{ btnConfirm }}"><sc-if value="{{ pending }}" hint-placeholder-val="{{ false }}"><i class="ph-bold ph-spinner" style="animation:spin .8s linear infinite"></i></sc-if><i class="ph-fill ph-paper-plane-tilt"></i>Confirmar e enviar</button></div></div></sc-if>
+</section></div></div>
+</sc-if>
+
+<!-- DEPOSIT -->
+<sc-if value="{{ isDeposit }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:20px;animation:fadeUp .45s both">
+<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><span style="{{ icoGreen }}"><i class="ph-bold ph-barcode"></i></span><div><h1 style="margin:0;font:700 30px/1.1 Sora">Depósito Digital</h1><div style="font:400 14px Manrope;color:var(--cm);margin-top:4px">Faça seu depósito online e receba o boleto para pagamento</div></div></div>
+<div style="{{ gridTwo }}">
+<section style="{{ cardS }}">
+<div style="{{ infoBox }}"><i class="ph-fill ph-info" style="color:#60A5FA;font-size:22px"></i>O depósito é processado em tempo real após a confirmação do pagamento.</div>
+<div><label for="da" style="font:600 14px Manrope;display:block;margin-bottom:8px">Valor do depósito</label><div style="position:relative"><span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font:600 22px Sora;color:var(--cm)">R$</span><input id="da" value="{{ depAmt }}" onChange="{{ inDep }}" inputmode="decimal" placeholder="0,00" style="{{ inpMoney }}"></div>
+<sc-if value="{{ depZero }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 13px Manrope;color:var(--exp);margin-top:6px"><i class="ph-bold ph-warning-circle"></i> Informe um valor maior que zero.</div></sc-if></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ depPresets }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div>
+<button disabled="{{ depDisabled }}" onClick="{{ genBoleto }}" style="{{ btnP }}"><i class="ph-bold ph-barcode"></i>Gerar boleto</button>
+<span style="{{ tagProposed }}">Proposto · demo no cliente</span>
+</section>
+<section style="{{ boletoCard }}">
+<div style="font:700 16px Sora;text-align:center">Seu boleto</div>
+<div style="background:#fff;color:#0F1B4D;border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 24px 50px -16px rgba(0,0,0,.6);position:relative;overflow:hidden">
+<sc-if value="{{ hasBoleto }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;right:14px;top:14px;display:inline-flex;gap:6px;align-items:center;font:700 11px Manrope;padding:4px 10px;border-radius:999px;background:#FEF3C7;color:#92400E"><span style="width:7px;height:7px;border-radius:50%;background:#D97706;animation:twinkle 1.4s infinite"></span>Aguardando pagamento</span></sc-if>
+<div style="display:flex;height:70px;align-items:stretch;overflow:hidden;opacity:{{ boletoOpacity }}"><sc-for list="{{ bol.bars }}" as="x" hint-placeholder-count="48"><span style="{{ x }}"></span></sc-for></div>
+<div style="text-align:center"><div style="font:800 28px Sora;font-variant-numeric:tabular-nums">{{ bol.amount }}</div><div style="font:600 13px Manrope;color:#4B5A8F;margin-top:2px">Vencimento: {{ bol.due }}</div></div>
+<sc-if value="{{ hasBoleto }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px;border-top:2px dashed #CBD5F0;padding-top:12px"><sc-for list="{{ bol.fields }}" as="x" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;gap:10px;font:500 13px Manrope"><span style="color:#4B5A8F">{{ x.k }}</span><b>{{ x.v }}</b></div></sc-for><div style="font:500 12px 'SF Mono',monospace;word-break:break-all;color:#334;line-height:1.6">{{ bol.line }}</div></div></sc-if>
+</div>
+<sc-if value="{{ hasBoleto }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px"><button onClick="{{ copyLine }}" style="{{ btnS }}"><i class="ph ph-download-simple"></i>Baixar boleto</button><button onClick="{{ copyLine }}" style="{{ btnS }}"><i class="ph ph-share-network"></i>Compartilhar</button><button onClick="{{ payBoleto }}" style="{{ btnGreen }}"><sc-if value="{{ pending }}" hint-placeholder-val="{{ false }}"><i class="ph-bold ph-spinner" style="animation:spin .8s linear infinite"></i></sc-if>Simular pagamento</button><button onClick="{{ backBoleto }}" style="{{ btnGhost }}">Novo valor</button><div style="font:400 12px Manrope;color:var(--cm);text-align:center">Demonstração. Este não é um boleto real.</div></div></sc-if>
+<sc-if value="{{ noBoleto }}" hint-placeholder-val="{{ true }}"><div style="font:400 13px/1.5 Manrope;color:var(--cm);text-align:center">Prévia. O código de barras e os dados reais aparecem depois de gerar o boleto.</div></sc-if>
+</section></div></div>
+</sc-if>
+
+<!-- RECHARGE -->
+<sc-if value="{{ isRecharge }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:20px;animation:fadeUp .45s both">
+<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><span style="{{ icoPurple }}"><i class="ph-bold ph-device-mobile"></i></span><div><h1 style="margin:0;font:700 30px/1.1 Sora">Recarga de Celular</h1><div style="font:400 14px Manrope;color:var(--cm);margin-top:4px">Rápida, fácil e segura</div></div><div style="{{ balPill }}"><span style="font:700 10px Manrope;color:var(--cm);text-transform:uppercase;letter-spacing:.08em">Saldo disponível</span><b style="font:700 18px Sora;font-variant-numeric:tabular-nums">{{ balFull }}</b></div></div>
+<div style="{{ gridTwo }}">
+<section style="{{ cardS }}">
+<div><div style="font:600 14px Manrope;margin-bottom:8px">Operadora</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"><sc-for list="{{ carriers }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.go }}" aria-pressed="{{ o.on }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div>
+<div><label for="ph" style="font:600 14px Manrope;display:block;margin-bottom:8px">Número do celular</label><div style="position:relative"><i class="ph ph-phone" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--cm);font-size:18px"></i><input id="ph" value="{{ phone }}" onChange="{{ inPhone }}" inputmode="tel" placeholder="(XX) 9 9999-9999" style="{{ inpIcon }}"></div><sc-if value="{{ phoneErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 13px Manrope;color:var(--exp);margin-top:6px"><i class="ph-bold ph-warning-circle"></i> Confira o número do celular.</div></sc-if></div>
+<div><div style="font:600 14px Manrope;margin-bottom:8px">Selecione o valor</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><sc-for list="{{ rechargePresets }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for><span style="{{ tagProposed }}">Valores propostos</span></div>
+<div style="position:relative"><span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font:600 22px Sora;color:var(--cm)">R$</span><input value="{{ amount }}" aria-label="Valor da recarga" onChange="{{ inAmount }}" placeholder="0,00" inputmode="decimal" style="{{ inpMoney }}"></div>
+<div style="font:400 13px Manrope;color:var(--cm);margin-top:8px">Saldo disponível <b style="color:var(--c)">{{ balFull }}</b></div>
+<sc-if value="{{ overBal }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 13px Manrope;color:#FBBF24;margin-top:6px"><i class="ph-bold ph-warning"></i> O valor não pode ser maior que o saldo disponível.</div></sc-if>
+<sc-if value="{{ zeroErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 13px Manrope;color:var(--exp);margin-top:6px"><i class="ph-bold ph-warning-circle"></i> Informe um valor maior que zero.</div></sc-if></div>
+<button disabled="{{ recDisabled }}" onClick="{{ openReview }}" style="{{ btnRec }}"><i class="ph-fill ph-lightning"></i>Recarregar agora</button>
+</section>
+<section style="{{ artPanel }}"><div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 38%,rgba(34,211,238,.35),transparent 55%);pointer-events:none"></div>
+<div style="position:relative;--r:8deg;transform:rotate(8deg);animation:floatY 6s ease-in-out infinite"><div style="width:190px;height:360px;border-radius:34px;padding:6px;background:linear-gradient(145deg,#A9B6FF,#3B3F9E 40%,#C7D0FF);box-shadow:0 40px 80px -12px rgba(59,130,246,.8),0 0 100px rgba(99,102,241,.6)"><div style="width:100%;height:100%;border-radius:28px;background:radial-gradient(circle at 50% 35%,#2F7BFF,#0B1E8F 60%,#1A0F5C);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;position:relative;overflow:hidden"><span style="position:absolute;top:10px;width:60px;height:17px;border-radius:10px;background:#050a1c"></span><i class="ph-bold ph-wifi-high" style="font-size:78px;color:#7DD3FC;filter:drop-shadow(0 0 16px #38BDF8)"></i><span style="width:46px;height:46px;border-radius:50%;background:#10B981;display:grid;place-items:center;color:#fff;font-size:24px;box-shadow:0 0 24px #10B981"><i class="ph-bold ph-check"></i></span></div></div></div>
+<div style="position:relative;text-align:center;display:flex;flex-direction:column;gap:6px"><b style="font:700 20px Sora">Crédito em segundos</b><span style="font:400 14px/1.5 Manrope;color:#C9D3FF">Seu saldo de recarga é creditado logo após a confirmação.</span></div>
+</section></div></div>
+</sc-if>
+
+<!-- WITHDRAW -->
+<sc-if value="{{ isWithdraw }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:20px;animation:fadeUp .45s both">
+<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><span style="{{ icoAmber }}"><i class="ph-bold ph-money"></i></span><div><h1 style="margin:0;font:700 30px/1.1 Sora">Saque</h1><div style="font:400 14px Manrope;color:var(--cm);margin-top:4px">Dinheiro da sua própria conta</div></div><div style="{{ balPill }}"><span style="font:700 10px Manrope;color:var(--cm);text-transform:uppercase;letter-spacing:.08em">Saldo disponível</span><b style="font:700 18px Sora;font-variant-numeric:tabular-nums">{{ balFull }}</b></div></div>
+<div style="{{ gridTwo }}">
+<section style="{{ cardS }}">
+<div style="{{ infoBox }}"><i class="ph-fill ph-info" style="color:#60A5FA;font-size:22px"></i>Saques são feitos da sua própria conta.</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ wdPresets }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for><button onClick="{{ useAll }}" style="{{ chipBtn }}">Usar saldo total</button><span style="{{ tagProposed }}">Valores propostos</span></div>
+<div><label for="wa" style="font:600 14px Manrope;display:block;margin-bottom:8px">Valor do saque</label><div style="position:relative"><span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font:600 22px Sora;color:var(--cm)">R$</span><input id="wa" value="{{ amount }}" onChange="{{ inAmount }}" placeholder="0,00" inputmode="decimal" style="{{ inpMoney }}"></div>
+<div style="font:400 13px Manrope;color:var(--cm);margin-top:8px">Saldo disponível <b style="color:var(--c)">{{ balFull }}</b></div>
+<sc-if value="{{ overBal }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 13px Manrope;color:#FBBF24;margin-top:6px"><i class="ph-bold ph-warning"></i> O valor não pode ser maior que o saldo disponível.</div></sc-if>
+<sc-if value="{{ zeroErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 13px Manrope;color:var(--exp);margin-top:6px"><i class="ph-bold ph-warning-circle"></i> Informe um valor maior que zero.</div></sc-if></div>
+<button disabled="{{ amtDisabled }}" onClick="{{ openReview }}" style="{{ btnWd }}">Revisar saque</button>
+</section>
+<section style="{{ artPanel }}"><div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(251,191,36,.28),transparent 55%);pointer-events:none"></div>
+<div style="position:relative;width:240px;height:240px;display:grid;place-items:center"><span style="position:absolute;inset:0;border-radius:50%;border:2px dashed rgba(251,191,36,.5);animation:orbit 24s linear infinite"></span><span style="position:absolute;inset:30px;border-radius:50%;border:1px solid rgba(251,191,36,.35)"></span><span style="width:120px;height:120px;border-radius:50%;display:grid;place-items:center;font-size:58px;color:#FDE68A;background:radial-gradient(circle,#B45309,#78350F);box-shadow:0 0 60px rgba(251,191,36,.55)"><i class="ph-fill ph-hand-coins"></i></span></div>
+<div style="position:relative;text-align:center;display:flex;flex-direction:column;gap:6px"><b style="font:700 20px Sora">Seu dinheiro, na sua mão</b><span style="font:400 14px/1.5 Manrope;color:#C9D3FF">Revise o valor antes de confirmar. Nada é feito sem o seu clique.</span></div></section></div></div>
+</sc-if>
+
+<!-- RESULT -->
+<sc-if value="{{ isResult }}" hint-placeholder-val="{{ false }}">
+<div style="max-width:580px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:18px" role="status">
+<div style="{{ cardS }};align-items:center;text-align:center;padding:36px 22px">
+<span style="position:relative;display:grid;place-items:center"><span style="{{ ringStyle }}"></span><span style="{{ resIcon }}"><i class="{{ res.icon }}"></i></span></span>
+<h1 style="margin:0;font:700 26px Sora">{{ res.title }}</h1>
+<div style="font:400 15px/1.5 Manrope;color:var(--cm);max-width:400px">{{ res.body }}</div>
+<sc-if value="{{ res.hasLines }}" hint-placeholder-val="{{ true }}"><div style="{{ receipt }};width:100%;box-sizing:border-box;text-align:left"><sc-for list="{{ res.lines }}" as="l" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;font:400 15px Manrope"><span style="color:var(--cm)">{{ l.k }}</span><span style="font-weight:700;font-variant-numeric:tabular-nums">{{ l.v }}</span></div></sc-for></div></sc-if>
+<sc-if value="{{ res.ok }}" hint-placeholder-val="{{ true }}"><div style="font:400 12px Manrope;color:var(--cm)">Registrado neste dispositivo às {{ res.time }}</div></sc-if>
+<sc-if value="{{ res.details }}" hint-placeholder-val="{{ false }}"><div style="font:400 12px 'SF Mono',monospace;color:var(--cm)">Detalhes: {{ res.details }}</div></sc-if>
+</div>
+<sc-if value="{{ res.ok }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-direction:column;gap:10px"><button onClick="{{ goStatement }}" style="{{ btnP }}">Ver transações</button><button onClick="{{ newOp }}" style="{{ btnS }}">{{ res.newLabel }}</button><button onClick="{{ goHome }}" style="{{ btnGhost }}">Voltar ao início</button></div></sc-if>
+<sc-if value="{{ res.fail }}" hint-placeholder-val="{{ false }}"><button onClick="{{ editTry }}" style="{{ btnP }}">Editar e tentar de novo</button></sc-if>
+<sc-if value="{{ res.unc }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px"><button onClick="{{ goStatement }}" style="{{ btnP }}">Abrir transações</button><button onClick="{{ goHome }}" style="{{ btnS }}">Voltar</button></div></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSys }}" hint-placeholder-val="{{ false }}"><div style="{{ cardS }};max-width:480px;margin:40px auto;text-align:center;align-items:center"><i class="ph ph-compass" style="font-size:36px;color:#38BDF8"></i><h1 style="margin:0;font:700 22px Sora">Página não encontrada</h1><div style="color:var(--cm);font:400 15px Manrope">Esta página não existe.</div><button onClick="{{ goHome }}" style="{{ btnP }}">Voltar ao início</button></div></sc-if>
+</div>
+</main>
+
+<sc-if value="{{ isMob }}" hint-placeholder-val="{{ false }}"><nav aria-label="Principal" style="position:sticky;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);background:rgba(7,12,38,.95);backdrop-filter:blur(14px);border-top:1px solid var(--ln);z-index:10"><sc-for list="{{ bottomItems }}" as="n" hint-placeholder-count="4"><button onClick="{{ n.go }}" style="{{ n.style }}"><i class="{{ n.icon }}" style="font-size:22px"></i>{{ n.label }}</button></sc-for></nav></sc-if>
+</div>
+</div>
+</sc-if>
+
+<!-- OVERLAYS -->
+<sc-if value="{{ more }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;inset:0;background:rgba(2,4,16,.7);z-index:90;display:flex;align-items:flex-end;justify-content:center" onClick="{{ closeAll }}"><div style="width:100%;max-width:420px;background:var(--so);border-radius:20px 20px 0 0;padding:16px;display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--ln)" onClick="{{ stop }}"><div style="width:40px;height:4px;border-radius:2px;background:var(--li);margin:0 auto 10px"></div><sc-for list="{{ moreItems }}" as="n" hint-placeholder-count="4"><button onClick="{{ n.go }}" style="{{ menuItem }};height:52px"><i class="{{ n.icon }}" style="font-size:20px"></i>{{ n.label }}</button></sc-for></div></div></sc-if>
+<sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;inset:0;background:rgba(2,4,16,.72);z-index:90;display:grid;place-items:center;padding:16px"><div role="dialog" aria-modal="true" style="width:100%;max-width:440px;background:var(--so);border:1px solid var(--ln);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px;box-shadow:0 30px 80px rgba(0,0,0,.6);animation:pop .3s both"><h2 style="margin:0;font:700 20px Sora">Revisar {{ opLabel }}</h2><div style="{{ receipt }}"><sc-for list="{{ reviewLines }}" as="l" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;font:400 15px Manrope"><span style="color:var(--cm)">{{ l.k }}</span><span style="font-weight:700;font-variant-numeric:tabular-nums">{{ l.v }}</span></div></sc-for></div><div style="display:flex;gap:10px;justify-content:flex-end"><button onClick="{{ closeAll }}" style="{{ btnS }}">Voltar</button><button onClick="{{ confirmOp }}" style="{{ btnConfirm }}"><sc-if value="{{ pending }}" hint-placeholder-val="{{ false }}"><i class="ph-bold ph-spinner" style="animation:spin .8s linear infinite"></i></sc-if>Confirmar</button></div></div></div></sc-if>
+<sc-if value="{{ isSignout }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;inset:0;background:rgba(2,4,16,.72);z-index:90;display:grid;place-items:center;padding:16px"><div role="dialog" aria-modal="true" style="width:100%;max-width:400px;background:var(--so);border:1px solid var(--ln);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px"><h2 style="margin:0;font:700 20px Sora">Sair do Banco MaisVida?</h2><div style="display:flex;gap:10px;justify-content:flex-end"><button onClick="{{ closeAll }}" style="{{ btnS }}">Cancelar</button><button onClick="{{ doSignout }}" style="{{ btnP }}">Sair</button></div></div></div></sc-if>
+<sc-if value="{{ isExpired }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;inset:0;background:rgba(2,4,16,.72);z-index:90;display:grid;place-items:center;padding:16px"><div role="alertdialog" aria-modal="true" style="width:100%;max-width:400px;background:var(--so);border:1px solid var(--ln);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:12px"><h2 style="margin:0;font:700 20px Sora">Sessão expirada</h2><div style="color:var(--cm);font:400 15px/1.5 Manrope">Sua sessão expirou. Entre de novo para continuar. O que você digitou foi mantido.</div><div style="display:flex;justify-content:flex-end"><button onClick="{{ closeAll }}" style="{{ btnP }}">Entrar</button></div></div></div></sc-if>
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}"><div role="status" style="position:fixed;left:50%;bottom:{{ toastBottom }}px;transform:translateX(-50%);z-index:100;background:var(--so);border:1px solid var(--li);border-radius:12px;padding:12px 18px;font:600 14px Manrope;box-shadow:0 14px 34px rgba(0,0,0,.5);color:var(--c)">{{ toast }}</div></sc-if>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { screen:'landing', bp:'desktop', period:30, filter:'ALL', sortBy:'date', sortDir:-1, data:'ok', sim:'success', pixStep:1, keyType:'cpf', pixKey:'', amount:'', depAmt:'150,00', carrier:'VIVO', phone:'', dialog:null, more:false, menu:false, pending:false, res:null, hide:false, showTable:false, detail:null, toast:null, bal:0, redirecting:false, signinError:false, phoneErr:false, pixFieldErr:'', boleto:null, lastOp:'pix' };
+  BAL = 4250;
+  TX = [['PIX',850,0,'Maria Silva','14:32'],['PIX',-320,1,'João Santos','16:10'],['PHONE_RECHARGE',-30,1,'Vivo','18:45'],['DEPOSIT',1800,2,'Boleto','09:12'],['WITHDRAW',-200,4,'','11:08'],['PIX',-230.5,6,'Mercado Extra','12:20'],['DEPOSIT',3200,12,'Boleto','15:40'],['PIX',-640,15,'Ana Costa','10:05'],['PHONE_RECHARGE',-50,21,'Claro','19:22'],['DEPOSIT',2500,27,'Boleto','08:50'],['PIX',1200,38,'Carlos Lima','13:15'],['WITHDRAW',-500,52,'','17:30'],['DEPOSIT',950,64,'Boleto','09:45']].map((a,i)=>({id:'TX-'+String(i+1).padStart(6,'0')+'-9F2',type:a[0],amt:a[1],ago:a[2],who:a[3],time:a[4]}));
+  fmt(n){ return 'R$ '+Math.abs(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  num(n){ return Math.abs(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  parse(s){ const v=parseFloat(String(s||'').replace(/\./g,'').replace(',','.')); return isNaN(v)?0:v; }
+  amtNum(){ return this.parse(this.state.amount); }
+  dstr(t){ if(t.ago===0) return 'Hoje, '+t.time; if(t.ago===1) return 'Ontem, '+t.time; const d=new Date(2026,10,3-t.ago); return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear()+', '+t.time; }
+  tlabel(t){ const b={DEPOSIT:'Depósito',PHONE_RECHARGE:'Recarga de celular',WITHDRAW:'Saque'}[t.type]||(t.amt>0?'Pix recebido':'Pix enviado'); return b+(t.who&&t.type!=='DEPOSIT'?' – '+t.who:''); }
+  ticon(t){ return {DEPOSIT:'ph-bold ph-bank',PIX:'ph-bold ph-diamonds-four',PHONE_RECHARGE:'ph-bold ph-device-mobile',WITHDRAW:'ph-bold ph-money'}[t.type]; }
+  tcolor(t){ return {DEPOSIT:['#10B981','rgba(16,185,129,.16)'],PIX:['#22D3EE','rgba(34,211,238,.16)'],PHONE_RECHARGE:['#A78BFA','rgba(139,92,246,.18)'],WITHDRAW:['#FBBF24','rgba(251,191,36,.16)']}[t.type]; }
+  vm(t,open){ const c=this.tcolor(t), inc=t.amt>0; return {id:t.id,label:this.tlabel(t),icon:this.ticon(t),color:inc?'#34D399':'#FF6B8A',amount:(inc?'+ ':'− ')+this.fmt(t.amt),date:this.dstr(t),open:open||(()=>{}),icoStyle:{width:'42px',height:'42px',borderRadius:'12px',background:c[1],color:c[0],display:'grid',placeItems:'center',fontSize:'20px',flex:'none'},rowStyle:{display:'flex',width:'100%',alignItems:'center',gap:'14px',padding:'13px 18px',border:0,borderTop:'1px solid var(--ln)',background:'transparent',color:'var(--c)',textAlign:'left',cursor:'pointer',fontFamily:'Manrope'}}; }
+  rows(){ const {period,filter,sortBy,sortDir}=this.state; let r=this.TX.filter(t=>t.ago<=period&&(filter==='ALL'||t.type===filter)); return [...r].sort((a,b)=>sortBy==='date'?(sortDir<0?a.ago-b.ago:b.ago-a.ago):(a.amt-b.amt)*sortDir); }
+  mask(t,v){ const d=v.replace(/\D/g,''); if(t==='cpf'){ return d.slice(0,11).replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})\.(\d{3})(\d)/,'$1.$2.$3').replace(/(\d{3})\.(\d{3})\.(\d{3})(\d)/,'$1.$2.$3-$4'); } if(t==='phone') return this.pmask(v); return v; }
+  pmask(v){ const d=v.replace(/\D/g,'').slice(0,11); if(d.length<3) return d; if(d.length<8) return '('+d.slice(0,2)+') '+d.slice(2); return '('+d.slice(0,2)+') '+d.slice(2,3)+' '+d.slice(3,7)+(d.length>7?'-'+d.slice(7):''); }
+  cpfOk(s){ const d=s.replace(/\D/g,''); if(d.length!==11||/^(\d)\1+$/.test(d))return false; const c=n=>{let t=0;for(let i=0;i<n;i++)t+=+d[i]*(n+1-i);const r=(t*10)%11;return r===10?0:r;}; return c(9)===+d[9]&&c(10)===+d[10]; }
+  keyOk(){ const {keyType:t,pixKey:k}=this.state; if(t==='cpf')return this.cpfOk(k); if(t==='email')return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(k); const d=k.replace(/\D/g,''); return d.length===11&&d[2]==='9'; }
+  opOf(){ const s=this.state; return s.screen==='home'?'recharge':s.screen==='result'?s.lastOp:s.screen; }
+  opLabel(){ return {pix:'Pix',deposit:'depósito',recharge:'recarga',withdraw:'saque'}[this.opOf()]||'operação'; }
+  reviewLines(){ const s=this.state, op=this.opOf(); const a=this.fmt(op==='deposit'&&s.boleto?s.boleto.v:this.amtNum()); if(op==='pix'){ const raw=s.pixKey,k=s.keyType; const shown=k==='cpf'?'•••.'+raw.slice(4,7)+'.•••-'+raw.slice(-2):k==='phone'?raw.slice(0,6)+' ••••-'+raw.slice(-4):raw; return [{k:'Tipo de chave',v:{cpf:'CPF',email:'E-mail',phone:'Celular'}[k]},{k:'Chave',v:shown},{k:'Valor',v:a},{k:'De',v:'Sua conta'}]; } if(op==='deposit') return [{k:'Forma',v:'Boleto'},{k:'Valor',v:a}]; if(op==='recharge') return [{k:'Operadora',v:s.carrier},{k:'Celular',v:s.phone},{k:'Valor',v:a}]; return [{k:'Valor',v:a},{k:'De',v:'Sua conta'}]; }
+  submit(){ const op=this.opOf(), lines=this.reviewLines(); this.setState({pending:true}); setTimeout(()=>{ const n=new Date(), time=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'), sim=this.state.sim;
+    if(sim==='business'&&op!=='deposit'){ if(op==='pix'){ this.setState({pending:false,pixFieldErr:'Não foi possível enviar este Pix. Seu saldo não foi alterado.'}); return; } if(op==='recharge'){ this.setState({pending:false,dialog:null,screen:'recharge',phoneErr:true}); return; } this.setState({pending:false,dialog:null,screen:'result',lastOp:op,res:{fail:true,icon:'ph-bold ph-x',title:'Não foi possível concluir',body:'O valor não pode ser maior que o saldo disponível.',details:'Operação não realizada: saldo insuficiente.',lines,hasLines:true}}); return; }
+    if(sim==='uncertain'){ this.setState({pending:false,dialog:null,screen:'result',lastOp:op,res:{unc:true,icon:'ph-bold ph-warning',title:'Não conseguimos confirmar a operação',body:'Confira suas transações antes de tentar de novo, para não pagar duas vezes.',lines:[],hasLines:false}}); return; }
+    const T={pix:['Pix enviado','Seu Pix foi enviado.','Novo Pix'],deposit:['Depósito registrado','O depósito foi registrado.','Novo depósito'],recharge:['Recarga solicitada','Sua operadora aplicará o crédito em instantes.','Nova recarga'],withdraw:['Saque registrado','O saque foi registrado.','Novo saque']}[op];
+    this.setState({pending:false,dialog:null,screen:'result',lastOp:op,boleto:op==='deposit'?null:this.state.boleto,res:{ok:true,icon:'ph-bold ph-check',title:T[0],body:T[1],newLabel:T[2],time,lines:lines.filter(l=>l.k!=='De'),hasLines:true}}); },900); }
+  go = (s) => { const o={screen:s,dialog:null,more:false,menu:false,pending:false,pixStep:1,pixKey:'',amount:'',phone:'',phoneErr:false,pixFieldErr:'',boleto:null}; if(['pix','deposit','recharge','withdraw'].includes(s)) o.lastOp=s; this.setState(o); if(s==='home'){ if(!this._counted) this.countUp(); else this.setState({bal:this.BAL}); } };
+  countUp(){ this._counted=true; let i=0; const t=setInterval(()=>{ i++; this.setState({bal:this.BAL*(1-Math.pow(1-i/24,3))}); if(i>=24)clearInterval(t); },30); }
+  toastMsg(m){ this.setState({toast:m}); clearTimeout(this._tt); this._tt=setTimeout(()=>this.setState({toast:null}),2400); }
+  curve(v,w,h,max){ const p=v.map((y,i)=>[i*w/(v.length-1),h-(y/max)*h]); let d='M'+p[0][0]+' '+p[0][1].toFixed(1); for(let i=0;i<p.length-1;i++){ const a=p[Math.max(i-1,0)],b=p[i],c=p[i+1],e=p[Math.min(i+2,p.length-1)]; d+=' C'+(b[0]+(c[0]-a[0])/6).toFixed(1)+' '+(b[1]+(c[1]-a[1])/6).toFixed(1)+','+(c[0]-(e[0]-b[0])/6).toFixed(1)+' '+(c[1]-(e[1]-b[1])/6).toFixed(1)+','+c[0].toFixed(1)+' '+c[1].toFixed(1); } return {line:d,area:d+' L'+w+' '+h+' L0 '+h+' Z'}; }
+  bolVm(b){ return {amount:this.fmt(b.v),due:'06/11/2026',line:b.line,fields:[{k:'Beneficiário',v:'Banco MaisVida (demo)'},{k:'Pagador',v:'Dowglas Maia'},{k:'Documento',v:b.doc}],bars:b.bars}; }
+  barStyles(arr){ return arr.map((w,i)=>({width:(w*1.5)+'px',flex:'none',marginRight:(i%3===0?2:1)+'px',background:i%2?'transparent':'#0F1B4D'})); }
+  btnBase(bg,col,dis,extra){ return Object.assign({height:'50px',padding:'0 22px',borderRadius:'12px',border:0,background:bg,color:col,font:'700 15px Manrope',cursor:dis?'not-allowed':'pointer',opacity:dis?.4:1,display:'inline-flex',alignItems:'center',justifyContent:'center',gap:'8px',boxSizing:'border-box'},extra||{}); }
+  P(dis,full){ return this.btnBase('linear-gradient(135deg,#2F6BFF,#1E4FE0)','#fff',dis,{boxShadow:dis?'none':'0 12px 28px -8px rgba(47,107,255,.8),inset 0 1px 0 rgba(255,255,255,.3)',width:full?'100%':undefined}); }
+  Sx(){ return this.btnBase('rgba(255,255,255,.04)','var(--c)',false,{border:'1px solid var(--li)',font:'600 15px Manrope'}); }
+  tb(on){ return {padding:'5px 12px',borderRadius:'6px',border:'1px solid '+(on?'#3B82F6':'#1B2656'),background:on?'#0E2159':'transparent',color:on?'#9DC1FF':'#9AA6D1',font:'600 12px Manrope',cursor:'pointer'}; }
+  seg(on){ return {flex:1,height:'38px',padding:'0 14px',border:0,borderRadius:'9px',background:on?'linear-gradient(135deg,#2F6BFF,#4F46E5)':'transparent',color:on?'#fff':'var(--cm)',font:'600 13px Manrope',cursor:'pointer',boxShadow:on?'0 6px 16px -6px rgba(47,107,255,.8)':'none'}; }
+  chip(on,extra){ return Object.assign({height:'44px',padding:'0 14px',borderRadius:'12px',border:'1.5px solid '+(on?'#38BDF8':'var(--ln)'),background:on?'rgba(56,189,248,.12)':'rgba(255,255,255,.03)',color:on?'#fff':'var(--c)',font:'700 14px Manrope',cursor:'pointer',boxShadow:on?'0 0 18px -4px rgba(56,189,248,.7)':'none'},extra||{}); }
+  skl(h){ return {height:h+'px',borderRadius:'14px',border:'1px solid var(--ln)',background:'linear-gradient(90deg,#10194A 25%,#1B2766 50%,#10194A 75%)',backgroundSize:'200% 100%',animation:'shimmer 1.5s linear infinite'}; }
+  renderVals(){
+    const s=this.state, set=(o)=>()=>this.setState(o), go=(x)=>()=>this.go(x);
+    const mob=s.bp==='mobile', desk=s.bp==='desktop', sc=s.screen, inApp=!['landing','signin'].includes(sc);
+    const V={'--s':'#060B1F','--sr':'#0E1738','--ss':'#0A1233','--so':'#121C47','--ln':'rgba(130,150,255,.16)','--li':'rgba(150,170,255,.38)','--c':'#F1F4FF','--cm':'#9AA6D1','--inc':'#34D399','--exp':'#FF6B8A'};
+    const pad=mob?16:desk?28:22, over=this.amtNum()>this.BAL, zero=s.amount!==''&&this.amtNum()<=0;
+    const rows=this.rows(), inP=this.TX.filter(t=>t.ago<=s.period&&t.amt>0).reduce((a,t)=>a+t.amt,0), outP=this.TX.filter(t=>t.ago<=s.period&&t.amt<0).reduce((a,t)=>a-t.amt,0);
+    const H=(v)=>s.hide?'••••••':v, st=(k)=>s.data===k, ok=st('ok'), empty=st('empty');
+    const cardS={background:'linear-gradient(160deg,rgba(22,32,82,.88),rgba(10,16,48,.92))',border:'1px solid var(--ln)',borderRadius:'20px',padding:mob?'18px':'24px',display:'flex',flexDirection:'column',gap:'18px',boxShadow:'0 24px 50px -24px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.05)',backdropFilter:'blur(12px)',position:'relative',boxSizing:'border-box'};
+    const nav=[['home','Início','ph ph-house'],['statement','Transações','ph ph-arrows-left-right'],['pix','Pix','ph ph-diamonds-four'],['recharge','Recarga','ph ph-device-mobile'],['deposit','Depósito','ph ph-barcode'],['withdraw','Saque','ph ph-money']];
+    const navItems=nav.map(n=>{const on=sc===n[0]||(n[0]==='statement'&&sc==='detail'); return {label:n[1],icon:n[2],go:go(n[0]),style:{display:'flex',alignItems:'center',gap:'14px',height:'48px',padding:desk?'0 16px':'0',justifyContent:desk?'flex-start':'center',border:0,borderRadius:'12px',background:on?'linear-gradient(135deg,#2F6BFF,#2457E6)':'transparent',boxShadow:on?'0 10px 24px -8px rgba(47,107,255,.8)':'none',color:on?'#fff':'#B4BEE8',font:'600 15px Manrope',cursor:'pointer'}};});
+    const bn=[['home','Início','ph ph-house'],['statement','Transações','ph ph-arrows-left-right'],['pix','Pix','ph ph-diamonds-four']];
+    const bst=(on)=>({display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'2px',minHeight:'58px',border:0,background:'transparent',color:on?'#60A5FA':'#B4BEE8',font:'600 11px Manrope',cursor:'pointer'});
+    const bottomItems=bn.map(n=>({label:n[1],icon:n[2],go:go(n[0]),style:bst(sc===n[0])})).concat([{label:'Mais',icon:'ph ph-dots-three-outline',go:set({more:true}),style:bst(false)}]);
+    const moreItems=[['recharge','Recarga','ph ph-device-mobile'],['deposit','Depósito','ph ph-barcode'],['withdraw','Saque','ph ph-money']].map(n=>({label:n[1],icon:n[2],go:go(n[0])})).concat([{label:'Sair',icon:'ph ph-sign-out',go:()=>this.setState({more:false,dialog:'signout'})}]);
+    const opt=(arr,cur,key)=>arr.map(a=>({label:a[1],go:set({[key]:a[0]}),style:this.tb(cur===a[0])}));
+    const keyMeta={cpf:['000.000.000-00','numeric','Teste com 529.982.247-25'],email:['nome@exemplo.com','email',''],phone:['(11) 9 1234-5678','tel','']}[s.keyType];
+    const kd=s.pixKey.replace(/\D/g,''), keyErr=!!s.pixKey&&!this.keyOk()&&((s.keyType==='cpf'&&kd.length===11)||(s.keyType==='phone'&&kd.length>=11)||(s.keyType==='email'&&s.pixKey.length>5));
+    const amtBad=this.amtNum()<=0||over, depBad=this.parse(s.depAmt)<=0, phoneBad=s.phone.replace(/\D/g,'').length!==11;
+    const preset=(list)=>list.map(v=>({label:'R$ '+v,go:set({amount:v+',00'}),style:this.chip(this.amtNum()===v,{height:'46px'})}));
+    const carr={VIVO:'#B25CFF',CLARO:'#FF4D5A',TIM:'#4C8DFF',OI:'#A3E635'}, carrLabel={VIVO:'vivo',CLARO:'Claro',TIM:'TIM',OI:'oi'};
+    const carriers=['CLARO','VIVO','TIM','OI'].map(c=>({label:carrLabel[c],on:s.carrier===c,go:set({carrier:c}),style:Object.assign(this.chip(s.carrier===c,{height:'58px',color:carr[c],font:'800 '+(c==='OI'?'22':'19')+'px Sora',padding:'0'}))}));
+    const ser=(k)=>{ const base=k?[6,7.5,6.4,7,8.2,7.4,9]:[4.2,5.1,3.4,4.0,3.2,4.6,5.5]; return base.map((v,i)=>Math.max(1,v*(1+.12*Math.sin(i*1.3+s.period+(k?0:2))))); };
+    const ci=this.curve(ser(1),600,200,10), co=this.curve(ser(0),600,200,10);
+    const xLabels=[0,1,2,3,4,5,6].map(i=>{const d=new Date(2026,10,3-Math.round((6-i)*s.period/6)); return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');});
+    const recent=(rows.length?rows:this.TX).slice(0,5).map(t=>this.vm(t,()=>this.setState({screen:'detail',detail:t.id})));
+    const chat=0;
+    const res=s.res||{lines:[]}, rc=res.ok?'#10B981':res.fail?'#FF6B8A':'#FBBF24';
+    const inpB={height:'52px',width:'100%',boxSizing:'border-box',padding:'0 16px',borderRadius:'12px',border:'1px solid var(--li)',background:'rgba(5,9,30,.7)',color:'var(--c)',font:'500 16px Manrope'};
+    const ico=(g)=>({width:'54px',height:'54px',borderRadius:'50%',display:'grid',placeItems:'center',fontSize:'26px',color:'#fff',background:g,boxShadow:'0 12px 30px -8px rgba(0,0,0,.6)',flex:'none'});
+    const tag=(c,bg,bd)=>({display:'inline-flex',alignItems:'center',gap:'6px',font:'600 12px Manrope',padding:'6px 12px',borderRadius:'999px',color:c,background:bg,border:'1px solid '+bd,whiteSpace:'nowrap',alignSelf:'flex-start'});
+    const sky=[]; let x=7; for(let i=0;i<16;i++){ x=(x*1103515245+12345)&0x7fffffff; const h=18+(x%52); sky.push({position:'absolute',bottom:'8%',left:(i*6.2)+'%',width:(3+(x%3))+'%',height:h+'%',background:'linear-gradient(180deg,#1B2A7A,#0A1038)',backgroundImage:'radial-gradient(rgba(255,214,120,.75) 1px,transparent 1.6px)',backgroundSize:'8px 11px',borderRadius:'2px 2px 0 0',opacity:.9}); }
+    const miniBars=Array.from({length:24},(_,i)=>({width:((i*7%3)+1)+'px',flex:'none',marginRight:'1px',background:i%2?'transparent':'#0F1B4D'}));
+    const frameW={mobile:390,tablet:820,desktop:1320}[s.bp];
+    return {
+      rootStyle:Object.assign({background:'#030616',minHeight:'100vh',fontFamily:'Manrope, sans-serif',color:'var(--c)'},V),
+      frameStyle:{width:frameW+'px',margin:'0 auto',background:'radial-gradient(900px 500px at 85% -5%,rgba(59,91,255,.22),transparent 60%),radial-gradient(800px 600px at -5% 40%,rgba(124,58,237,.16),transparent 60%),linear-gradient(180deg,#070C28,#050920)',isolation:'isolate',border:'1px solid var(--ln)',borderRadius:'20px',overflow:'hidden',position:'relative',boxShadow:'0 30px 80px rgba(0,0,0,.6)',color:'var(--c)',fontFamily:'Manrope, sans-serif'},
+      bpOpts:opt([['mobile','Mobile'],['tablet','Tablet'],['desktop','Desktop']],s.bp,'bp'),
+      dataOpts:opt([['ok','Sucesso'],['loading','Carregando'],['empty','Vazio'],['error','Erro']],s.data,'data'),
+      outOpts:opt([['success','Sucesso'],['business','Falha de negócio'],['uncertain','Incerto']],s.sim,'sim'),
+      jumpOpts:[['landing','Landing'],['signin','Entrar'],['home','Início'],['statement','Transações'],['pix','Pix'],['deposit','Depósito'],['recharge','Recarga'],['withdraw','Saque']].map(a=>({label:a[1],go:()=>['landing','signin'].includes(a[0])?this.setState({screen:a[0],redirecting:false,signinError:false,menu:false}):this.go(a[0]),style:this.tb(sc===a[0])})).concat([{label:'Sessão expirada',go:set({dialog:'expired'}),style:this.tb(false)}]),
+      isLanding:sc==='landing',isSignin:sc==='signin',inApp,isHome:sc==='home',isStatement:sc==='statement',isDetail:sc==='detail',isPix:sc==='pix',isDeposit:sc==='deposit',isRecharge:sc==='recharge',isWithdraw:sc==='withdraw',isResult:sc==='result'&&!!s.res,isSys:sc==='sys',
+      isMob:mob,showSearch:!mob,isDesk:desk,showRail:!mob,padX:pad,padY:mob?16:24,padB:mob?24:32,heroPadY:mob?24:40,heroSize:mob?36:desk?60:46,
+      showSky:!mob,showPhone:!mob,showSide:desk,heroTextW:desk?380:mob?999:420,h1Size:mob?24:desk?28:26,h2Size:mob?26:34,
+      railStyle:{width:desk?'250px':'80px',flex:'none',background:'linear-gradient(180deg,#081039,#050A28)',padding:'20px 14px',display:'flex',flexDirection:'column',gap:'4px',borderRight:'1px solid var(--ln)',boxSizing:'border-box'},
+      topbar:{display:'flex',alignItems:'center',gap:'12px',padding:'14px '+pad+'px',position:'relative',zIndex:20},
+      navItems,bottomItems,moreItems,
+      logoRow:{display:'flex',alignItems:'center',gap:'10px',font:'800 18px Sora',color:'#fff'},
+      logoMark:{width:'40px',height:'40px',borderRadius:'12px',background:'linear-gradient(135deg,#22D3EE,#3B82F6 55%,#7C3AED)',color:'#fff',display:'grid',placeItems:'center',fontSize:'22px',boxShadow:'0 8px 24px -4px rgba(56,189,248,.7)',flex:'none'},
+      logoMarkBig:{width:'60px',height:'60px',borderRadius:'18px',background:'linear-gradient(135deg,#22D3EE,#3B82F6 55%,#7C3AED)',color:'#fff',display:'grid',placeItems:'center',fontSize:'32px',boxShadow:'0 12px 34px -4px rgba(56,189,248,.7)'},
+      secCard:{display:'flex',flexDirection:'column',alignItems:'center',gap:'10px',padding:'20px 14px',borderRadius:'16px',border:'1px solid var(--ln)',background:'linear-gradient(160deg,rgba(24,36,92,.9),rgba(10,16,48,.9))'},
+      iconBtn:{position:'relative',width:'46px',height:'46px',borderRadius:'14px',border:'1px solid var(--ln)',background:'rgba(18,28,71,.7)',color:'var(--c)',cursor:'pointer',display:'grid',placeItems:'center'},
+      userBtn:{display:'flex',alignItems:'center',gap:'10px',height:'46px',padding:'0 12px 0 6px',borderRadius:'14px',border:'1px solid var(--ln)',background:'rgba(18,28,71,.7)',color:'var(--c)',cursor:'pointer'},
+      menuItem:{display:'flex',alignItems:'center',gap:'12px',width:'100%',height:'46px',padding:'0 12px',border:0,borderRadius:'10px',background:'transparent',color:'var(--c)',font:'600 14px Manrope',cursor:'pointer',textAlign:'left'},
+      chipStyle:{display:'inline-flex',gap:'6px',alignItems:'center',font:'600 12px Manrope',padding:'6px 12px',borderRadius:'999px',border:'1px solid rgba(255,255,255,.2)',background:'rgba(255,255,255,.08)',color:'#D5DCFF',whiteSpace:'nowrap'},
+      tagGreen:tag('#34D399','rgba(16,185,129,.14)','rgba(16,185,129,.4)'),tagPurple:tag('#C4B5FD','rgba(139,92,246,.18)','rgba(139,92,246,.45)'),
+      tagProposed:{display:'inline-block',font:'700 10px Manrope',letterSpacing:'.05em',textTransform:'uppercase',padding:'3px 9px',borderRadius:'999px',border:'1px dashed #FBBF24',color:'#FBBF24',alignSelf:'center'},
+      icoPurple:ico('linear-gradient(135deg,#8B5CF6,#6D28D9)'),icoGreen:ico('linear-gradient(135deg,#10B981,#047857)'),icoCyan:ico('linear-gradient(135deg,#22D3EE,#2563EB)'),icoAmber:ico('linear-gradient(135deg,#F59E0B,#B45309)'),
+      linkBtn:{border:0,background:'transparent',color:'#38BDF8',font:'700 14px Manrope',cursor:'pointer',padding:'6px 0'},
+      cardS,cardFlat:Object.assign({},cardS,{padding:0,gap:0,overflow:'hidden'}),
+      tile:{background:'linear-gradient(160deg,rgba(24,36,92,.85),rgba(10,16,48,.9))',border:'1px solid var(--ln)',borderRadius:'16px',padding:'16px 18px',display:'flex',alignItems:'center',gap:'14px'},
+      miniTile:{display:'flex',alignItems:'center',gap:'12px',padding:'4px 6px'},
+      receipt:{border:'1.5px dashed var(--li)',borderRadius:'14px',padding:'14px 18px',background:'rgba(5,9,30,.5)'},
+      alertErr:{display:'flex',gap:'8px',alignItems:'center',padding:'12px 14px',borderRadius:'12px',border:'1px solid var(--exp)',background:'rgba(255,107,138,.08)',color:'var(--exp)',font:'600 14px Manrope',textAlign:'left',width:'100%',boxSizing:'border-box'},
+      infoBox:{display:'flex',gap:'12px',alignItems:'center',padding:'14px 16px',borderRadius:'12px',border:'1px solid rgba(96,165,250,.3)',background:'rgba(37,99,235,.14)',color:'#DCE6FF',font:'500 13px/1.4 Manrope'},
+      balPill:{marginLeft:'auto',display:'flex',flexDirection:'column',alignItems:'flex-end',padding:'8px 16px',borderRadius:'14px',background:'rgba(18,28,71,.8)',border:'1px solid var(--ln)'},
+      btnP:this.P(false),btnPFull:this.P(false,true),btnS:this.Sx(),btnG:this.btnBase('rgba(255,255,255,.1)','#fff',false,{height:'42px',border:'1px solid rgba(255,255,255,.25)'}),btnGhost:this.btnBase('transparent','var(--cm)',false),
+      btnGreen:this.btnBase('linear-gradient(135deg,#10B981,#059669)','#fff',depBad,{width:'100%',boxShadow:depBad?'none':'0 12px 28px -8px rgba(16,185,129,.8),inset 0 1px 0 rgba(255,255,255,.3)',position:'relative'}),
+      btnNext1:Object.assign(this.P(!this.keyOk(),true),{}),btnNext2:Object.assign(this.P(amtBad),{flex:1}),btnRec:this.P(amtBad||phoneBad,true),btnWd:this.P(amtBad,true),btnConfirm:Object.assign(this.P(s.pending),{flex:1}),
+      chipBtn:this.chip(false,{height:'46px',color:'#7DD3FC'}),
+      inp:inpB,inpKey:Object.assign({},inpB,{borderColor:keyErr?'var(--exp)':'var(--li)'}),inpIcon:Object.assign({},inpB,{paddingLeft:'44px'}),
+      inpMoney:Object.assign({},inpB,{paddingLeft:'58px',height:'62px',font:'700 24px Sora',fontVariantNumeric:'tabular-nums',borderColor:over?'#FBBF24':'var(--li)'}),
+      inpMoneySm:Object.assign({},inpB,{paddingLeft:'46px',height:'54px',font:'700 20px Sora',background:'rgba(2,20,18,.55)',borderColor:'rgba(52,211,153,.4)'}),
+      grid75:{display:'grid',gridTemplateColumns:desk?'7fr 5fr':'1fr',gap:'20px'},gridTiles:{display:'grid',gridTemplateColumns:mob?'1fr':'repeat(3,1fr)',gap:'12px'},
+      gridTwo:{display:'grid',gridTemplateColumns:desk?'1.1fr 1fr':'1fr',gap:'20px',alignItems:'start'},gridSide:{display:'grid',gridTemplateColumns:desk?'280px 1fr':'1fr',gap:'20px',alignItems:'start'},
+      heroS:{position:'relative',overflow:'hidden',borderRadius:'22px',padding:mob?'22px':'30px',minHeight:'320px',background:'linear-gradient(120deg,#0A1B66 0%,#1D3FD8 58%,#4F46E5 100%)',border:'1px solid rgba(150,170,255,.3)',boxShadow:'0 30px 70px -24px rgba(47,107,255,.65),inset 0 1px 0 rgba(255,255,255,.2)',color:'#fff',boxSizing:'border-box'},
+      depCard:Object.assign({},cardS,{background:'linear-gradient(160deg,rgba(7,60,52,.92),rgba(5,22,32,.95))',border:'1px solid rgba(52,211,153,.28)',overflow:'hidden'}),
+      artPanel:Object.assign({},cardS,{alignItems:'center',justifyContent:'center',gap:'28px',minHeight:'460px',overflow:'hidden',background:'linear-gradient(160deg,#0A1B66,#1A2F9E 60%,#3B2C9E)'}),
+      boletoCard:Object.assign({},cardS,{background:'linear-gradient(160deg,rgba(22,32,82,.9),rgba(10,16,48,.95))'}),
+      landHero:{position:'relative',overflow:'hidden',minHeight:mob?'640px':'560px',borderRadius:'0 0 24px 24px',display:'flex',flexDirection:'column'},
+      featStrip:{position:'relative',zIndex:3,margin:mob?'0 16px 24px':'auto 0 28px',marginLeft:mob?'16px':pad+'px',alignSelf:'flex-start',display:'grid',gridTemplateColumns:mob?'1fr':'repeat(3,minmax(0,1fr))',gap:'14px',padding:'20px 10px',borderRadius:'18px',background:'rgba(244,247,255,.95)',boxShadow:'0 24px 50px -16px rgba(0,0,0,.5)',maxWidth:'660px',width:mob?'auto':'calc(100% - '+(pad*2)+'px)'},
+      features:[['ph-fill ph-chart-bar','Controle total','Acompanhe gastos e receitas em tempo real.','linear-gradient(135deg,#38BDF8,#2563EB)'],['ph-fill ph-shield-check','Transações seguras','Tecnologia de ponta para sua tranquilidade.','linear-gradient(135deg,#8B5CF6,#4F46E5)'],['ph-fill ph-lightning','Pagamentos rápidos','Pix, boletos e muito mais, com agilidade.','linear-gradient(135deg,#34D399,#059669)']].map(a=>({icon:a[0],t:a[1],b:a[2],icoStyle:{width:'46px',height:'46px',borderRadius:'12px',display:'grid',placeItems:'center',fontSize:'24px',color:'#fff',background:a[3]}})),
+      skyline:sky,statGrid:{display:'grid',gridTemplateColumns:mob?'1fr':desk?'repeat(4,1fr)':'repeat(2,1fr)',gap:'14px',padding:pad+'px'},
+      signCard:Object.assign({},cardS,{width:'100%',maxWidth:'420px',alignItems:'center',textAlign:'center',padding:'34px',gap:'16px',position:'relative',zIndex:2}),
+      goSignin:set({screen:'signin',redirecting:false,signinError:false}),doSignin:()=>{ this.setState({redirecting:true,signinError:false}); setTimeout(()=>this.go('home'),1100); },failSignin:(e)=>{ e.preventDefault(); this.setState({signinError:true,redirecting:false}); },
+      redirecting:s.redirecting,notRedirecting:!s.redirecting,signinError:s.signinError,
+      toggleMenu:()=>this.setState({menu:!s.menu}),menu:s.menu,askSignout:set({dialog:'signout',menu:false}),doSignout:()=>this.setState({screen:'signin',dialog:null,redirecting:false}),
+      closeAll:set({dialog:null,more:false,pending:false}),stop:(e)=>e.stopPropagation(),more:s.more,isSignout:s.dialog==='signout',isExpired:s.dialog==='expired',isReview:s.dialog==='review',
+      goHome:go('home'),goStatement:go('statement'),goPix:go('pix'),goDeposit:go('deposit'),
+      setOk:set({data:'ok'}),stOk:ok,stLoading:st('loading'),stError:st('error'),stEmptyHome:empty&&sc==='home',skel70:this.skl(70),skel180:this.skl(200),skel56:this.skl(58),
+      periodOpts:[[7,'7 dias'],[30,'30 dias'],[90,'90 dias']].map(a=>({label:a[1],go:set({period:a[0]}),style:this.seg(s.period===a[0])})),
+      periodOpts2:[[7,'Últimos 7 dias'],[30,'Últimos 30 dias'],[90,'Últimos 90 dias']].map(a=>({label:a[1],go:set({period:a[0]}),style:this.chip(s.period===a[0])})),
+      balText:H(this.num(s.bal)),balFull:H(this.fmt(this.BAL)),eyeIcon:s.hide?'ph ph-eye-slash':'ph ph-eye',toggleHide:set({hide:!s.hide}),
+      inText:H(this.fmt(inP)),outText:H(this.fmt(outP)),chartAlt:'Entradas '+this.fmt(inP)+', saídas '+this.fmt(outP),
+      lineIn:ci.line,areaIn:ci.area,lineOut:co.line,areaOut:co.area,xLabels,showTable:s.showTable,toggleTable:set({showTable:!s.showTable}),tableLabel:s.showTable?'Ocultar tabela':'Ver como tabela',
+      recentRows:recent,recentHas:!empty,recentNone:empty,
+      typeChips:[['ALL','Todas'],['DEPOSIT','Depósito'],['PIX','Pix'],['PHONE_RECHARGE','Recarga'],['WITHDRAW','Saque']].map(a=>({label:a[1],on:s.filter===a[0],go:set({filter:a[0]}),style:this.chip(s.filter===a[0],{borderRadius:'999px',height:'38px',font:'600 13px Manrope'})})),
+      stmtEmpty:(ok&&rows.length===0)||(empty&&sc==='statement'),stmtList:ok&&rows.length>0,rowCount:rows.length,
+      stmtRows:rows.map(t=>this.vm(t,()=>this.setState({screen:'detail',detail:t.id}))),
+      sortDate:()=>this.setState({sortBy:'date',sortDir:s.sortBy==='date'?-s.sortDir:-1}),sortAmt:()=>this.setState({sortBy:'amount',sortDir:s.sortBy==='amount'?-s.sortDir:-1}),
+      sortStyleD:Object.assign(this.chip(s.sortBy==='date'),{height:'30px',padding:'0 10px',fontSize:'12px'}),sortStyleA:Object.assign(this.chip(s.sortBy==='amount'),{height:'30px',padding:'0 10px',fontSize:'12px'}),
+      dateArrow:s.sortBy==='date'?(s.sortDir<0?'↓':'↑'):'',amtArrow:s.sortBy==='amount'?(s.sortDir<0?'↓':'↑'):'',
+      det:this.vm(this.TX.find(t=>t.id===s.detail)||this.TX[0]),copyId:()=>this.toastMsg('Id da transação copiado'),
+      pix1:s.pixStep===1,pix2:s.pixStep===2,pix3:s.pixStep===3,pixStep:s.pixStep,pixStepName:['Chave','Valor','Revisão'][s.pixStep-1],
+      stepBars:[1,2,3].map(i=>i<=s.pixStep?'linear-gradient(90deg,#2F6BFF,#38BDF8)':'rgba(130,150,255,.2)'),
+      pixSteps:['Dados da transferência','Confirmar','Concluir'].map((t,i)=>({n:i+1<s.pixStep?'✓':i+1,t,color:i+1<=s.pixStep?'#fff':'var(--cm)',dot:{width:'34px',height:'34px',borderRadius:'50%',display:'grid',placeItems:'center',font:'700 14px Sora',background:i+1<s.pixStep?'#10B981':i+1===s.pixStep?'linear-gradient(135deg,#2F6BFF,#38BDF8)':'rgba(130,150,255,.16)',color:'#fff',boxShadow:i+1===s.pixStep?'0 0 20px rgba(47,107,255,.8)':'none'}})),
+      keyTypes:[['cpf','CPF'],['email','E-mail'],['phone','Celular']].map(a=>({label:a[1],go:set({keyType:a[0],pixKey:''}),style:this.seg(s.keyType===a[0])})),
+      pixKey:s.pixKey,inKey:(e)=>this.setState({pixKey:this.mask(s.keyType,e.target.value)}),keyPlaceholder:keyMeta[0],keyMode:keyMeta[1],keyDemo:keyMeta[2],
+      keyErr,keyErrText:{cpf:'Informe um CPF válido.',email:'Informe um e-mail válido.',phone:'Informe DDD e um número de 9 dígitos começando com 9.'}[s.keyType],keyDisabled:!this.keyOk(),
+      pixNext1:()=>this.setState({pixStep:2}),pixNext2:()=>this.setState({pixStep:3,pixFieldErr:''}),pixBack:()=>this.setState({pixStep:s.pixStep-1}),confirmPix:()=>!s.pending&&this.submit(),
+      amount:s.amount,inAmount:(e)=>this.setState({amount:e.target.value.replace(/[^0-9.,]/g,'')}),amtDisabled:amtBad,recDisabled:amtBad||phoneBad,
+      overBal:over&&this.amtNum()>0,zeroErr:zero,useAll:()=>this.setState({amount:String(this.BAL).replace('.',',')+(String(this.BAL).includes('.')?'':',00')}),
+      pixPresets:preset([50,100,200,500]),rechargePresets:preset([15,30,50,100]),wdPresets:preset([50,100,200,500]),
+      reviewLines:this.reviewLines(),pixFieldErr:s.pixFieldErr,pending:s.pending,opLabel:this.opLabel(),
+      depAmt:s.depAmt,inDep:(e)=>this.setState({depAmt:e.target.value.replace(/[^0-9.,]/g,'')}),depZero:depBad&&s.depAmt!=='',depDisabled:depBad,
+      depPresets:[100,250,500,1000].map(v=>({label:'R$ '+v,go:set({depAmt:v+',00'}),style:this.chip(this.parse(s.depAmt)===v,{height:'46px'})})),
+      noBoleto:!s.boleto,hasBoleto:!!s.boleto,boletoOpacity:s.boleto?1:.35,miniBars,
+      bol:s.boleto?this.bolVm(s.boleto):{amount:this.fmt(this.parse(s.depAmt)),due:'06/11/2026',fields:[],bars:this.barStyles(Array.from({length:56},(_,i)=>1+((i*5+3)%4)))},
+      genBoleto:()=>{ const v=this.parse(s.depAmt); if(v<=0) return; const seed=Math.round(v*100); let x=seed+7; const w=[]; for(let i=0;i<56;i++){ x=(x*1103515245+12345)&0x7fffffff; w.push(1+(x%4)); } this.setState({boleto:{v,bars:this.barStyles(w),doc:'BOL-2026-'+String(4200+(seed%800)).padStart(5,'0'),line:'23793.38128 60000.000003 00000.000400 1 '+String(seed).padStart(14,'0')}}); },
+      copyLine:()=>this.toastMsg('Ação de demonstração'),payBoleto:()=>!s.pending&&this.submit(),backBoleto:set({boleto:null}),
+      openReview:set({dialog:'review'}),confirmOp:()=>!s.pending&&this.submit(),
+      quickRecharge:()=>{ if(!amtBad&&!phoneBad) this.setState({dialog:'review'}); else this.setState({screen:'recharge',lastOp:'recharge'}); },
+      carriers,phone:s.phone,inPhone:(e)=>this.setState({phone:this.pmask(e.target.value),phoneErr:false}),phoneErr:s.phoneErr,
+      res,resIcon:{width:'68px',height:'68px',borderRadius:'50%',display:'grid',placeItems:'center',fontSize:'32px',animation:'pop .5s cubic-bezier(.2,.9,.3,1.3) both',position:'relative',background:rc,color:'#04120E',boxShadow:'0 0 50px -4px '+rc},ringStyle:{position:'absolute',inset:0,borderRadius:'50%',border:'2px solid '+rc,animation:'ring 1.6s ease-out 2'},
+      newOp:()=>this.go(s.lastOp),editTry:()=>this.setState({screen:s.lastOp,res:null,pixStep:s.lastOp==='pix'?3:1}),
+      bgIcon:({home:'ph-bold ph-bank',statement:'ph-bold ph-arrows-left-right',detail:'ph-bold ph-receipt',pix:'ph-bold ph-diamonds-four',deposit:'ph-bold ph-barcode',recharge:'ph-bold ph-device-mobile',withdraw:'ph-bold ph-money',result:'ph-bold ph-check-circle',landing:'ph-bold ph-plus',signin:'ph-bold ph-lock-simple',sys:'ph-bold ph-compass'})[sc]||'ph-bold ph-bank',bgIconSize:mob?340:560,
+      toast:s.toast,toastBottom:mob?84:32
+    };
+  }
+}
+</script>
+</body>
+</html>

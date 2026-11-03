@@ -1,6 +1,8 @@
 # Spec Execution Flow
 
-How to execute the 13 specs, in what order, and how to verify each one. Goal: **fix the backend** (BE-01…BE-08) and **build the complete Angular frontend** (FE-01…FE-05). Protocol for ticking tasks and writing evidence: `shared/como-executar.md`. Base context for every run: `memory/produto.md` + `memory/contexto-tecnico.md`.
+How to execute the specs, in what order, and how to verify each one. Goal: **fix the backend** and **build the complete Angular frontend**, delivered from now on as **vertical slices** (D-31): one slice = one branch = one PR that carries backend + frontend + e2e for one user-visible capability. Protocol for ticking tasks and writing evidence: `shared/como-executar.md`. Base context for every run: `memory/produto.md` + `memory/contexto-tecnico.md`.
+
+> **What changed (2026-11-03):** the visual reference is now **`Maia Bank v2.dc.html`** (D-32), and the remaining work is organized as slices `SL-00…SL-06` followed by the backend-only `BE-07`/`BE-08`, then `FE-05` and `FINAL-01`. `BE-05`, `BE-06`, `FE-03` and `FE-04` are superseded (mapping in `specs/README.md`). Specs `MONO-01`, `BE-01…BE-04`, `FE-02` are Done and unchanged.
 
 ## 0. Repository layout
 Monorepo: `api-financial-transaction-service/` (backend), `app-financial-transaction-service/` (frontend, created by FE-02), `prototype/` (UI reference), `.spec/`, `.github/workflows/` with **two isolated pipelines** (`api-ci.yml`, `app-ci.yml`, path-filtered). Each spec runs inside its own app folder and must keep its pipeline green without touching the other app.
@@ -20,26 +22,45 @@ Ready-made prompts per spec: `prompts.md`. **Every spec has a *Minimal validatio
 Generic prompt (the per-spec versions in `prompts.md` add the extras):
 > Execute SPEC-<ID> (`.spec/specs/<file>`). Read `.spec/memory/produto.md` and `.spec/memory/contexto-tecnico.md` first, then follow `.spec/spec-execution-flow.md` §4 for this spec. Stay in scope, tests first, tick tasks only with evidence, stop at the "Stop and ask" gates.
 
+## 1b. The slice loop (SL-00…SL-06)
+A slice is one branch `slice/<nn>-<slug>` created from a fresh `main`, one PR, and both pipelines (`api-ci`, `app-ci`) must be green on it. Inside a slice the order is fixed so the parts that connect never drift:
+
+1. **Gate** — dependencies Done, the spec's *Human action before* completed, spec *Approved*.
+2. **Prepare** — `git checkout main && git pull origin main`, new branch, run the baseline (`./mvnw -B verify`, `npm test`), start the stack (below) and record what is green today.
+3. **Contract first** — if the slice changes the API: preview with `openapi-rest-contract` → **explicit approval** → apply to the OpenAPI file. Nothing is generated or coded before the approval.
+4. **Backend** — failing tests first (show them red), smallest change, `./mvnw -B verify` green. One commit per task: `SL-NN: <task>`.
+5. **Types** — regenerate the frontend API types from the contract (`npm run api:types`, created in SL-01); commit the diff.
+6. **Frontend** — failing unit tests first (Vitest), implement, `npm run build && npm test` green. Tests mirror the backend rules (feedback only; the server decides).
+7. **E2E** — Playwright against the real stack with the **mock OIDC provider** (SL-01 creates it) so an agent can sign in without a password; axe inside the e2e on every new screen; 1280 / 768 / 390 viewports.
+8. **Browser proof** — walk the slice by hand in the built-in browser (the agent never types a password; for the real Auth0 login the **owner** signs in and reports). Record exactly what was seen.
+9. **Close** — tick acceptance with evidence, fill *Result*, update `specs/README.md`, commit and **push the slice branch** (no PR, no merge — the owner does that). Sync `memory/` and `docs/prototype-deviations.md` in the same branch.
+
+**Local stack for slices** (from the repo root): `cp .env.example .env` (once) → `docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api` (db on `localhost:5433`, Kafka `9092`, Kafdrop `19000`, MaiaBank stub `8089`) → API from the IDE run configuration (`SPRING_PROFILES_ACTIVE=local`, `SEED_OWNER_SUB`, `SEED_SECOND_SUB`) on `8088` → `cd app-financial-transaction-service && npm start` on `4200` (dev proxy `/api → 8088`). From SL-01 `docker compose --profile api up` can run the API as well, and `--profile e2e` adds the mock IdP.
+
+**Rule of thumb:** if a task needs the other side (a field, a status code, a message), it belongs to the **same slice** — never leave a frontend mock or a backend stub for "later".
+
 ## 2. Master order
 | # | Spec(s) | Track | Human action before | Exit proof |
 |---|---|---|---|---|
-| 0 | **MONO-01** monorepo + isolated CI (executed) | both | push to GitHub to verify path filters | both workflows trigger independently |
-| 1 | **BE-01** safety net ∥ **FE-01** prototype review | BE ∥ FE | — (prototype already delivered in `prototype/`) | `api-ci` green with all rules characterized ∥ prototype signed off + divergence list |
-| 2 | **BE-02** foundation (profiles, secrets, Flyway) | BE | rotate committed DB credentials | app boots on empty DB via Flyway, data survives restart |
-| 3 | **BE-03** money integrity ∥ **FE-02** foundation | BE ∥ FE | FE-01 signed off (tokens tasks) — project name is fixed: `app-financial-transaction-service` | concurrency test green; `npm run build` green |
-| 4 | **BE-04** Auth0 + ownership | BE | Auth0 Action + 2 test users (see `auth-auth0.md`) | 401/403/404 matrix tests; two-user isolation |
-| 5 | **BE-05** dates, validation, errors | BE | choose day-boundary time zone | single-day statement works; no 500/NPE |
-| 6 | **BE-06** contract + API evolution | BE | approve the OpenAPI preview | contract = behaviour; `/accounts/me`, row ids, pagination live |
-| 7 | **FE-03** auth + Home + Statement ∥ **BE-07** platform upgrade | FE ∥ BE | — | login works against Auth0/mock; Home + Statement e2e ∥ suite green on 17→21→25 |
-| 8 | **FE-04** operations (Pix, Deposit, Recharge, Withdraw) | FE | — | four flows complete against compose stack |
-| 9 | **FE-05** final validation ∥ **BE-08** cleanup | FE ∥ BE | release sign-off | e2e + axe green; no PII in logs; memory updated |
-| 10 | **FINAL-01** final test round | both | all specs Done | `docs/test-report.md` with evidence; CI green on `main` |
-Rules: a row starts only when the previous rows it depends on are Done (dependency list in `specs/README.md`). `∥` means run in parallel on separate branches/worktrees **only if** they do not touch the same files. Backend specs are never parallel with each other.
+| 0 | **MONO-01** monorepo + isolated CI (Done) | both | — | both workflows trigger independently |
+| 1 | **BE-01 … BE-04** safety net, foundation, money integrity, auth (Done) | BE | Auth0 Action + 2 test users | 98+ tests green; two-user isolation |
+| 2 | **FE-01 / FE-02** prototype review + Angular foundation (Done; look replaced in SL-00) | FE | — | `npm run build` green |
+| 3 | **SL-00** visual identity v2 | FE only | (optional) screenshots of v2; owner sign-off of the look | build + tests green; `/design` matches v2; contrast test green |
+| 4 | **SL-01** sign in + `/accounts/me` + shell + Home header | BE+FE+E2E | Auth0 callback/logout URLs for `http://localhost:4200`; run API with seed subs | real browser sign-in for both users; e2e with mock IdP green |
+| 5 | **SL-02** statement + detail + Home summary (+ contract, dates, errors) | BE+FE+E2E | time zone; OpenAPI preview; 400-vs-422; summary endpoint | single-day statement end to end; contract = behaviour; `openapi-diff` in CI |
+| 6 | **SL-03** withdrawal + result panel + `Idempotency-Key` | BE+FE+E2E | idempotency design | replay does not double-debit; double click = one request |
+| 7 | **SL-04** deposit (boleto simulation) | BE+FE+E2E | approve the reconciliation | balance +amount once; `DEPOSIT` row |
+| 8 | **SL-05** mobile recharge | BE+FE+E2E | — | "requested" copy; Kafka payload identical |
+| 9 | **SL-06** Pix | BE+FE+E2E | MaiaBank contract only if the payload changes | success/failure/uncertain paths; validators agree client/server |
+| 10 | **BE-07** platform upgrade (backend-only) | BE | Boot version, JDK image | suite green on 17→21→25 |
+| 11 | **FE-05** final validation ∥ **BE-08** cleanup | FE ∥ BE | release sign-off | e2e + axe green on all flows; no PII in logs; memory updated |
+| 12 | **FINAL-01** final test round | both | all specs Done | `docs/test-report.md` with evidence; CI green on `main` |
+Rules: a row starts only when the rows it depends on are Done (dependency list in `specs/README.md`). **Slices are strictly sequential.** `∥` (only FE-05 ∥ BE-08) means separate branches that do not touch the same files.
 
 ## 3. Conventions
-* **Branch/PR:** one branch and one PR per spec; commits per task; the **owner opens the PRs manually** (PR description = spec link + evidence summary) and merges before the next spec starts. Agents push only their own spec branch (after committing) and never commit to or push `main`.
-* **Commands (backend)** — from `api-financial-transaction-service/`: `./mvnw -B verify` (all tests), `./mvnw -B -Dtest=<Class> test` (focused). From the repo root: `docker compose up --build` (stack; API on 8088). Integration tests use Testcontainers (Docker required).
-* **Commands (frontend)** — from `app-financial-transaction-service/`: `npm ci`, `npm start` (4200), `npm run build`, test runner chosen in FE-02, Playwright for e2e against the compose stack.
+* **Branch/PR:** one branch and one PR per spec **or slice**: `spec/<id>-<slug>` for foundation/backend-only specs, `slice/<nn>-<slug>` for slices; commits per task (`<ID>: <task>`); the **owner opens the PRs manually** (PR description = spec link + evidence summary) and merges before the next spec starts. Agents push only their own branch (after committing) and never commit to or push `main`.
+* **Commands (backend)** — from `api-financial-transaction-service/`: `./mvnw -B verify` (all tests), `./mvnw -B -Dtest=<Class> test` (focused). Infra from the repo root: `docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api`; the API runs from the IDE (profile `local`, port 8088) or, from SL-01, `docker compose --profile api up`. Integration tests use Testcontainers (Docker required). Build JDK: 21 (see BE-07 note).
+* **Commands (frontend)** — from `app-financial-transaction-service/`: `npm ci`, `npm start` (4200), `npm run build`, `npm test` (Vitest), `npm run api:types` (SL-01), Playwright e2e (SL-01) against the compose stack with `--profile e2e` (mock IdP).
 * **Evidence line:** `> ✅ YYYY-MM-DD HH:MM ±TZ — result. Verification: command → outcome.` Say whether a test was *run* or only *written*.
 * **Blocked:** keep the box unticked, add `⛔` line (cause + what unblocks), continue only independent tasks.
 * **Skills:** invoke the named skill before the task it owns and follow its instructions (they are procedures, not hints).
@@ -62,40 +83,50 @@ Rules: a row starts only when the previous rows it depends on are Done (dependen
 1. Human finishes Auth0 as `auth-auth0.md` §Auth0 configuration (Action + two users); record non-secret ids and each user's `sub`. 2. Add Spring Security resource server, audience validator, role-claim converter, method security; `V3` (`external_subject`) + `CurrentUser`; remove `DBService` from the main path. 3. Mock JWKS issuer for tests/local; update tests to send tokens. 4. Scope statement/by-id/withdraw by caller; ledger follows debited account. 5. Re-verify every `[VERIFY]` item.
 **Verify:** matrix tests (401/403/404), two-user isolation, manual login against the real Auth0 tenant. **Skills:** `java-modern-engineering`, `java-persistence-performance`.
 
-### BE-05 Behaviour fixes
-1. Tests first (single-day range, null/invalid dates, null bodies). 2. Half-open date range in the chosen zone; validators and CPF fixed; handler extended (parse errors, generic 500 with `{code,message}`). **Verify:** suite green; existing messages unchanged. **Skill:** `java-modern-engineering`.
+### BE-05 / BE-06 — superseded
+Delivered through the slices: `/accounts/me` (SL-01); generator migration, contract corrections, dates, handler, statement evolution, openapi-diff (SL-02); `Idempotency-Key` + `V4` (SL-03); per-operation validators (SL-03…SL-06). Old text kept in `specs/be-05-behaviour-fixes.md` and `specs/be-06-api-contract-and-evolution.md` as the scope catalogue.
 
-### BE-06 Contract and API evolution
-1. **Preview** every contract change using `openapi-rest-contract` and wait for explicit approval. 2. Migrate to openapi-generator (jakarta); record whether bean validation is now enforced. 3. Apply approved corrections; add `GET /accounts/me`, row `id`, pagination/sort/type, aggregate totals, ISO dates (old deprecated), `Idempotency-Key` (`V4`). 4. Statement-count assertion (2 queries); idempotent-replay test; openapi-diff in CI.
-**Verify:** contract validation scripts of the skill, Maven generation, full suite. **Skills:** `openapi-rest-contract`, `java-persistence-performance`.
+### SL-00 Visual identity v2 (frontend only)
+1. (Optional, human) screenshots of v2. 2. Review v2 against brief §13 and write the divergence list. 3. Contrast test red → tokens (dark + derived light). 4. Restyle shared components, add segmented/stepper/dialog/toast/icon tile. 5. Shell (rail, bottom nav + More, top bar, demo chip, footer). 6. `/design`. **Verify:** build + tests, v1-colors grep empty, screenshots at 3 widths in 2 themes, owner sign-off. **Skills:** `angular-tailwind-ui-specialist`, `ui-ux-pro-max`.
+
+### SL-01 Sign in and account
+1. Human: Auth0 callback/logout URLs for `http://localhost:4200`, Action + users, API seed subs. 2. Contract preview for `GET /accounts/me`. 3. Backend red → green. 4. Library check (`@auth0/auth0-angular` + Angular 21 zoneless), `core/auth`, guard, interceptor, `api:types`. 5. Landing, sign-in, Home header, account menu, dialogs, 403/404. 6. Compose `api` and `e2e` profiles, Playwright + mock IdP. 7. Human: real Auth0 sign-in for both users. **Verify:** `./mvnw verify`, `npm test/build`, e2e, manual sign-in (closes BE-04). **Skills:** `openapi-rest-contract`, `java-modern-engineering`, `angular-module-scaffold`, `auth-oidc-config`.
+
+### SL-02 Statement, detail, Home summary
+1. Human: time zone, 400-vs-422, summary endpoint. 2. **Contract preview for all operations** → approval. 3. Backend tests red: single day, boundaries, bad dates, ids, pagination, totals, 2 queries. 4. Generator migration (record the bean-validation answer), corrections, handler, statement evolution (+ summary), `openapi-diff` in CI. 5. Types → Statement, Detail, Home summary with chart + table fallback. 6. E2E incl. cross-customer. **Verify:** suite, contract scripts, e2e + axe. **Skills:** `openapi-rest-contract`, `java-persistence-performance`, `angular-module-scaffold`.
+
+### SL-03 Withdrawal + result panel + idempotency
+1. Human: approve the idempotency design. 2. Contract preview (header). 3. Backend: concurrency/replay tests red → `V4` + component. 4. Frontend: operation shell + result panel (success/business/uncertain) → Withdraw. 5. E2E incl. forced network failure and replay. **Verify:** replay does not double-debit; double click = one request; no POST auto-retry.
+
+### SL-04 Deposit · SL-05 Recharge · SL-06 Pix
+Same loop, one operation each (details in each spec). Common checks: body validation never 500, idempotency replay, balance + new statement row in the browser, three result variants, axe. Specifics: SL-04 boleto simulation calls the real deposit for the caller's own account; SL-05 copy says "requested" and the Kafka payload stays byte-identical (observe in Kafdrop); SL-06 validators agree client/server and MaiaBank failure leaves no debit.
 
 ### BE-07 Platform upgrade
+> **Pre-applied locally (not committed when this was written):** the owner moved `java.version` to 21 and Lombok to `1.18.42` (the pinned `1.18.24` breaks `javac` 21+: *JCImport qualid*); `mvn test-compile` was verified on JDK 21. When BE-07 starts, treat step (b) as partly done: commit it as its own change, run the suite, then continue with (a) Boot 3.5.x and (c) Java 25.
+
 Three separate PRs/commits sets: (a) Java 17 build hygiene + Boot 3.5.x + Lombok; (b) Java 21; (c) Java 25 + Docker images. Before (a): save `dependency:tree` and Actuator/Prometheus output as baseline. After (c): `jdeprscan --release 25`, compose smoke. **Verify:** full suite green after each step; metrics unchanged. **Skill:** `java-modern-engineering` (version matrix, migration).
 
 ### BE-08 Cleanup and hardening
 `Money` + `Account` invariants, dead-code removal, ArchUnit, log masking, correlation id, management port, CI scans. **Verify:** no package moves (`git diff --name-status`), no PII in logs, scans green. **Skill:** `java-modern-engineering`.
 
-### FE-01 Design prototype
-The prototype is delivered (`prototype/Maia Bank UI prototype/`). Open `Maia Bank.dc.html`, review every screen/state against brief §13, and write down the divergences (prototype vs backend contract, e.g. boleto deposit; prototype vs brief). Output: sign-off + initial divergence list that seeds `docs/prototype-deviations.md`. **Verify:** checklist ticked, written sign-off. **Skills:** `ui-ux-pro-max`, `angular-tailwind-ui-specialist`.
+### FE-01 Design prototype — superseded by SL-00
+The v1 prototype review (static) stays recorded in `specs/fe-01-design-prototype.md`. The reference is now **`Maia Bank v2.dc.html`**; its review, divergence list and the owner's visual sign-off happen in **SL-00**.
 
 ### FE-02 Frontend foundation (project creation)
 1. Project name is fixed: `app-financial-transaction-service`, at the repo root; confirm that directory does **not** exist (the scaffold refuses to overwrite). 2. From the repo root: `node ~/.claude/skills/angular-frontend-scaffold/scripts/scaffold.mjs --output . --project-name app-financial-transaction-service`, then `node ~/.claude/skills/angular-frontend-scaffold/scripts/validate.mjs ./app-financial-transaction-service` (build only; do not run `ng serve`/tests during scaffold validation). 3. Add core: runtime `config.json`, `API_BASE_URL`, error + auth interceptors (dev-open until BE-04), layout shell, dev proxy to `localhost:8088`, OpenAPI type generation (from the BE-06 contract once available). 4. Extract tokens from the prototype (palette, Manrope/Sora, radius, spacing, motion), dark default + light, theme toggle, shared components, `/design` route; create `docs/prototype-deviations.md`. 5. Decide test runner and chart library (record decisions in the project's `doc.md`).
 **Verify:** `npm run build`; axe on `/design`; contrast report. **Skills:** `angular-frontend-scaffold`, `angular-tailwind-ui-specialist`, `angular-architect`.
 
-### FE-03 Auth, Home, Statement
-Prerequisites: BE-04 (auth) and BE-06 (contract with `/accounts/me`, row ids). Use `angular-module-scaffold` per feature (`features/<module>/` with routes, `pages/`, `ui/`, `data-access/`, `doc.md`) driven by the approved OpenAPI operations. Order: auth (`AuthService` wrapper, guard, callback, interceptor, session-expired) → Home → Statement/detail → AI Assistant concept screen (static, "Coming soon"). **Verify:** unit + e2e against mock issuer; manual login with Auth0; axe; 320/768/1280. **Skills:** `angular-module-scaffold`, `angular-tailwind-ui-specialist`, `ui-ux-pro-max`.
-
-### FE-04 Operations
-Modules in this order: Withdrawal (simplest) → Deposit → Recharge → Pix. Shared result panel first (success / business failure / uncertain outcome). Tests per module: double-click sends one request, exact balance allowed, no POST auto-retry, withdrawal body is `{amount}` only. **Verify:** each flow end-to-end on `docker compose` stack. **Skills:** as FE-03.
+### FE-03 / FE-04 — superseded
+Auth, shell, Home header → SL-01; Home summary, Statement, Detail → SL-02; Withdrawal + shared result panel → SL-03; Deposit → SL-04; Recharge → SL-05; Pix → SL-06. Old text kept in `specs/fe-03-auth-home-statement.md` and `specs/fe-04-operations.md`. The module layout rule (`features/<module>/` with `routes`, `pages/`, `ui/`, `data-access/`, `doc.md`, via `angular-module-scaffold`) still applies to every slice.
 
 ### FE-05 Final validation
-Playwright e2e for flows F-0…F-9 of the brief, axe inside e2e, responsive checks, demo README with screenshots, update `memory/` to match what was delivered. **Verify:** CI e2e job green.
+Most e2e now exists per slice (SL-01…SL-06). FE-05 completes the matrix: Playwright flows F-0…F-9 of the brief on 3 viewports, axe across every screen, a responsive audit, demo README with screenshots, update `memory/` to match what was delivered. **Verify:** CI e2e job green.
 
-## 5. Frontend agent autonomy (applies to FE-02…FE-05)
-The prototype is the reference, **not a limit**. The agent proposes and applies improvements within the tiers defined in `memory/contexto-tecnico.md` (*Frontend: prototype and agent autonomy*): Tier 1 (refinements inside the same flow) → apply and log in `app-financial-transaction-service/docs/prototype-deviations.md`; Tier 2 (flow/screen/capability/backend changes) → write a proposal and stop for approval. Backend contract and `produto.md` rules always win over the prototype.
+## 5. Frontend agent autonomy (applies to SL-00…SL-06 and FE-05)
+The prototype (**v2**) is the reference, **not a limit**. The agent proposes and applies improvements within the tiers defined in `memory/contexto-tecnico.md` (*Frontend: prototype and agent autonomy*): Tier 1 (refinements inside the same flow) → apply and log in `app-financial-transaction-service/docs/prototype-deviations.md`; Tier 2 (flow/screen/capability/backend changes) → write a proposal and stop for approval. Backend contract and `produto.md` rules always win over the prototype.
 
 ## 6. Parallelism and conflicts
-Frontend and backend run in separate repos/folders and can proceed together once their contract dependencies are Done. Inside the backend never run two specs at once. If the backend contract changes after a FE module started, stop the module, regenerate types, adapt, re-test.
+Backend and frontend of a slice move **together on one branch**, in the fixed order of §1b. Never run two slices (or a slice and a backend spec) at once: they share backend services and the app shell. The only allowed overlap is `FE-05 ∥ BE-08`. If the contract changes after the frontend started, stop, regenerate types, adapt, re-test; if a slice needs a contract change that was not previewed, that is a "Stop and ask".
 
 ## 7. Done for the whole programme
-All 13 specs Done · CI green (backend + e2e) · app runs with `docker compose up` and the Angular app against it · both pipelines green independently · `docs/prototype-deviations.md` reviewed · `memory/` matches reality · no open "Stop and ask" items.
+All specs Done (foundation, SL-00…SL-06, BE-07, BE-08, FE-05, FINAL-01) · CI green (backend + e2e) · app runs with `docker compose up` and the Angular app against it · both pipelines green independently · `docs/prototype-deviations.md` reviewed · `memory/` matches reality · no open "Stop and ask" items.

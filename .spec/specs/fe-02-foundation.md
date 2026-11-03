@@ -1,6 +1,7 @@
 # SPEC-FE-02 — Angular foundation: scaffold, core, design system
 
 **Status:** Done (PR #5 merged 2026-11-02; app-ci green) · **Depends on:** BE-02, FE-01 · **Parallel with:** BE-04
+> Addendum 2026-11-03: the v1 look built here (brown/gold tokens) is **replaced by the v2 identity in SL-00**. Structure, core, interceptors, config loader, runner and tests stay.
 **Read first:** `../memory/produto.md`, `../memory/contexto-tecnico.md` (incl. *Frontend agent autonomy*) and the visual/flow reference `../../prototype/Maia Bank UI prototype/` (open `Maia Bank.dc.html`). Protocol: `../shared/como-executar.md` (tick a task only after verification + evidence line).
 
 ## Objective

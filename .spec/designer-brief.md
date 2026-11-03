@@ -1,5 +1,7 @@
 # Designer Agent Brief — UI/UX Prototyping & Template Creation
 
+> **Update 2026-11-03:** the visual reference is now **`../prototype/Maia Bank UI prototype/Maia Bank v2.dc.html`** (navy/blue identity, dark-first). Its pt-BR copy and "Banco MaisVida" name are **not** adopted: UI stays English and the brand stays **Maia Bank** (D-33). §3 tokens and the v1 description below are superseded; the requirements (screens, flows, states, §13 checklist) still apply.
+>
 > **Update 2026-11-02:** the prototype was delivered in `../prototype/Maia Bank UI prototype/` and is now the visual reference. Where this brief's §3 tokens (Grafite Ciano) differ from the prototype, **the prototype wins**. This brief remains the requirements baseline for any new design iteration.
 
 **Audience:** a design/prototyping agent (no access to the codebase). **Self-contained:** everything needed to design every screen, flow and navigation path supported by the real backend is below.

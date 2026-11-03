@@ -1,6 +1,7 @@
 # SPEC-FE-01 — UI/UX prototype and templates (designer agent)
 
-**Status:** In progress (approved by the owner 2026-11-02) · **Depends on:** none · **Parallel with:** BE-01, BE-02
+**Status:** Superseded by SL-00 (2026-11-03) · **Depends on:** none · **Parallel with:** BE-01, BE-02
+> The owner replaced the v1 prototype by **`Maia Bank v2.dc.html`**. The review below (v1, static) is kept as history. Review of v2, its divergence list and the owner's visual sign-off are tasks of **SL-00**; the pending v1 sign-off is void.
 **Read first:** `../memory/produto.md`, `../memory/contexto-tecnico.md` (incl. *Frontend agent autonomy*) and the visual/flow reference `../../prototype/Maia Bank UI prototype/` (open `Maia Bank.dc.html`). Protocol: `../shared/como-executar.md` (tick a task only after verification + evidence line).
 
 ## Objective

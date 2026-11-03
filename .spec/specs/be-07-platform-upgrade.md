@@ -1,6 +1,7 @@
 # SPEC-BE-07 — Platform upgrade: Boot 3.5.x, Java 21, Java 25
 
-**Status:** Draft (not authorized) · **Depends on:** BE-06 · **Parallel with:** none
+**Status:** Draft (not authorized) · **Depends on:** SL-06 (replaces BE-06) · **Parallel with:** none
+> Note 2026-11-03: the local build was moved to Java 21 with Lombok `1.18.42` (uncommitted when written); the pinned `1.18.24` made `javac` 21+ fail (*JCImport qualid*). Step 2 below is therefore partly done — commit it as its own change, rerun the suite, then continue.
 **Read first:** `../memory/produto.md`, `../memory/contexto-tecnico.md`. Protocol: `../shared/como-executar.md` (tick a task only after verification + evidence line).
 
 ## Objective

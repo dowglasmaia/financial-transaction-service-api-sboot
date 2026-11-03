@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="FinancialTransctionServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <option name="ACTIVE_PROFILES" value="local" />
+    <envs>
+      <env name="SEED_OWNER_SUB" value="auth0|6ae9a7d25898a59fc803d242" />
+      <env name="SEED_SECOND_SUB" value="auth0|6ae9a8f5cc59993b7f7394f0" />
+    </envs>
+    <module name="financial-transaction" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.dowglasmaia.financialtransaction.FinancialTransctionServiceApplication" />
+    <option name="VM_PARAMETERS" value="SPRING_PROFILES_ACTIVE=local" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
