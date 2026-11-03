@@ -1,6 +1,7 @@
 # SPEC-FE-03 — Auth, Home, Statement and detail
 
-**Status:** Draft (not authorized) · **Depends on:** FE-02, BE-04, BE-06 · **Parallel with:** FE-04 (after FE-03 auth lands)
+**Status:** Superseded (2026-11-03, D-31) — executed through the vertical slices · **Depends on:** FE-02, BE-04, BE-06 · **Parallel with:** FE-04 (after FE-03 auth lands)
+> **Do not execute this spec on its own.** Scope catalogue only. Auth, shell, Home header → **SL-01**; Home summary, Statement, Detail → **SL-02**. The AI Assistant concept card is dropped (v2 has none, D-35). The visual reference is now `Maia Bank v2.dc.html`.
 **Read first:** `../memory/produto.md`, `../memory/contexto-tecnico.md` (incl. *Frontend agent autonomy*) and the visual/flow reference `../../prototype/Maia Bank UI prototype/` (open `Maia Bank.dc.html`). Protocol: `../shared/como-executar.md` (tick a task only after verification + evidence line).
 
 ## Objective

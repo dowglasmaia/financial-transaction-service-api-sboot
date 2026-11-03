@@ -121,7 +121,7 @@ Done when: F-01 closed, `BR-04` replaced, all above pass, `git grep` shows no to
 - [ ] Human: Post-Login Action attached to the Login flow; two test users; sign-ups disabled; send each `sub` for seed linking.
 - [ ] Backend (BE-04): dependencies, filter chain, decoder + audience validator, role converter, method security, `CurrentUser`, Flyway `V3`, error handlers, CORS, actuator hardening, mock issuer, tests.
 - [ ] Contract (BE-06): `bearerAuth` scheme, 401/403 responses.
-- [ ] Frontend (FE-03): `core/auth` wrapper, guard, interceptor, logout, config loader.
+- [ ] Frontend (**SL-01**, formerly FE-03): `core/auth` wrapper, guard, interceptor, logout, config loader. Also add `http://localhost:4200` to the SPA's callback/logout/web-origin URLs and verify `@auth0/auth0-angular` against Angular 21 zoneless.
 - [ ] Re-verify every **[VERIFY]** item against current Auth0 docs.
 
 ## Skills used

@@ -1,8 +1,9 @@
-# Ready-to-paste prompts (one per spec)
+# Ready-to-paste prompts (one per spec or slice)
 
-Use **one fresh agent session per spec** (open the PR of the previous spec and merge it BEFORE starting the next), opened at the repo root. Before pasting: the spec status is *Approved* in `specs/README.md` and the *Human action before* is done. The agent must not close a spec unless its **Minimal validation** passes. After ALL specs are Done, run **FINAL-01** (final test round).
+Use **one fresh agent session per spec or slice** (open the PR of the previous one and merge it BEFORE starting the next), opened at the repo root. Before pasting: the spec status is *Approved* in `specs/README.md` and the *Human action before* is done. The agent must not close a spec unless its **Minimal validation** passes. After ALL specs are Done, run **FINAL-01** (final test round).
 
-Order: `MONO-01 → (BE-01 ∥ FE-01) → BE-02 → (BE-03 ∥ FE-02) → BE-04 → BE-05 → BE-06 → (FE-03 ∥ BE-07) → FE-04 → (FE-05 ∥ BE-08) → FINAL-01`. Backend specs never run in parallel with each other.
+Order: `MONO-01 → BE-01 → BE-02 → BE-03 → BE-04 → (FE-01, FE-02 done) → SL-00 → SL-01 → SL-02 → SL-03 → SL-04 → SL-05 → SL-06 → BE-07 → (FE-05 ∥ BE-08) → FINAL-01`.
+**Slices (`SL-xx`) carry backend + frontend + e2e on ONE branch and are strictly sequential** (D-31). `BE-05`, `BE-06`, `FE-03`, `FE-04` and `FE-01` no longer have prompts: they were superseded (see `specs/README.md`).
 
 ## MONO-01 — mono-01-monorepo
 
@@ -98,46 +99,154 @@ Minimal validation (you may NOT mark the spec Done until all pass; paste the rea
 Finish: fill the spec's Result section, set its status in .spec/specs/README.md, commit on the spec branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
 ```
 
-## BE-05 — be-05-behaviour-fixes
+## SL-00 - sl-00-visual-v2
 
-**Human action before:** Choose the time zone for day boundaries (default proposal: America/Sao_Paulo).
+**Human action before:** (Optional) export screenshots of every v2 screen/state into `prototype/screens-v2/` if the HTML does not render locally. Be ready to give a written sign-off of the look at the end.
 
 ```text
-Execute SPEC-BE-05 (.spec/specs/be-05-behaviour-fixes.md).
-Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md.
-Process: follow .spec/spec-execution-flow.md section 1 (the loop) and the runbook for this spec in section 4. Tests first, one commit per task, tick a task only with an evidence line (.spec/shared/como-executar.md).
-Keep all existing messages and the 204/404/422 contract.
-Git: FIRST run `git checkout main && git pull origin main`, then create the branch `spec/be-05-behaviour-fixes` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually.
-Stay strictly in the spec scope; stop and ask at its 'Stop and ask' items.
+Execute SPEC-SL-00 (.spec/specs/sl-00-visual-v2.md) - a VERTICAL SLICE: backend + frontend + e2e on ONE branch.
+Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (including decisions D-31..D-38 and 'Frontend: prototype and agent autonomy'), the slice loop in .spec/spec-execution-flow.md section 1b, and open the CURRENT visual reference prototype/Maia Bank UI prototype/Maia Bank v2.dc.html (the v1 file is history). UI copy is English and the brand is Maia Bank (D-33).
+Process: follow .spec/spec-execution-flow.md section 1b in order (contract first -> backend red/green -> API types -> frontend red/green -> e2e -> browser proof). Tests first (show them failing before the fix), one commit per task (`SL-00: <task>`), tick a task only with an evidence line (.spec/shared/como-executar.md).
+Frontend only: no backend change, no feature route, no HTTP. Replace the v1 look completely (tokens, shared components, shell, /design). Do not build any v2 element that has no endpoint (D-35).
+Git: FIRST run `git checkout main && git pull origin main`, then create the branch `slice/00-visual-v2` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually. Never commit or push to main.
+Stay strictly in the slice scope; stop and ask at its 'Stop and ask' items. A contract change needs the openapi-rest-contract preview and explicit approval BEFORE anything is generated or coded.
+Local stack: `docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api` (Postgres on localhost:5433), API on 8088 with profile local, app on 4200. You never type a password: automated e2e uses the mock IdP; the real Auth0 login is a manual step for the owner.
 Minimal validation (you may NOT mark the spec Done until all pass; paste the real outputs in the PR):
-  - A statement for a single day returns that day's transactions
-  - Missing/invalid dates and null request bodies never produce 500/NPE
-  - Suite green
-Finish: fill the spec's Result section, set its status in .spec/specs/README.md, commit on the spec branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
+  - `cd app-financial-transaction-service && npm ci && npm run build && npm test` green (state the counts)
+  - grep for the v1 palette (CEA45C, 2A1708, FBF1DE, 5FA899) in src returns nothing
+  - contrast unit test green in dark and derived light (text >= 4.5:1, controls >= 3:1)
+  - screenshots of /design at 1280/768/390 in both themes; written owner sign-off of the v2 look
+  - `app-ci` green on the PR
+Finish: fill the spec's Result section, set its status in .spec/specs/README.md, sync .spec/memory and app docs/prototype-deviations.md, commit on the slice branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
 ```
 
-## BE-06 — be-06-api-contract-and-evolution
+## SL-01 - sl-01-login-and-account
 
-**Human action before:** Approve the OpenAPI preview (the agent must present it before generating anything).
+**Human action before:** In Auth0 (app Transaction-app, SPA) add `http://localhost:4200` to Allowed Callback URLs, Logout URLs and Web Origins; the roles Action is attached to the Login flow; both test users exist with role customer. Run the API with `SPRING_PROFILES_ACTIVE=local`, `SEED_OWNER_SUB`, `SEED_SECOND_SUB`, and the compose infra up. Be ready to sign in manually at the end.
 
 ```text
-Execute SPEC-BE-06 (.spec/specs/be-06-api-contract-and-evolution.md).
-Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md.
-Process: follow .spec/spec-execution-flow.md section 1 (the loop) and the runbook for this spec in section 4. Tests first, one commit per task, tick a task only with an evidence line (.spec/shared/como-executar.md).
-Use the `openapi-rest-contract` skill's preview → approval → generation flow. Report whether generated bean validation is now enforced.
-Git: FIRST run `git checkout main && git pull origin main`, then create the branch `spec/be-06-api-contract-and-evolution` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually.
-Stay strictly in the spec scope; stop and ask at its 'Stop and ask' items.
+Execute SPEC-SL-01 (.spec/specs/sl-01-login-and-account.md) - a VERTICAL SLICE: backend + frontend + e2e on ONE branch.
+Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (including decisions D-31..D-38 and 'Frontend: prototype and agent autonomy'), the slice loop in .spec/spec-execution-flow.md section 1b, and open the CURRENT visual reference prototype/Maia Bank UI prototype/Maia Bank v2.dc.html (the v1 file is history). UI copy is English and the brand is Maia Bank (D-33).
+Process: follow .spec/spec-execution-flow.md section 1b in order (contract first -> backend red/green -> API types -> frontend red/green -> e2e -> browser proof). Tests first (show them failing before the fix), one commit per task (`SL-01: <task>`), tick a task only with an evidence line (.spec/shared/como-executar.md).
+Verify `@auth0/auth0-angular` against Angular 21 zoneless before using it (stop and ask if incompatible or if tokens must leave memory). New devDependencies (Playwright, type generator) and the mock-IdP image are 'Stop and ask'. Tokens never go to URLs, console or logs.
+Git: FIRST run `git checkout main && git pull origin main`, then create the branch `slice/01-login-and-account` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually. Never commit or push to main.
+Stay strictly in the slice scope; stop and ask at its 'Stop and ask' items. A contract change needs the openapi-rest-contract preview and explicit approval BEFORE anything is generated or coded.
+Local stack: `docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api` (Postgres on localhost:5433), API on 8088 with profile local, app on 4200. You never type a password: automated e2e uses the mock IdP; the real Auth0 login is a manual step for the owner.
 Minimal validation (you may NOT mark the spec Done until all pass; paste the real outputs in the PR):
-  - Contract validation scripts of the skill pass and Maven generation succeeds
-  - `GET /accounts/me` returns `{agency, number, balance}`; statement rows contain `id`; pagination parameters work
-  - Replaying a POST with the same `Idempotency-Key` does not double-debit
-  - Suite green
-Finish: fill the spec's Result section, set its status in .spec/specs/README.md, commit on the spec branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
+  - `./mvnw -B verify` green; `GET /accounts/me` returns exactly `{agency, number, balance}` for the caller; no token -> 401; unlinked sub -> 403
+  - `npm ci && npm run build && npm test` green; `npm run api:types` reproducible
+  - e2e with the mock IdP green on 1280/768/390: unauthenticated -> landing; sign in -> Home shows the caller's balance; user 2 sees a different account; sign out; expired token -> session-expired dialog
+  - axe: no serious violations on landing, sign-in, Home
+  - OWNER: one real Auth0 sign-in per test user in the browser (this closes BE-04's manual validation)
+  - `api-ci` and `app-ci` green on the PR
+Finish: fill the spec's Result section, set its status in .spec/specs/README.md, sync .spec/memory and app docs/prototype-deviations.md, commit on the slice branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
+```
+
+## SL-02 - sl-02-statement-and-detail
+
+**Human action before:** Choose the time zone for day boundaries (default America/Sao_Paulo); decide 400 vs 422 (default 422); decide the proposed `GET /transactions/summary`; be ready to approve the OpenAPI preview.
+
+```text
+Execute SPEC-SL-02 (.spec/specs/sl-02-statement-and-detail.md) - a VERTICAL SLICE: backend + frontend + e2e on ONE branch.
+Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (including decisions D-31..D-38 and 'Frontend: prototype and agent autonomy'), the slice loop in .spec/spec-execution-flow.md section 1b, and open the CURRENT visual reference prototype/Maia Bank UI prototype/Maia Bank v2.dc.html (the v1 file is history). UI copy is English and the brand is Maia Bank (D-33).
+Process: follow .spec/spec-execution-flow.md section 1b in order (contract first -> backend red/green -> API types -> frontend red/green -> e2e -> browser proof). Tests first (show them failing before the fix), one commit per task (`SL-02: <task>`), tick a task only with an evidence line (.spec/shared/como-executar.md).
+Preview ALL contract changes (every operation) with the openapi-rest-contract skill and wait for approval. Migrate to openapi-generator (jakarta) keeping generated package names; record whether bean validation is now enforced. Keep every existing message and the 204/404/422 contract. Totals come from the backend; the UI never computes a balance.
+Git: FIRST run `git checkout main && git pull origin main`, then create the branch `slice/02-statement-and-detail` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually. Never commit or push to main.
+Stay strictly in the slice scope; stop and ask at its 'Stop and ask' items. A contract change needs the openapi-rest-contract preview and explicit approval BEFORE anything is generated or coded.
+Local stack: `docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api` (Postgres on localhost:5433), API on 8088 with profile local, app on 4200. You never type a password: automated e2e uses the mock IdP; the real Auth0 login is a manual step for the owner.
+Minimal validation (you may NOT mark the spec Done until all pass; paste the real outputs in the PR):
+  - `./mvnw -B verify` green: single-day range returns that day; bad/missing/reversed dates -> 422, never 500; rows have `id`; page/size/sort/type work; totals independent of page; statement uses 2 queries
+  - contract validation scripts pass, Maven generation succeeds, `openapi-diff` runs in api-ci
+  - `npm ci && npm run build && npm test` green; e2e green on 3 viewports incl. user 2 opening user 1's id -> not found; axe no serious violations
+  - browser proof: single-day filter, detail by id, Home summary equals Statement totals
+  - `api-ci` and `app-ci` green on the PR
+Finish: fill the spec's Result section, set its status in .spec/specs/README.md, sync .spec/memory and app docs/prototype-deviations.md, commit on the slice branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
+```
+
+## SL-03 - sl-03-withdrawal
+
+**Human action before:** Approve the idempotency design (optional header; same key+body replays; same key+different body -> 422; per customer; TTL 24 h).
+
+```text
+Execute SPEC-SL-03 (.spec/specs/sl-03-withdrawal.md) - a VERTICAL SLICE: backend + frontend + e2e on ONE branch.
+Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (including decisions D-31..D-38 and 'Frontend: prototype and agent autonomy'), the slice loop in .spec/spec-execution-flow.md section 1b, and open the CURRENT visual reference prototype/Maia Bank UI prototype/Maia Bank v2.dc.html (the v1 file is history). UI copy is English and the brand is Maia Bank (D-33).
+Process: follow .spec/spec-execution-flow.md section 1b in order (contract first -> backend red/green -> API types -> frontend red/green -> e2e -> browser proof). Tests first (show them failing before the fix), one commit per task (`SL-03: <task>`), tick a task only with an evidence line (.spec/shared/como-executar.md).
+Write the replay/concurrency tests FIRST and show them failing. The result panel (success / business failure / uncertain) and the operation shell (one in-flight request, no automatic POST retry) are shared by SL-04..06: build them reusable. Withdrawal body is `{amount}` only.
+Git: FIRST run `git checkout main && git pull origin main`, then create the branch `slice/03-withdrawal` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually. Never commit or push to main.
+Stay strictly in the slice scope; stop and ask at its 'Stop and ask' items. A contract change needs the openapi-rest-contract preview and explicit approval BEFORE anything is generated or coded.
+Local stack: `docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api` (Postgres on localhost:5433), API on 8088 with profile local, app on 4200. You never type a password: automated e2e uses the mock IdP; the real Auth0 login is a manual step for the owner.
+Minimal validation (you may NOT mark the spec Done until all pass; paste the real outputs in the PR):
+  - Replaying a POST with the same `Idempotency-Key` does not double-debit; parallel same-key requests debit once
+  - A debit of exactly the full balance succeeds (204); amount > balance returns 422 and balance is unchanged; null/zero/negative -> 422, no 500
+  - Double click sends exactly one request; no automatic retry of any POST; request body is `{amount}` only
+  - e2e incl. forced network failure -> uncertain panel and explicit 'Try again' reusing the key; axe no serious violations
+  - `api-ci` and `app-ci` green on the PR
+Finish: fill the spec's Result section, set its status in .spec/specs/README.md, sync .spec/memory and app docs/prototype-deviations.md, commit on the slice branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
+```
+
+## SL-04 - sl-04-deposit
+
+**Human action before:** Approve the reconciliation: the boleto is a client-side demo and 'Simulate payment' calls the real `POST /transactions/deposit` for the caller's own account (agency and number from /accounts/me).
+
+```text
+Execute SPEC-SL-04 (.spec/specs/sl-04-deposit.md) - a VERTICAL SLICE: backend + frontend + e2e on ONE branch.
+Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (including decisions D-31..D-38 and 'Frontend: prototype and agent autonomy'), the slice loop in .spec/spec-execution-flow.md section 1b, and open the CURRENT visual reference prototype/Maia Bank UI prototype/Maia Bank v2.dc.html (the v1 file is history). UI copy is English and the brand is Maia Bank (D-33).
+Process: follow .spec/spec-execution-flow.md section 1b in order (contract first -> backend red/green -> API types -> frontend red/green -> e2e -> browser proof). Tests first (show them failing before the fix), one commit per task (`SL-04: <task>`), tick a task only with an evidence line (.spec/shared/como-executar.md).
+No server-side boleto, no new endpoint. Label every boleto surface as demo. Third-party deposits stay allowed in the API but are not offered in the UI.
+Git: FIRST run `git checkout main && git pull origin main`, then create the branch `slice/04-deposit` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually. Never commit or push to main.
+Stay strictly in the slice scope; stop and ask at its 'Stop and ask' items. A contract change needs the openapi-rest-contract preview and explicit approval BEFORE anything is generated or coded.
+Local stack: `docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api` (Postgres on localhost:5433), API on 8088 with profile local, app on 4200. You never type a password: automated e2e uses the mock IdP; the real Auth0 login is a manual step for the owner.
+Minimal validation (you may NOT mark the spec Done until all pass; paste the real outputs in the PR):
+  - Generate boleto -> Simulate payment: balance +amount exactly once and a DEPOSIT row in the statement
+  - null/invalid bodies -> 422 (no NPE); unknown account -> 404 'Account not found.' shown as a field error; replay with the same key credits once
+  - Double click = one request; no automatic retry; copy never claims a real boleto
+  - e2e green on 3 viewports; axe no serious violations; `api-ci` and `app-ci` green on the PR
+Finish: fill the spec's Result section, set its status in .spec/specs/README.md, sync .spec/memory and app docs/prototype-deviations.md, commit on the slice branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
+```
+
+## SL-05 - sl-05-recharge
+
+**Human action before:** None (carriers are the backend enum VIVO/CLARO/TIM/ALGAR; v2's Oi becomes Algar).
+
+```text
+Execute SPEC-SL-05 (.spec/specs/sl-05-recharge.md) - a VERTICAL SLICE: backend + frontend + e2e on ONE branch.
+Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (including decisions D-31..D-38 and 'Frontend: prototype and agent autonomy'), the slice loop in .spec/spec-execution-flow.md section 1b, and open the CURRENT visual reference prototype/Maia Bank UI prototype/Maia Bank v2.dc.html (the v1 file is history). UI copy is English and the brand is Maia Bank (D-33).
+Process: follow .spec/spec-execution-flow.md section 1b in order (contract first -> backend red/green -> API types -> frontend red/green -> e2e -> browser proof). Tests first (show them failing before the fix), one commit per task (`SL-05: <task>`), tick a task only with an evidence line (.spec/shared/como-executar.md).
+Keep the Kafka topic `recharge-mobile-topic` and payload byte-identical to the BE-01/BE-03 characterization. Success copy says the recharge was 'requested', never 'completed'.
+Git: FIRST run `git checkout main && git pull origin main`, then create the branch `slice/05-recharge` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually. Never commit or push to main.
+Stay strictly in the slice scope; stop and ask at its 'Stop and ask' items. A contract change needs the openapi-rest-contract preview and explicit approval BEFORE anything is generated or coded.
+Local stack: `docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api` (Postgres on localhost:5433), API on 8088 with profile local, app on 4200. You never type a password: automated e2e uses the mock IdP; the real Auth0 login is a manual step for the owner.
+Minimal validation (you may NOT mark the spec Done until all pass; paste the real outputs in the PR):
+  - Recharge payload on Kafka equals the BE-01 characterization (test) and the event is visible in Kafdrop (record what you saw)
+  - invalid phone/carrier/amount/null bodies -> 422 (no NPE); debit + ledger + outbox consistent
+  - Success text contains 'requested' and never 'completed'; masked phone splits into areaCode + phoneNumber
+  - e2e green on 3 viewports; axe no serious violations; `api-ci` and `app-ci` green on the PR
+Finish: fill the spec's Result section, set its status in .spec/specs/README.md, sync .spec/memory and app docs/prototype-deviations.md, commit on the slice branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
+```
+
+## SL-06 - sl-06-pix
+
+**Human action before:** Confirm `maiabank-api` is up on localhost:8089; provide the MaiaBank contract only if the Pix payload must change.
+
+```text
+Execute SPEC-SL-06 (.spec/specs/sl-06-pix.md) - a VERTICAL SLICE: backend + frontend + e2e on ONE branch.
+Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (including decisions D-31..D-38 and 'Frontend: prototype and agent autonomy'), the slice loop in .spec/spec-execution-flow.md section 1b, and open the CURRENT visual reference prototype/Maia Bank UI prototype/Maia Bank v2.dc.html (the v1 file is history). UI copy is English and the brand is Maia Bank (D-33).
+Process: follow .spec/spec-execution-flow.md section 1b in order (contract first -> backend red/green -> API types -> frontend red/green -> e2e -> browser proof). Tests first (show them failing before the fix), one commit per task (`SL-06: <task>`), tick a task only with an evidence line (.spec/shared/como-executar.md).
+Do not credit a local Pix recipient. Keep reserve -> MaiaBank -> confirm/compensate and the Feign timeouts/circuit breaker as built in BE-03. Client validators must agree with the server on the shared CPF/e-mail/phone cases; never log or show a full Pix key.
+Git: FIRST run `git checkout main && git pull origin main`, then create the branch `slice/06-pix` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually. Never commit or push to main.
+Stay strictly in the slice scope; stop and ask at its 'Stop and ask' items. A contract change needs the openapi-rest-contract preview and explicit approval BEFORE anything is generated or coded.
+Local stack: `docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api` (Postgres on localhost:5433), API on 8088 with profile local, app on 4200. You never type a password: automated e2e uses the mock IdP; the real Auth0 login is a manual step for the owner.
+Minimal validation (you may NOT mark the spec Done until all pass; paste the real outputs in the PR):
+  - CPF/e-mail/phone/null-body cases -> 422 with existing messages and no NPE; client and server agree on the shared cases
+  - A MaiaBank failure/timeout leaves balance and ledger consistent (existing BE-03 tests green); UI shows 'We couldn't send this Pix. Your balance was not changed.' or the uncertain-outcome panel
+  - Valid Pix debits once and appears in the statement; replay with the same key sends one Pix
+  - e2e against the real maiabank-api container green on 3 viewports; axe no serious violations; `api-ci` and `app-ci` green on the PR
+Finish: fill the spec's Result section, set its status in .spec/specs/README.md, sync .spec/memory and app docs/prototype-deviations.md, commit on the slice branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
 ```
 
 ## BE-07 — be-07-platform-upgrade
 
-**Human action before:** Approve the Boot version and JDK vendor/image.
+**Human action before:** Approve the Boot version and JDK vendor/image. (The local build is already on Java 21 with Lombok 1.18.42, uncommitted: commit it as its own change first.)
 
 ```text
 Execute SPEC-BE-07 (.spec/specs/be-07-platform-upgrade.md).
@@ -172,24 +281,6 @@ Minimal validation (you may NOT mark the spec Done until all pass; paste the rea
 Finish: fill the spec's Result section, set its status in .spec/specs/README.md, commit on the spec branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
 ```
 
-## FE-01 — fe-01-design-prototype
-
-**Human action before:** Open `prototype/Maia Bank UI prototype/Maia Bank.dc.html` yourself.
-
-```text
-Execute SPEC-FE-01 (.spec/specs/fe-01-design-prototype.md).
-Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (including 'Frontend: prototype and agent autonomy') and open the reference prototype in prototype/Maia Bank UI prototype/ (Maia Bank.dc.html).
-Process: follow .spec/spec-execution-flow.md section 1 (the loop) and the runbook for this spec in section 4. Tests first, one commit per task, tick a task only with an evidence line (.spec/shared/como-executar.md).
-Do not write code. Review every screen/state against `.spec/designer-brief.md` §13 and write the divergence list (prototype vs backend contract, e.g. boleto deposit; prototype vs brief).
-Git: FIRST run `git checkout main && git pull origin main`, then create the branch `spec/fe-01-design-prototype` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually.
-Stay strictly in the spec scope; stop and ask at its 'Stop and ask' items.
-Minimal validation (you may NOT mark the spec Done until all pass; paste the real outputs in the PR):
-  - Checklist §13 completed with pass/fail per item
-  - Divergence list written (seed for `docs/prototype-deviations.md`)
-  - Written sign-off from the owner
-Finish: fill the spec's Result section, set its status in .spec/specs/README.md, commit on the spec branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
-```
-
 ## FE-02 — fe-02-foundation
 
 **Human action before:** FE-01 signed off (tokens tasks). Project name is fixed.
@@ -209,50 +300,13 @@ Minimal validation (you may NOT mark the spec Done until all pass; paste the rea
 Finish: fill the spec's Result section, set its status in .spec/specs/README.md, commit on the spec branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
 ```
 
-## FE-03 — fe-03-auth-home-statement
-
-**Human action before:** BE-04 and BE-06 are Done (real auth, `/accounts/me`, row ids).
-
-```text
-Execute SPEC-FE-03 (.spec/specs/fe-03-auth-home-statement.md).
-Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (including 'Frontend: prototype and agent autonomy') and open the reference prototype in prototype/Maia Bank UI prototype/ (Maia Bank.dc.html).
-Process: follow .spec/spec-execution-flow.md section 1 (the loop) and the runbook for this spec in section 4. Tests first, one commit per task, tick a task only with an evidence line (.spec/shared/como-executar.md).
-Use `angular-module-scaffold` per feature with a `doc.md`. The prototype is a reference, not a limit: apply Tier-1 improvements and log them; write Tier-2 proposals and stop.
-Git: FIRST run `git checkout main && git pull origin main`, then create the branch `spec/fe-03-auth-home-statement` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually.
-Stay strictly in the spec scope; stop and ask at its 'Stop and ask' items.
-Minimal validation (you may NOT mark the spec Done until all pass; paste the real outputs in the PR):
-  - e2e with the mock issuer: unauthenticated route redirects to login; after login Home shows the balance from `/accounts/me`
-  - Statement: filter a single day, see rows, open detail by id
-  - No tokens in URLs/console; axe has no serious violations on these screens
-Finish: fill the spec's Result section, set its status in .spec/specs/README.md, commit on the spec branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
-```
-
-## FE-04 — fe-04-operations
-
-**Human action before:** Approve the deposit reconciliation if the prototype's boleto flow must change (Tier-2 proposal from FE-01/FE-03).
-
-```text
-Execute SPEC-FE-04 (.spec/specs/fe-04-operations.md).
-Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (including 'Frontend: prototype and agent autonomy') and open the reference prototype in prototype/Maia Bank UI prototype/ (Maia Bank.dc.html).
-Process: follow .spec/spec-execution-flow.md section 1 (the loop) and the runbook for this spec in section 4. Tests first, one commit per task, tick a task only with an evidence line (.spec/shared/como-executar.md).
-Order: Withdrawal → Deposit → Recharge → Pix. Build the shared result panel first (success / business failure / uncertain outcome).
-Git: FIRST run `git checkout main && git pull origin main`, then create the branch `spec/fe-04-operations` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually.
-Stay strictly in the spec scope; stop and ask at its 'Stop and ask' items.
-Minimal validation (you may NOT mark the spec Done until all pass; paste the real outputs in the PR):
-  - Each flow completes against `docker compose` (balance changes, new row in statement)
-  - Double click sends exactly one request; no automatic retry of any POST
-  - Withdrawal request body is `{amount}` only
-  - Recharge success text says 'requested', never 'completed'
-Finish: fill the spec's Result section, set its status in .spec/specs/README.md, commit on the spec branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
-```
-
 ## FE-05 — fe-05-final-validation
 
-**Human action before:** Release sign-off.
+**Human action before:** SL-06 and BE-07 Done; release sign-off.
 
 ```text
 Execute SPEC-FE-05 (.spec/specs/fe-05-final-validation.md).
-Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (including 'Frontend: prototype and agent autonomy') and open the reference prototype in prototype/Maia Bank UI prototype/ (Maia Bank.dc.html).
+Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (including 'Frontend: prototype and agent autonomy') and open the reference prototype prototype/Maia Bank UI prototype/Maia Bank v2.dc.html.
 Process: follow .spec/spec-execution-flow.md section 1 (the loop) and the runbook for this spec in section 4. Tests first, one commit per task, tick a task only with an evidence line (.spec/shared/como-executar.md).
 Update `.spec/memory/` so it matches what was delivered.
 Git: FIRST run `git checkout main && git pull origin main`, then create the branch `spec/fe-05-final-validation` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually.
@@ -282,7 +336,8 @@ Finish: fill the spec's Result section, set its status in .spec/specs/README.md,
 ```
 
 ## Rules for every prompt
-- **Git:** always `git checkout main && git pull origin main` before creating the spec branch; commit after the spec's minimal validation passes, then push the branch; never open PRs or merge (the owner does it manually). If the dependency specs are not merged into main yet, stop and ask.
-- Fresh session per spec; never combine two specs in one session.
-- If a validation cannot be run (e.g. no Docker or no Auth0 tenant), the agent reports it as **not executed** and the spec stays open.
+- **Git:** always `git checkout main && git pull origin main` before creating the branch (`spec/<id>-<slug>` or `slice/<nn>-<slug>`); commit after the minimal validation passes, then push the branch; never open PRs or merge (the owner does it manually); never commit or push to `main`. If the dependency specs are not merged into main yet, stop and ask.
+- Fresh session per spec or slice; never combine two in one session. **A slice never leaves the other side for later:** if a field, status or message is needed by the frontend, the backend change is in the same slice (and the contract was previewed first).
+- If a validation cannot be run (e.g. no Docker or no Auth0 tenant), the agent reports it as **not executed** and the spec stays open. The agent never types a password.
 - If the agent proposes a change outside the spec, it writes a proposal and stops (backend contract wins over the prototype).
+- Language: docs and code in English, chat answers in Portuguese; UI copy English; brand Maia Bank (D-33).

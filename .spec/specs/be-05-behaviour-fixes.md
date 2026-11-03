@@ -1,6 +1,7 @@
 # SPEC-BE-05 — Dates, validation and error handling
 
-**Status:** Draft (not authorized) · **Depends on:** BE-04 · **Parallel with:** none
+**Status:** Superseded (2026-11-03, D-31) — executed through the vertical slices · **Depends on:** BE-04 · **Parallel with:** none
+> **Do not execute this spec on its own.** Scope catalogue only. Dates, handler → **SL-02**; validators and null bodies → **SL-03** (withdraw), **SL-04** (deposit), **SL-05** (recharge), **SL-06** (Pix). Mapping in `README.md`.
 **Read first:** `../memory/produto.md`, `../memory/contexto-tecnico.md`. Protocol: `../shared/como-executar.md` (tick a task only after verification + evidence line).
 
 ## Objective

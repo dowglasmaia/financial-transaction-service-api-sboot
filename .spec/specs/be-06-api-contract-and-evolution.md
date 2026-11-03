@@ -1,6 +1,7 @@
 # SPEC-BE-06 — OpenAPI contract, generator, new endpoints
 
-**Status:** Draft (not authorized) · **Depends on:** BE-05 · **Parallel with:** none
+**Status:** Superseded (2026-11-03, D-31) — executed through the vertical slices · **Depends on:** BE-05 · **Parallel with:** none
+> **Do not execute this spec on its own.** Scope catalogue only. `GET /accounts/me` → **SL-01**; generator migration, contract corrections, row `id`, pagination/sort/type, totals, ISO dates, openapi-diff → **SL-02**; `Idempotency-Key` + `V4` → **SL-03**. Mapping in `README.md`.
 **Read first:** `../memory/produto.md`, `../memory/contexto-tecnico.md`. Protocol: `../shared/como-executar.md` (tick a task only after verification + evidence line).
 
 ## Objective
