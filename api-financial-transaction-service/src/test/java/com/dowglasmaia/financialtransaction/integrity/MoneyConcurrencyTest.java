@@ -1,6 +1,6 @@
 package com.dowglasmaia.financialtransaction.integrity;
 
-import com.dowglasmaia.financialtransaction.entity.Transaction;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionEntity;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ class MoneyConcurrencyTest extends AbstractIntegrationTest {
         assertThat(accepted + rejected).as("only 204 or 422 are expected, got %s", statuses).isEqualTo(THREADS);
 
         BigDecimal balance = balanceOf(SEED_ACCOUNT);
-        List<Transaction> ledger = transactionRepository.findAll();
+        List<TransactionEntity> ledger = transactionRepository.findAll();
 
         assertThat(balance.signum()).as("balance must never be negative").isGreaterThanOrEqualTo(0);
         assertThat(ledger).as("one ledger row per accepted withdrawal").hasSize((int) accepted);
@@ -55,7 +55,7 @@ class MoneyConcurrencyTest extends AbstractIntegrationTest {
 
         assertThat(statuses).allMatch(s -> s == 204 || s == 422);
         BigDecimal balance = balanceOf(SEED_ACCOUNT);
-        List<Transaction> ledger = transactionRepository.findAll();
+        List<TransactionEntity> ledger = transactionRepository.findAll();
 
         BigDecimal deposits = sum(ledger.stream().filter(t -> t.getTransactionType() == TransactionType.DEPOSIT).toList());
         BigDecimal withdrawals = sum(ledger.stream().filter(t -> t.getTransactionType() == TransactionType.WITHDRAW).toList());
@@ -67,8 +67,8 @@ class MoneyConcurrencyTest extends AbstractIntegrationTest {
 
     // ---------------------------------------------------------------- helpers
 
-    private static BigDecimal sum(List<Transaction> rows) {
-        return rows.stream().map(Transaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+    private static BigDecimal sum(List<TransactionEntity> rows) {
+        return rows.stream().map(TransactionEntity::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private static int status(org.springframework.test.web.servlet.ResultActions result) throws Exception {

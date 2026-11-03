@@ -1,11 +1,11 @@
 package com.dowglasmaia.financialtransaction.integrity;
 
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountEntity;
-import com.dowglasmaia.financialtransaction.entity.Transaction;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionEntity;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountJpaRepository;
 import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
-import com.dowglasmaia.financialtransaction.repository.TransactionRepository;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionJpaRepository;
 import com.dowglasmaia.financialtransaction.support.MockIssuer;
 import com.dowglasmaia.financialtransaction.support.SharedPostgres;
 import com.sun.net.httpserver.HttpServer;
@@ -106,7 +106,7 @@ class PixMaiaBankResilienceTest {
 
     @Autowired MockMvc mvc;
     @Autowired AccountJpaRepository accounts;
-    @Autowired TransactionRepository ledger;
+    @Autowired TransactionJpaRepository ledger;
     @Autowired OutboxEventRepository outbox;
     @Autowired CircuitBreakerRegistry breakers;
 
@@ -143,7 +143,7 @@ class PixMaiaBankResilienceTest {
         pix().andExpect(status().isNoContent());
 
         assertThat(balance()).isEqualByComparingTo("4900.00");
-        List<Transaction> rows = ledger.findAll();
+        List<TransactionEntity> rows = ledger.findAll();
         assertThat(rows).hasSize(1);
         assertThat(rows.get(0).getStatus()).isEqualTo(TransactionStatus.COMPLETED);
         assertThat(HITS.get()).isEqualTo(1);
@@ -156,7 +156,7 @@ class PixMaiaBankResilienceTest {
         pix().andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.message").value("Fail send Pix."));
 
         assertThat(balance()).as("debit reversed").isEqualByComparingTo(SEED_BALANCE);
-        assertThat(ledger.findAll()).singleElement().extracting(Transaction::getStatus).isEqualTo(TransactionStatus.FAILED);
+        assertThat(ledger.findAll()).singleElement().extracting(TransactionEntity::getStatus).isEqualTo(TransactionStatus.FAILED);
     }
 
     @Test
@@ -169,7 +169,7 @@ class PixMaiaBankResilienceTest {
 
         assertThat(elapsed).as("the request must not wait for the slow bank").isLessThan(2400);
         assertThat(balance()).isEqualByComparingTo(SEED_BALANCE);
-        assertThat(ledger.findAll()).singleElement().extracting(Transaction::getStatus).isEqualTo(TransactionStatus.FAILED);
+        assertThat(ledger.findAll()).singleElement().extracting(TransactionEntity::getStatus).isEqualTo(TransactionStatus.FAILED);
     }
 
     @Test

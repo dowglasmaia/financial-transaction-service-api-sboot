@@ -1,7 +1,7 @@
 package com.dowglasmaia.financialtransaction.characterization;
 
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountEntity;
-import com.dowglasmaia.financialtransaction.entity.Transaction;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionEntity;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -79,7 +79,7 @@ class StatementCharacterizationTest extends AbstractIntegrationTest {
 
     @Test
     void transactionByIdReturnsTypeAmountAndDate() throws Exception {
-        Transaction saved = ledger(TransactionType.PIX, new BigDecimal("12.50"), seedAccount().getId(), at(11, 12));
+        TransactionEntity saved = ledger(TransactionType.PIX, new BigDecimal("12.50"), seedAccount().getId(), at(11, 12));
 
         get("/" + saved.getId()).andExpect(status().isOk())
               .andExpect(jsonPath("$.transactionType").value("PIX"))
@@ -89,7 +89,7 @@ class StatementCharacterizationTest extends AbstractIntegrationTest {
     @Test
     void transactionByIdOfAnotherAccountIsNotFound() throws Exception { // F-04 fixed by BE-04
         AccountEntity other = createOtherAccount("9999", new BigDecimal("10.00"));
-        Transaction foreign = ledger(TransactionType.DEPOSIT, new BigDecimal("9.00"), other.getId(), at(11, 12));
+        TransactionEntity foreign = ledger(TransactionType.DEPOSIT, new BigDecimal("9.00"), other.getId(), at(11, 12));
         get("/" + foreign.getId()).andExpect(status().isNotFound())
               .andExpect(jsonPath("$.message").value("Transaction not found"));
     }

@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.entity;
+package com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence;
 
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "transaction")
-public class Transaction {
+public class TransactionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -1,7 +1,7 @@
 package com.dowglasmaia.financialtransaction.security;
 
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountEntity;
-import com.dowglasmaia.financialtransaction.entity.Transaction;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionEntity;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
 import com.dowglasmaia.financialtransaction.support.MockIssuer;
@@ -33,7 +33,7 @@ class OwnershipTest extends AbstractIntegrationTest {
         accountB = createOtherAccount("9999", new BigDecimal("1000.00"), MockIssuer.OTHER_SUB);
     }
 
-    private Transaction row(TransactionType type, String amount, AccountEntity account) {
+    private TransactionEntity row(TransactionType type, String amount, AccountEntity account) {
         return ledger(type, new BigDecimal(amount), account.getId(), OffsetDateTime.now().minusHours(1));
     }
 
@@ -41,7 +41,7 @@ class OwnershipTest extends AbstractIntegrationTest {
 
     @Test
     void aCustomerCannotReadAnotherCustomersTransactionById() throws Exception {
-        Transaction ofB = row(TransactionType.DEPOSIT, "9.00", accountB);
+        TransactionEntity ofB = row(TransactionType.DEPOSIT, "9.00", accountB);
 
         getAs(tokenA, "/" + ofB.getId()).andExpect(status().isNotFound())
               .andExpect(jsonPath("$.code").value("NOT_FOUND"))

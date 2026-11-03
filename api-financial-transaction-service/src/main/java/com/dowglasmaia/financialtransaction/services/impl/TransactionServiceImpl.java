@@ -2,11 +2,11 @@ package com.dowglasmaia.financialtransaction.services.impl;
 
 import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAccountUseCase;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
-import com.dowglasmaia.financialtransaction.entity.Transaction;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionEntity;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
-import com.dowglasmaia.financialtransaction.repository.TransactionRepository;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionJpaRepository;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
 import com.dowglasmaia.financialtransaction.transaction.domain.DateConverter;
 import com.dowglasmaia.provider.model.TransactionResponseDTO;
@@ -28,12 +28,12 @@ import static com.dowglasmaia.financialtransaction.services.impl.mapper.Transact
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
-    private final TransactionRepository transactionRepository;
+    private final TransactionJpaRepository transactionRepository;
     private final GetCurrentAccountUseCase getCurrentAccount;
 
 
     @Autowired
-    public TransactionServiceImpl(TransactionRepository transactionRepository,
+    public TransactionServiceImpl(TransactionJpaRepository transactionRepository,
                                   GetCurrentAccountUseCase getCurrentAccount
     ){
         this.transactionRepository = transactionRepository;
@@ -50,7 +50,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public String record(TransactionType type, String accountId, BigDecimal amount, String agencyId, TransactionStatus status){
         log.info("Start save Transaction");
-        var transactionEntity = Transaction.builder()
+        var transactionEntity = TransactionEntity.builder()
               .transactionType(type)
               .accountId(accountId)
               .amount(amount)

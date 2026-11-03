@@ -1,7 +1,7 @@
 package com.dowglasmaia.financialtransaction.characterization;
 
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountEntity;
-import com.dowglasmaia.financialtransaction.entity.Transaction;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionEntity;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
@@ -27,9 +27,9 @@ class DepositWithdrawCharacterizationTest extends AbstractIntegrationTest {
               .andExpect(status().isNoContent());
 
         assertThat(sameValue(new BigDecimal("5200.00"), balanceOf(SEED_ACCOUNT))).isTrue();
-        List<Transaction> rows = transactionRepository.findAll();
+        List<TransactionEntity> rows = transactionRepository.findAll();
         assertThat(rows).hasSize(1);
-        Transaction row = rows.get(0);
+        TransactionEntity row = rows.get(0);
         assertThat(row.getTransactionType()).isEqualTo(TransactionType.DEPOSIT);
         assertThat(row.getAccountId()).isEqualTo(seedAccount().getId());
         assertThat(row.getAgencyId()).isEqualTo(seedAgency().getId());
@@ -83,7 +83,7 @@ class DepositWithdrawCharacterizationTest extends AbstractIntegrationTest {
         post("/atm-withdrawal", "{\"amount\":100.00}").andExpect(status().isNoContent());
 
         assertThat(sameValue(new BigDecimal("4900.00"), balanceOf(SEED_ACCOUNT))).isTrue();
-        Transaction row = transactionRepository.findAll().get(0);
+        TransactionEntity row = transactionRepository.findAll().get(0);
         assertThat(row.getTransactionType()).isEqualTo(TransactionType.WITHDRAW);
         assertThat(row.getAccountId()).isEqualTo(seedAccount().getId());
         assertThat(row.getAgencyId()).isEqualTo(seedAgency().getId());

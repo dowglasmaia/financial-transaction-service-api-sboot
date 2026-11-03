@@ -1,6 +1,6 @@
 package com.dowglasmaia.financialtransaction.services.impl.mapper;
 
-import com.dowglasmaia.financialtransaction.entity.Transaction;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionEntity;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.provider.model.TransactionResponseDTO;
 import com.dowglasmaia.provider.model.TransactionsResponseDTO;
@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class TransactionMapper {
 
-    public static TransactionsResponseDTO toTransactionsResponse(List<Transaction> transactions){
+    public static TransactionsResponseDTO toTransactionsResponse(List<TransactionEntity> transactions){
         TransactionsResponseDTO transactionsResponse = new TransactionsResponseDTO();
 
         List<TransactionResponseDTO> newTransactions = transactions.stream()
@@ -27,14 +27,14 @@ public class TransactionMapper {
         // sumIncoming e sumOutgoing
         BigDecimal sumIncoming = transactions.stream()
               .filter(transaction -> transaction.getTransactionType() == TransactionType.DEPOSIT)
-              .map(Transaction::getAmount)
+              .map(TransactionEntity::getAmount)
               .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal sumOutgoing = transactions.stream()
               .filter(transaction -> transaction.getTransactionType() == TransactionType.PIX ||
                     transaction.getTransactionType() == TransactionType.PHONE_RECHARGE ||
                     transaction.getTransactionType() == TransactionType.WITHDRAW)
-              .map(Transaction::getAmount)
+              .map(TransactionEntity::getAmount)
               .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         transactionsResponse.setTransaction(newTransactions);
@@ -44,7 +44,7 @@ public class TransactionMapper {
         return transactionsResponse;
     }
 
-    public static TransactionResponseDTO toTransactionRequest(Transaction transaction){
+    public static TransactionResponseDTO toTransactionRequest(TransactionEntity transaction){
         TransactionResponseDTO response = new TransactionResponseDTO();
         response.setAmount(transaction.getAmount());
         response.setTransactionType(transaction.getTransactionType().name());

@@ -1,11 +1,11 @@
 package com.dowglasmaia.financialtransaction.integrity;
 
 import com.dowglasmaia.financialtransaction.entity.OutboxEvent;
-import com.dowglasmaia.financialtransaction.entity.Transaction;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionEntity;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
-import com.dowglasmaia.financialtransaction.repository.TransactionRepository;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionJpaRepository;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -26,11 +26,11 @@ import static org.mockito.Mockito.verify;
  */
 class FailureInjectionTest extends AbstractIntegrationTest {
 
-    @SpyBean TransactionRepository ledger;
+    @SpyBean TransactionJpaRepository ledger;
     @SpyBean OutboxEventRepository outbox;
 
     private void ledgerFails() {
-        doThrow(new IllegalStateException("ledger unavailable")).when(ledger).save(any(Transaction.class));
+        doThrow(new IllegalStateException("ledger unavailable")).when(ledger).save(any(TransactionEntity.class));
     }
 
     @Test
@@ -84,7 +84,7 @@ class FailureInjectionTest extends AbstractIntegrationTest {
               .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isUnprocessableEntity());
 
         assertThat(sameValue(SEED_BALANCE, balanceOf(SEED_ACCOUNT))).as("debit reversed").isTrue();
-        List<Transaction> rows = transactionRepository.findAll();
+        List<TransactionEntity> rows = transactionRepository.findAll();
         assertThat(rows).hasSize(1);
         assertThat(rows.get(0).getTransactionType()).isEqualTo(TransactionType.PIX);
         assertThat(rows.get(0).getStatus()).isEqualTo(TransactionStatus.FAILED);
@@ -92,7 +92,7 @@ class FailureInjectionTest extends AbstractIntegrationTest {
         assertThat(bodyOf(get("?initial-date=01/01/2000&final-date=31/12/2100")).get("transaction")).isEmpty();
     }
 
-    private static BigDecimal sum(List<Transaction> rows) {
-        return rows.stream().map(Transaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+    private static BigDecimal sum(List<TransactionEntity> rows) {
+        return rows.stream().map(TransactionEntity::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }
