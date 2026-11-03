@@ -1,9 +1,9 @@
 package com.dowglasmaia.financialtransaction.integrity;
 
-import com.dowglasmaia.financialtransaction.entity.Account;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.entity.Transaction;
 import com.dowglasmaia.financialtransaction.entity.TransactionStatusEnum;
-import com.dowglasmaia.financialtransaction.repository.AccountRepository;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountJpaRepository;
 import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
 import com.dowglasmaia.financialtransaction.repository.TransactionRepository;
 import com.dowglasmaia.financialtransaction.support.MockIssuer;
@@ -105,7 +105,7 @@ class PixMaiaBankResilienceTest {
     }
 
     @Autowired MockMvc mvc;
-    @Autowired AccountRepository accounts;
+    @Autowired AccountJpaRepository accounts;
     @Autowired TransactionRepository ledger;
     @Autowired OutboxEventRepository outbox;
     @Autowired CircuitBreakerRegistry breakers;
@@ -115,7 +115,7 @@ class PixMaiaBankResilienceTest {
         await().atMost(Duration.ofSeconds(10)).until(() -> IN_FLIGHT.get() == 0); // leftovers of a slow test
         ledger.deleteAll();
         outbox.deleteAll();
-        Account seed = accounts.findByNumber(SEED_ACCOUNT).orElseThrow();
+        AccountEntity seed = accounts.findByNumber(SEED_ACCOUNT).orElseThrow();
         seed.setBalance(SEED_BALANCE);
         accounts.save(seed);
         HITS.set(0);

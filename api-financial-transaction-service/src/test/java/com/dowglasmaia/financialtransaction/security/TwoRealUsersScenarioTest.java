@@ -1,8 +1,8 @@
 package com.dowglasmaia.financialtransaction.security;
 
-import com.dowglasmaia.financialtransaction.entity.Account;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
-import com.dowglasmaia.financialtransaction.entity.User;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.UserEntity;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
 import com.dowglasmaia.financialtransaction.support.MockIssuer;
 import org.junit.jupiter.api.AfterEach;
@@ -30,11 +30,11 @@ class TwoRealUsersScenarioTest extends AbstractIntegrationTest {
     private final String token1 = MockIssuer.tokenFor(USER_1);
     private final String token2 = MockIssuer.tokenFor(USER_2);
     private String previousSubject;
-    private Account second;
+    private AccountEntity second;
 
     @BeforeEach
     void linkTheTwoUsers() {
-        User demo = seedAccount().getUser();
+        UserEntity demo = seedAccount().getUser();
         previousSubject = demo.getExternalSubject();
         demo.setExternalSubject(USER_1);
         userRepository.save(demo);
@@ -43,7 +43,7 @@ class TwoRealUsersScenarioTest extends AbstractIntegrationTest {
 
     @AfterEach
     void restoreTheSeed() {
-        User demo = seedAccount().getUser();
+        UserEntity demo = seedAccount().getUser();
         demo.setExternalSubject(previousSubject);
         userRepository.save(demo);
     }

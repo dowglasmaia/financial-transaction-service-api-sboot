@@ -1,10 +1,10 @@
 package com.dowglasmaia.financialtransaction.services.client;
 
-import com.dowglasmaia.financialtransaction.entity.Account;
-import com.dowglasmaia.financialtransaction.entity.User;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.UserEntity;
 import com.dowglasmaia.financialtransaction.exeptions.ForbiddenExeption;
-import com.dowglasmaia.financialtransaction.repository.AccountRepository;
-import com.dowglasmaia.financialtransaction.repository.UserRepository;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountJpaRepository;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.UserJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,11 +23,11 @@ public class CurrentUser {
 
     static final String NOT_LINKED = "Access denied: this identity is not linked to a customer.";
 
-    private final UserRepository userRepository;
-    private final AccountRepository accountRepository;
+    private final UserJpaRepository userRepository;
+    private final AccountJpaRepository accountRepository;
 
     @Autowired
-    public CurrentUser(UserRepository userRepository, AccountRepository accountRepository) {
+    public CurrentUser(UserJpaRepository userRepository, AccountJpaRepository accountRepository) {
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
     }
@@ -41,7 +41,7 @@ public class CurrentUser {
         throw new ForbiddenExeption("Access denied.");
     }
 
-    public Optional<User> user() {
+    public Optional<UserEntity> user() {
         return userRepository.findByExternalSubject(subject());
     }
 
@@ -50,8 +50,8 @@ public class CurrentUser {
     }
 
     /** The caller's account (one per user). Not linked, or linked without an account: 403. */
-    public Account account() {
-        User user = user().orElseThrow(() -> new ForbiddenExeption(NOT_LINKED));
+    public AccountEntity account() {
+        UserEntity user = user().orElseThrow(() -> new ForbiddenExeption(NOT_LINKED));
         return accountRepository.findFirstByUserIdOrderByNumberAsc(user.getId())
               .orElseThrow(() -> new ForbiddenExeption(NOT_LINKED));
     }

@@ -1,6 +1,6 @@
 package com.dowglasmaia.financialtransaction.controllers;
 
-import com.dowglasmaia.financialtransaction.entity.Account;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.services.client.CurrentUser;
 import com.dowglasmaia.provider.api.AccountsApi;
 import com.dowglasmaia.provider.model.AccountResponseDTO;
@@ -26,7 +26,7 @@ public class AccountController implements AccountsApi {
 
     @Override
     public ResponseEntity<AccountResponseDTO> getMyAccount(){
-        Account account = currentUser.account();
+        AccountEntity account = currentUser.account();
 
         AccountResponseDTO body = new AccountResponseDTO()
               .agency(account.getAgency().getNumber())

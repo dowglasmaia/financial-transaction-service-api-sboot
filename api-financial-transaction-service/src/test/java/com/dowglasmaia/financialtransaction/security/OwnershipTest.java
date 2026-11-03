@@ -1,6 +1,6 @@
 package com.dowglasmaia.financialtransaction.security;
 
-import com.dowglasmaia.financialtransaction.entity.Account;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.entity.Transaction;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
@@ -26,14 +26,14 @@ class OwnershipTest extends AbstractIntegrationTest {
 
     private final String tokenA = MockIssuer.ownerToken();
     private final String tokenB = MockIssuer.tokenFor(MockIssuer.OTHER_SUB);
-    private Account accountB;
+    private AccountEntity accountB;
 
     @BeforeEach
     void customerB() {
         accountB = createOtherAccount("9999", new BigDecimal("1000.00"), MockIssuer.OTHER_SUB);
     }
 
-    private Transaction row(TransactionTypeEnum type, String amount, Account account) {
+    private Transaction row(TransactionTypeEnum type, String amount, AccountEntity account) {
         return ledger(type, new BigDecimal(amount), account.getId(), OffsetDateTime.now().minusHours(1));
     }
 

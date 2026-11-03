@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.entity;
+package com.dowglasmaia.financialtransaction.account.infra.persistence;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Entity
 @Table(name = "account")
-public class Account {
+public class AccountEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -22,11 +22,11 @@ public class Account {
 
     @ManyToOne
     @JoinColumn(name = "agency_id")
-    private Agency agency;
+    private AgencyEntity agency;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private UserEntity user;
 
     @Column(length = 100)
     private String number;

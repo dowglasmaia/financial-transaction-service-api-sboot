@@ -1,15 +1,15 @@
 package com.dowglasmaia.financialtransaction.support;
 
-import com.dowglasmaia.financialtransaction.entity.Account;
-import com.dowglasmaia.financialtransaction.entity.Agency;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AgencyEntity;
 import com.dowglasmaia.financialtransaction.entity.Transaction;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
-import com.dowglasmaia.financialtransaction.entity.User;
-import com.dowglasmaia.financialtransaction.repository.AccountRepository;
-import com.dowglasmaia.financialtransaction.repository.AgencyRepository;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.UserEntity;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountJpaRepository;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AgencyJpaRepository;
 import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
 import com.dowglasmaia.financialtransaction.repository.TransactionRepository;
-import com.dowglasmaia.financialtransaction.repository.UserRepository;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.UserJpaRepository;
 import com.dowglasmaia.financialtransaction.services.client.maiaBank.MaiaBankClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,22 +59,22 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired protected MockMvc mvc;
     @Autowired protected ObjectMapper json;
-    @Autowired protected AccountRepository accountRepository;
-    @Autowired protected AgencyRepository agencyRepository;
-    @Autowired protected UserRepository userRepository;
+    @Autowired protected AccountJpaRepository accountRepository;
+    @Autowired protected AgencyJpaRepository agencyRepository;
+    @Autowired protected UserJpaRepository userRepository;
     @Autowired protected TransactionRepository transactionRepository;
     @Autowired protected OutboxEventRepository outboxEventRepository;
 
     @MockBean protected MaiaBankClient maiaBankClient;
 
-    private final List<Account> extraAccounts = new ArrayList<>();
-    private final List<User> extraUsers = new ArrayList<>();
+    private final List<AccountEntity> extraAccounts = new ArrayList<>();
+    private final List<UserEntity> extraUsers = new ArrayList<>();
 
     @BeforeEach
     void resetToSeed() {
         transactionRepository.deleteAll();
         outboxEventRepository.deleteAll();
-        Account seed = seedAccount();
+        AccountEntity seed = seedAccount();
         seed.setBalance(SEED_BALANCE);
         accountRepository.save(seed);
     }
@@ -88,27 +88,27 @@ public abstract class AbstractIntegrationTest {
         extraUsers.clear();
     }
 
-    protected Account seedAccount() {
+    protected AccountEntity seedAccount() {
         return accountRepository.findByNumber(SEED_ACCOUNT).orElseThrow();
     }
 
-    protected Agency seedAgency() {
+    protected AgencyEntity seedAgency() {
         return agencyRepository.findByNumber(SEED_AGENCY).orElseThrow();
     }
 
     /** A second account in the same agency, owned by another user whose token subject is NOT linked. */
-    protected Account createOtherAccount(String number, BigDecimal balance) {
+    protected AccountEntity createOtherAccount(String number, BigDecimal balance) {
         return createOtherAccount(number, balance, null);
     }
 
     /** A second account in the same agency, owned by the user linked to {@code subject} (see {@link MockIssuer#OTHER_SUB}). */
-    protected Account createOtherAccount(String number, BigDecimal balance, String subject) {
-        User user = userRepository.save(User.builder()
+    protected AccountEntity createOtherAccount(String number, BigDecimal balance, String subject) {
+        UserEntity user = userRepository.save(UserEntity.builder()
               .name("Other Test User").CPF(number + "000000000".substring(0, 11 - number.length()))
               .email("other-" + number + "@example.test").areaCode(11).phoneNumber(988887777)
               .externalSubject(subject).build());
         extraUsers.add(user);
-        Account account = accountRepository.save(Account.builder()
+        AccountEntity account = accountRepository.save(AccountEntity.builder()
               .agency(seedAgency()).user(user).number(number).balance(balance).build());
         extraAccounts.add(account);
         return account;

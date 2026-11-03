@@ -1,6 +1,6 @@
 package com.dowglasmaia.financialtransaction.services.impl;
 
-import com.dowglasmaia.financialtransaction.entity.Account;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
 import com.dowglasmaia.financialtransaction.services.client.account.AddAmountService;
@@ -31,7 +31,7 @@ class AtmWithdrawalServiceImplTest {
     @Mock FindAccountByNumberAndUserIdService findAccount;
 
     AtmWithdrawalServiceImpl service;
-    Account actingAccount;
+    AccountEntity actingAccount;
 
     @BeforeEach
     void setUp() {

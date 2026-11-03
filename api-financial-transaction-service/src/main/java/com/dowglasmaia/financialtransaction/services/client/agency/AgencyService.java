@@ -1,10 +1,10 @@
 package com.dowglasmaia.financialtransaction.services.client.agency;
 
-import com.dowglasmaia.financialtransaction.entity.Agency;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AgencyEntity;
 
 public interface AgencyService {
     String getCurrentAgency();
 
-    Agency  findByNumber(String number);
+    AgencyEntity  findByNumber(String number);
 
 }

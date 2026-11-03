@@ -1,6 +1,6 @@
 package com.dowglasmaia.financialtransaction.support;
 
-import com.dowglasmaia.financialtransaction.entity.Account;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ class FlywaySchemaTest extends AbstractIntegrationTest {
 
     @Test
     void anAccountNumberIsUniquePerAgency() {
-        Account duplicate = Account.builder().agency(seedAgency()).user(seedAccount().getUser())
+        AccountEntity duplicate = AccountEntity.builder().agency(seedAgency()).user(seedAccount().getUser())
               .number(SEED_ACCOUNT).balance(BigDecimal.ZERO).build();
         assertThatThrownBy(() -> accountRepository.saveAndFlush(duplicate))
               .isInstanceOf(DataIntegrityViolationException.class);

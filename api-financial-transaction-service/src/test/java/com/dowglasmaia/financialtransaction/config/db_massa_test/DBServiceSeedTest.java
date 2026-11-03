@@ -1,11 +1,11 @@
 package com.dowglasmaia.financialtransaction.config.db_massa_test;
 
-import com.dowglasmaia.financialtransaction.entity.Account;
-import com.dowglasmaia.financialtransaction.entity.Agency;
-import com.dowglasmaia.financialtransaction.entity.User;
-import com.dowglasmaia.financialtransaction.repository.AccountRepository;
-import com.dowglasmaia.financialtransaction.repository.AgencyRepository;
-import com.dowglasmaia.financialtransaction.repository.UserRepository;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AgencyEntity;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.UserEntity;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountJpaRepository;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AgencyJpaRepository;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.UserJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,14 +28,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DBServiceSeedTest {
 
-    @Mock UserRepository users;
-    @Mock AgencyRepository agencies;
-    @Mock AccountRepository accounts;
+    @Mock UserJpaRepository users;
+    @Mock AgencyJpaRepository agencies;
+    @Mock AccountJpaRepository accounts;
 
     DBService seed;
-    Agency agency = Agency.builder().id("agency-1").number("0211").build();
-    User demoUser = User.builder().id("user-1").name("Demo User").build();
-    Account demoAccount = Account.builder().id("acc-1").number("2022").user(demoUser).agency(agency).balance(new BigDecimal("5000")).build();
+    AgencyEntity agency = AgencyEntity.builder().id("agency-1").number("0211").build();
+    UserEntity demoUser = UserEntity.builder().id("user-1").name("Demo User").build();
+    AccountEntity demoAccount = AccountEntity.builder().id("acc-1").number("2022").user(demoUser).agency(agency).balance(new BigDecimal("5000")).build();
 
     @BeforeEach
     void setUp() {
@@ -43,8 +43,8 @@ class DBServiceSeedTest {
         lenient().when(agencies.findByNumber("0211")).thenReturn(Optional.of(agency));
         lenient().when(accounts.findByNumber("2022")).thenReturn(Optional.of(demoAccount));
         lenient().when(accounts.findByNumber("3033")).thenReturn(Optional.empty());
-        lenient().when(users.save(any(User.class))).thenAnswer(call -> call.getArgument(0));
-        lenient().when(accounts.save(any(Account.class))).thenAnswer(call -> call.getArgument(0));
+        lenient().when(users.save(any(UserEntity.class))).thenAnswer(call -> call.getArgument(0));
+        lenient().when(accounts.save(any(AccountEntity.class))).thenAnswer(call -> call.getArgument(0));
     }
 
     @Test
@@ -54,7 +54,7 @@ class DBServiceSeedTest {
         seed.instanciateTestDatabase();
 
         assertThat(demoUser.getExternalSubject()).isEqualTo("auth0|owner");
-        verify(accounts, never()).save(any(Account.class));
+        verify(accounts, never()).save(any(AccountEntity.class));
     }
 
     @Test
@@ -64,9 +64,9 @@ class DBServiceSeedTest {
 
         seed.instanciateTestDatabase();
 
-        ArgumentCaptor<Account> saved = ArgumentCaptor.forClass(Account.class);
+        ArgumentCaptor<AccountEntity> saved = ArgumentCaptor.forClass(AccountEntity.class);
         verify(accounts).save(saved.capture());
-        Account second = saved.getValue();
+        AccountEntity second = saved.getValue();
         assertThat(second.getNumber()).isEqualTo("3033");
         assertThat(second.getBalance()).isEqualByComparingTo("1000");
         assertThat(second.getUser().getExternalSubject()).isEqualTo("auth0|second");
@@ -75,25 +75,25 @@ class DBServiceSeedTest {
 
     @Test
     void reseedingDoesNotDuplicateAnExistingSecondCustomer() {
-        User secondUser = User.builder().id("user-2").externalSubject("auth0|second").build();
-        when(accounts.findByNumber("3033")).thenReturn(Optional.of(Account.builder().id("acc-2").number("3033").user(secondUser).build()));
+        UserEntity secondUser = UserEntity.builder().id("user-2").externalSubject("auth0|second").build();
+        when(accounts.findByNumber("3033")).thenReturn(Optional.of(AccountEntity.builder().id("acc-2").number("3033").user(secondUser).build()));
         ReflectionTestUtils.setField(seed, "secondSubject", "auth0|second");
 
         seed.instanciateTestDatabase();
 
-        verify(accounts, never()).save(any(Account.class));
+        verify(accounts, never()).save(any(AccountEntity.class));
     }
 
     @Test
     void anExistingSecondCustomerLinkedToAnotherSubjectIsRelinkedNotDuplicated() {
-        User secondUser = User.builder().id("user-2").externalSubject("auth0|old-subject").build();
-        when(accounts.findByNumber("3033")).thenReturn(Optional.of(Account.builder().id("acc-2").number("3033").user(secondUser).build()));
+        UserEntity secondUser = UserEntity.builder().id("user-2").externalSubject("auth0|old-subject").build();
+        when(accounts.findByNumber("3033")).thenReturn(Optional.of(AccountEntity.builder().id("acc-2").number("3033").user(secondUser).build()));
         ReflectionTestUtils.setField(seed, "secondSubject", "auth0|second");
 
         seed.instanciateTestDatabase();
 
         assertThat(secondUser.getExternalSubject()).isEqualTo("auth0|second");
         verify(users).save(secondUser);
-        verify(accounts, never()).save(any(Account.class));
+        verify(accounts, never()).save(any(AccountEntity.class));
     }
 }

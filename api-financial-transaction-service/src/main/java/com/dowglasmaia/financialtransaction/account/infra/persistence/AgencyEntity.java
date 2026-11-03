@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.entity;
+package com.dowglasmaia.financialtransaction.account.infra.persistence;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Table(name = "agency")
-public class Agency {
+public class AgencyEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

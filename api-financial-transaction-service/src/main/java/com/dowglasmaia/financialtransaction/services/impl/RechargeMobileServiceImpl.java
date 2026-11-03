@@ -1,7 +1,7 @@
 package com.dowglasmaia.financialtransaction.services.impl;
 
 import com.dowglasmaia.financialtransaction.config.kafka.KafkaAdminConfig;
-import com.dowglasmaia.financialtransaction.entity.Account;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.entity.OutboxEvent;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;
@@ -55,7 +55,7 @@ public class RechargeMobileServiceImpl implements RechargeMobileService {
     public void makeRecharge(MobileRechargeRequestDTO request){
         validatePhoneNumber(request);
 
-        Account account = findAccountByNumberAndUserIdService.findByNumberAndUserId();
+        AccountEntity account = findAccountByNumberAndUserIdService.findByNumberAndUserId();
 
         addAmountService.debitById(account.getId(), request.getAmount());
 

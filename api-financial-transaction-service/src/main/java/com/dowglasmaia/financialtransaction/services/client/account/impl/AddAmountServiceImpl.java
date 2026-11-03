@@ -1,9 +1,9 @@
 package com.dowglasmaia.financialtransaction.services.client.account.impl;
 
-import com.dowglasmaia.financialtransaction.entity.Account;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
 import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;
-import com.dowglasmaia.financialtransaction.repository.AccountRepository;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountJpaRepository;
 import com.dowglasmaia.financialtransaction.services.client.account.AddAmountService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +20,10 @@ public class AddAmountServiceImpl implements AddAmountService {
 
     static final String INSUFFICIENT_BALANCE = "Operation not performed, there is not enough balance in the account.";
 
-    private final AccountRepository accountRepository;
+    private final AccountJpaRepository accountRepository;
 
     @Autowired
-    public AddAmountServiceImpl(AccountRepository accountRepository){
+    public AddAmountServiceImpl(AccountJpaRepository accountRepository){
         this.accountRepository = accountRepository;
     }
 
@@ -32,7 +32,7 @@ public class AddAmountServiceImpl implements AddAmountService {
     public void debit(String accountNumber, BigDecimal amount){
         log.info("Start debit at account:{}", accountNumber);
 
-        Account account = accountRepository.findByNumber(accountNumber)
+        AccountEntity account = accountRepository.findByNumber(accountNumber)
               .orElseThrow(() -> new ObjectNotFoundExeption("Account not found.", HttpStatus.FOUND));
 
         debitById(account.getId(), amount);

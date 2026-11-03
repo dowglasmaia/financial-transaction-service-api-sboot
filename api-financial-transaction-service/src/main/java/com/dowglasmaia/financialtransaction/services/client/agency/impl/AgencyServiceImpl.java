@@ -1,8 +1,8 @@
 package com.dowglasmaia.financialtransaction.services.client.agency.impl;
 
-import com.dowglasmaia.financialtransaction.entity.Agency;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AgencyEntity;
 import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
-import com.dowglasmaia.financialtransaction.repository.AgencyRepository;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AgencyJpaRepository;
 import com.dowglasmaia.financialtransaction.services.client.agency.AgencyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +13,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class AgencyServiceImpl implements AgencyService {
 
-    private final AgencyRepository agencyRepository;
+    private final AgencyJpaRepository agencyRepository;
 
     @Autowired
-    public AgencyServiceImpl(AgencyRepository agencyRepository){
+    public AgencyServiceImpl(AgencyJpaRepository agencyRepository){
         this.agencyRepository = agencyRepository;
     }
 
@@ -31,7 +31,7 @@ public class AgencyServiceImpl implements AgencyService {
     }
 
     @Override
-    public Agency findByNumber(String number){
+    public AgencyEntity findByNumber(String number){
         return agencyRepository.findByNumber(number)
               .orElseThrow(()-> new ObjectNotFoundExeption("Agency not found.", HttpStatus.FOUND) );
     }

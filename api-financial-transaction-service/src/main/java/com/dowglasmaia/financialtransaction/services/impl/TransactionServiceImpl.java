@@ -1,6 +1,6 @@
 package com.dowglasmaia.financialtransaction.services.impl;
 
-import com.dowglasmaia.financialtransaction.entity.Account;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.entity.Transaction;
 import com.dowglasmaia.financialtransaction.entity.TransactionStatusEnum;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
@@ -72,7 +72,7 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionsResponseDTO findByDateRange(String initialDate, String finalDate){
         log.info("Start findByDateRange Transactions");
 
-        Account accountEntity = findAccountByNumberAndUserIdService.findByNumberAndUserId();
+        AccountEntity accountEntity = findAccountByNumberAndUserIdService.findByNumberAndUserId();
 
         var startDate = DateConverter.convertStringToOffsetDateTime(initialDate);
         log.info("startDate: {}", startDate);
@@ -92,7 +92,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public TransactionResponseDTO findById(String id){
-        Account account = findAccountByNumberAndUserIdService.findByNumberAndUserId();
+        AccountEntity account = findAccountByNumberAndUserIdService.findByNumberAndUserId();
 
         var transaction = transactionRepository.findByIdAndAccountId(id, account.getId())
               .orElseThrow(() -> new ObjectNotFoundExeption("Transaction not found", HttpStatus.FOUND));

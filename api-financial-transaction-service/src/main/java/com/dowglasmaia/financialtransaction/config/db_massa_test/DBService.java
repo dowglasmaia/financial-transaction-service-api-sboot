@@ -1,11 +1,11 @@
 package com.dowglasmaia.financialtransaction.config.db_massa_test;
 
-import com.dowglasmaia.financialtransaction.entity.Account;
-import com.dowglasmaia.financialtransaction.entity.Agency;
-import com.dowglasmaia.financialtransaction.entity.User;
-import com.dowglasmaia.financialtransaction.repository.AccountRepository;
-import com.dowglasmaia.financialtransaction.repository.AgencyRepository;
-import com.dowglasmaia.financialtransaction.repository.UserRepository;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AgencyEntity;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.UserEntity;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountJpaRepository;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AgencyJpaRepository;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.UserJpaRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,9 +15,9 @@ import java.math.BigDecimal;
 @Component
 public class DBService {
 
-    private final UserRepository userRepository;
-    private final AgencyRepository agencyRepository;
-    private final AccountRepository accountRepository;
+    private final UserJpaRepository userRepository;
+    private final AgencyJpaRepository agencyRepository;
+    private final AccountJpaRepository accountRepository;
 
 
     /** The token subject to link to the demo customer (SEED_OWNER_SUB). Blank = leave the user unlinked. */
@@ -29,9 +29,9 @@ public class DBService {
     private String secondSubject;
 
     @Autowired
-    public DBService(UserRepository userRepository,
-                     AgencyRepository agencyRepository,
-                     AccountRepository accountRepository){
+    public DBService(UserJpaRepository userRepository,
+                     AgencyJpaRepository agencyRepository,
+                     AccountJpaRepository accountRepository){
         this.userRepository = userRepository;
         this.agencyRepository = agencyRepository;
         this.accountRepository = accountRepository;
@@ -54,8 +54,8 @@ public class DBService {
         }
     }
 
-    private Account createSecondAccount(Agency agency){
-        User user = userRepository.save(User.builder()
+    private AccountEntity createSecondAccount(AgencyEntity agency){
+        UserEntity user = userRepository.save(UserEntity.builder()
               .name("Second Demo User")
               .CPF("52998224725")
               .email("second.user@example.test")
@@ -63,7 +63,7 @@ public class DBService {
               .phoneNumber(999997777)
               .externalSubject(secondSubject)
               .build());
-        return accountRepository.save(Account.builder()
+        return accountRepository.save(AccountEntity.builder()
               .agency(agency)
               .user(user)
               .number("3033")
@@ -72,15 +72,15 @@ public class DBService {
     }
 
     /** Points the demo customer at the configured token subject (also when the data already existed with another one). */
-    private void link(User user, String subject){
+    private void link(UserEntity user, String subject){
         if (subject != null && !subject.isBlank() && !subject.equals(user.getExternalSubject())) {
             user.setExternalSubject(subject);
             userRepository.save(user);
         }
     }
 
-    private User createUser(){
-        return userRepository.save(User.builder()
+    private UserEntity createUser(){
+        return userRepository.save(UserEntity.builder()
               .name("Demo User")
               .CPF("11144477735")
               .email("demo.user@example.test")
@@ -89,16 +89,16 @@ public class DBService {
               .build());
     }
 
-    private Agency createAgency(){
+    private AgencyEntity createAgency(){
         return agencyRepository.save(
-              Agency.builder()
+              AgencyEntity.builder()
                     .number("0211")
                     .build());
     }
 
-    private Account createAccount(Agency agency, User user){
+    private AccountEntity createAccount(AgencyEntity agency, UserEntity user){
         return accountRepository.save(
-              Account.builder()
+              AccountEntity.builder()
                     .agency(agency)
                     .user(user)
                     .number("2022")

@@ -1,6 +1,6 @@
 package com.dowglasmaia.financialtransaction.services.client.account.impl;
 
-import com.dowglasmaia.financialtransaction.entity.Account;
+import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.services.client.CurrentUser;
 import com.dowglasmaia.financialtransaction.services.client.account.FindAccountByNumberAndUserIdService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ public class FindFindAccountByNumberAndUserIdByNumberAndUserIdServiceImpl implem
     }
 
     @Override
-    public Account findByNumberAndUserId(){
+    public AccountEntity findByNumberAndUserId(){
         return currentUser.account();
     }
 
