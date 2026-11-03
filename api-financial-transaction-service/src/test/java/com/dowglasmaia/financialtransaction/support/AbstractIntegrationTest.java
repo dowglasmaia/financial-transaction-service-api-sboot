@@ -10,7 +10,7 @@ import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.A
 import com.dowglasmaia.financialtransaction.transaction.infrastructure.messaging.OutboxEventJpaRepository;
 import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionJpaRepository;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.UserJpaRepository;
-import com.dowglasmaia.financialtransaction.services.client.maiaBank.MaiaBankClient;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.client.MaiaBankClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;

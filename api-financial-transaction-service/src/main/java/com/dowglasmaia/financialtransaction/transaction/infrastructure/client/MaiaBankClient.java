@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.services.client.maiaBank;
+package com.dowglasmaia.financialtransaction.transaction.infrastructure.client;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.cloud.openfeign.FeignClient;

@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.services.client.maiaBank.model;
+package com.dowglasmaia.financialtransaction.transaction.infrastructure.client;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

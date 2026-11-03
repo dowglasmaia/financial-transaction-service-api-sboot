@@ -10,7 +10,7 @@ import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;
 import com.dowglasmaia.financialtransaction.services.PixService;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
-import com.dowglasmaia.financialtransaction.services.client.maiaBank.MaiaBankClient;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.client.MaiaBankClient;
 import com.dowglasmaia.financialtransaction.transaction.domain.CPFValidator;
 import com.dowglasmaia.financialtransaction.transaction.domain.EmailValidator;
 import com.dowglasmaia.financialtransaction.transaction.domain.PhoneValidator;
