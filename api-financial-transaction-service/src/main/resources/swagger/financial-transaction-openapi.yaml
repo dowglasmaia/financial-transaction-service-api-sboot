@@ -231,6 +231,35 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResponseError'
 
+  /accounts/me:
+    get:
+      tags:
+        - Accounts
+      summary: Get my account
+      description: Account of the signed-in customer. It takes no id, the account comes from the token, so no other customer's data can be requested.
+      operationId: getMyAccount
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        401:
+          description: Unauthorized (no token, or a token that is not valid for this API)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        403:
+          description: Forbidden (valid token, but the identity is not linked to a customer)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+
 components:
   schemas:
     DepositRequest:
@@ -401,3 +430,27 @@ components:
         message:
           type: string
           example: 'Error'
+
+    AccountResponse:
+      type: object
+      required:
+        - agency
+        - number
+        - balance
+      properties:
+        agency:
+          type: string
+          example: '0211'
+        number:
+          type: string
+          example: '2022'
+        balance:
+          type: number
+          format: decimal
+          example: 5000.00
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

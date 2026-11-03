@@ -4,15 +4,13 @@ import { TestBed } from '@angular/core/testing';
 import { ApiError } from './api-error';
 import { apiErrorInterceptor } from './api-error.interceptor';
 import { API_BASE_URL } from './api-base-url.token';
-import { AUTH_TOKEN_PROVIDER, authInterceptor } from './auth.interceptor';
 import { requestIdInterceptor } from './request-id.interceptor';
 
-function setup(token: string | null = null) {
+function setup() {
   TestBed.configureTestingModule({
     providers: [
       { provide: API_BASE_URL, useValue: '/api' },
-      { provide: AUTH_TOKEN_PROVIDER, useValue: () => token },
-      provideHttpClient(withInterceptors([requestIdInterceptor, authInterceptor, apiErrorInterceptor])),
+      provideHttpClient(withInterceptors([requestIdInterceptor, apiErrorInterceptor])),
       provideHttpClientTesting(),
     ],
   });
@@ -49,22 +47,6 @@ describe('apiErrorInterceptor', () => {
     expect(error?.status).toBe(500);
     expect(error?.code).toBe('HTTP_500');
     expect(error?.message).toBe('Something went wrong. Try again.');
-  });
-});
-
-describe('authInterceptor', () => {
-  it('adds the bearer token only to API requests', () => {
-    const { http, controller } = setup('tok-123');
-    http.get('/api/v1/transactions').subscribe();
-    http.get('https://other.example.test/file').subscribe();
-    expect(controller.expectOne('/api/v1/transactions').request.headers.get('Authorization')).toBe('Bearer tok-123');
-    expect(controller.expectOne('https://other.example.test/file').request.headers.has('Authorization')).toBe(false);
-  });
-
-  it('sends no Authorization header when there is no token (dev-open mode)', () => {
-    const { http, controller } = setup(null);
-    http.get('/api/v1/transactions').subscribe();
-    expect(controller.expectOne('/api/v1/transactions').request.headers.has('Authorization')).toBe(false);
   });
 });
 

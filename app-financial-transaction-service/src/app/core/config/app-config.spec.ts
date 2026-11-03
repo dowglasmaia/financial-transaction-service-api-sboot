@@ -6,11 +6,11 @@ describe('parseAppConfig', () => {
   });
 
   it('keeps valid values and fills the rest with defaults', () => {
-    const config = parseAppConfig({ apiBaseUrl: 'https://api.example.test/api', auth: { enabled: true, clientId: 'abc' } });
+    const config = parseAppConfig({ apiBaseUrl: 'https://api.example.test/api', auth: { domain: 'tenant.example.auth0.com', clientId: 'abc' } });
     expect(config.apiBaseUrl).toBe('https://api.example.test/api');
-    expect(config.auth.enabled).toBe(true);
+    expect(config.auth.domain).toBe('tenant.example.auth0.com');
     expect(config.auth.clientId).toBe('abc');
-    expect(config.auth.scopes).toEqual(DEFAULT_APP_CONFIG.auth.scopes);
+    expect(config.auth.audience).toBe(DEFAULT_APP_CONFIG.auth.audience);
     expect(config.demoBanner).toBe(true);
   });
 

@@ -38,7 +38,7 @@ A slice is one branch `slice/<nn>-<slug>` created from a fresh `main`, one PR, a
 8. **Browser proof** — walk the slice by hand in the built-in browser (the agent never types a password; for the real Auth0 login the **owner** signs in and reports). Record exactly what was seen.
 9. **Close** — tick acceptance with evidence, fill *Result*, update `specs/README.md`, commit and **push the slice branch** (no PR, no merge — the owner does that). Sync `memory/` and `docs/prototype-deviations.md` in the same branch.
 
-**Local stack for slices** (from the repo root): `cp .env.example .env` (once) → `docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api` (db on `localhost:5433`, Kafka `9092`, Kafdrop `19000`, MaiaBank stub `8089`) → API from the IDE run configuration (`SPRING_PROFILES_ACTIVE=local`, `SEED_OWNER_SUB`, `SEED_SECOND_SUB`) on `8088` → `cd app-financial-transaction-service && npm start` on `4200` (dev proxy `/api → 8088`). From SL-01 `docker compose --profile api up` can run the API as well, and `--profile e2e` adds the mock IdP.
+**Local stack for slices** (from the repo root): `cp .env.example .env` (once) → `docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api` (db on `localhost:5433`, Kafka `9092`, Kafdrop `19000`, MaiaBank stub `8089`) → API from the IDE run configuration (`SPRING_PROFILES_ACTIVE=local`, `SEED_OWNER_SUB`, `SEED_SECOND_SUB`) on `8088` → `cd app-financial-transaction-service && npm start` on `4200` (dev proxy `/api → 8088`). `docker compose --profile api up -d --build` runs the API in Docker too; for the browser tests use the overlay: `docker compose -f docker-compose.yml -f docker-compose.e2e.yml --profile api --profile e2e up -d --build` (mock IdP + API trusting it), then `cd app-financial-transaction-service && npm run e2e`.
 
 **Rule of thumb:** if a task needs the other side (a field, a status code, a message), it belongs to the **same slice** — never leave a frontend mock or a backend stub for "later".
 
@@ -48,17 +48,18 @@ A slice is one branch `slice/<nn>-<slug>` created from a fresh `main`, one PR, a
 | 0 | **MONO-01** monorepo + isolated CI (Done) | both | — | both workflows trigger independently |
 | 1 | **BE-01 … BE-04** safety net, foundation, money integrity, auth (Done) | BE | Auth0 Action + 2 test users | 98+ tests green; two-user isolation |
 | 2 | **FE-01 / FE-02** prototype review + Angular foundation (Done; look replaced in SL-00) | FE | — | `npm run build` green |
-| 3 | **SL-00** visual identity v2 ∥ **ARCH-01** architecture foundation + `account` pilot | FE ∥ BE (different folders) | SL-00: (optional) screenshots of v2, owner sign-off of the look · ARCH-01: approve the class mapping table and the security split | SL-00: build + tests green, `/design` matches v2 · ARCH-01: suite green, checker 0 violations with the legacy list, `git diff` of resources empty |
-| 4 | **ARCH-02** `transaction` feature + legacy cleanup (backend only) | BE | approve the transaction-side mapping | no legacy package; strict checker 0 violations; Kafka payload, concurrency and failure tests unchanged and green |
-| 5 | **SL-01** sign in + `/accounts/me` + shell + Home header | BE+FE+E2E | Auth0 callback/logout URLs for `http://localhost:4200`; run API with seed subs | real browser sign-in for both users; e2e with mock IdP green |
-| 6 | **SL-02** statement + detail + Home summary (+ contract, dates, errors) | BE+FE+E2E | time zone; OpenAPI preview; 400-vs-422; summary endpoint | single-day statement end to end; contract = behaviour; `openapi-diff` in CI |
-| 7 | **SL-03** withdrawal + result panel + `Idempotency-Key` | BE+FE+E2E | idempotency design | replay does not double-debit; double click = one request |
-| 8 | **SL-04** deposit (boleto simulation) | BE+FE+E2E | approve the reconciliation | balance +amount once; `DEPOSIT` row |
-| 9 | **SL-05** mobile recharge | BE+FE+E2E | — | "requested" copy; Kafka payload identical |
-| 10 | **SL-06** Pix | BE+FE+E2E | MaiaBank contract only if the payload changes | success/failure/uncertain paths; validators agree client/server |
-| 11 | **BE-07** platform upgrade (backend-only) | BE | Boot version, JDK image | suite green on 17→21→25 |
-| 12 | **FE-05** final validation ∥ **BE-08** cleanup | FE ∥ BE | release sign-off | e2e + axe green on all flows; no PII in logs; memory updated |
-| 13 | **FINAL-01** final test round | both | all specs Done | `docs/test-report.md` with evidence; CI green on `main` |
+| 3 | **SL-00** visual identity v2 (Done) | FE only | owner sign-off of the look | build + tests green; `/design` matches v2; contrast test green |
+| 4 | **SL-01** sign in + `/accounts/me` + shell + Home header | BE+FE+E2E | Auth0 callback/logout URLs for `http://localhost:4200`; run API with seed subs | real browser sign-in for both users; e2e with mock IdP green |
+| 5 | **ARCH-01** architecture foundation + `account` pilot (backend only) | BE | approve the class mapping table and the security split | suite green, checker 0 violations with the legacy list, `git diff` of resources empty |
+| 6 | **ARCH-02** `transaction` feature + legacy cleanup (backend only) | BE | approve the transaction-side mapping | no legacy package; strict checker 0 violations; Kafka payload, concurrency and failure tests unchanged and green |
+| 7 | **SL-02** statement + detail + Home summary (+ contract, dates, errors) | BE+FE+E2E | time zone; OpenAPI preview; 400-vs-422; summary endpoint | single-day statement end to end; contract = behaviour; `openapi-diff` in CI |
+| 8 | **SL-03** withdrawal + result panel + `Idempotency-Key` | BE+FE+E2E | idempotency design | replay does not double-debit; double click = one request |
+| 9 | **SL-04** deposit (boleto simulation) | BE+FE+E2E | approve the reconciliation | balance +amount once; `DEPOSIT` row |
+| 10 | **SL-05** mobile recharge | BE+FE+E2E | — | "requested" copy; Kafka payload identical |
+| 11 | **SL-06** Pix | BE+FE+E2E | MaiaBank contract only if the payload changes | success/failure/uncertain paths; validators agree client/server |
+| 12 | **BE-07** platform upgrade (backend-only) | BE | Boot version, JDK image | suite green on 17→21→25 |
+| 13 | **FE-05** final validation ∥ **BE-08** cleanup | FE ∥ BE | release sign-off | e2e + axe green on all flows; no PII in logs; memory updated |
+| 14 | **FINAL-01** final test round | both | all specs Done | `docs/test-report.md` with evidence; CI green on `main` |
 Rules: a row starts only when the rows it depends on are Done (dependency list in `specs/README.md`). **Slices are strictly sequential.** `∥` (only FE-05 ∥ BE-08) means separate branches that do not touch the same files.
 
 ## 3. Conventions

@@ -56,6 +56,74 @@
 					"response": []
 				},
 				{
+					"name": "My account (GET /accounts/me) -> 200, exactly 3 fields",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('200 for a linked customer', () => pm.response.to.have.status(200));",
+									"pm.test('exactly agency, number and balance', () => pm.expect(Object.keys(pm.response.json()).sort()).to.eql(['agency','balance','number']));",
+									"pm.test('it is the signed-in customer account', () => pm.expect(pm.response.json().number).to.eql(pm.collectionVariables.get('ownAccount')));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/accounts/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"accounts",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "My account without a token -> 401",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('401 without a token', () => pm.response.to.have.status(401));",
+									"pm.test('standard error body', () => pm.expect(pm.response.json().code).to.eql('UNAUTHORIZED'));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/accounts/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"accounts",
+								"me"
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Statement with a valid user token -> 200",
 					"event": [
 						{

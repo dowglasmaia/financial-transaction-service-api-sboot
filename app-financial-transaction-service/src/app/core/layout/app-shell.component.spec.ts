@@ -1,6 +1,10 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
+import { AccountApi } from '../../features/account/data-access/account.api';
+import { SessionService } from '../auth/session.service';
+import { FakeSession } from '../auth/testing/fake-session';
 import { APP_CONFIG, DEFAULT_APP_CONFIG } from '../config/app-config';
 import { AppShellComponent } from './app-shell.component';
 
@@ -15,17 +19,22 @@ function routesWith(count: number) {
 }
 
 describe('AppShellComponent', () => {
-  async function render(options: { items?: number; demoBanner?: boolean } = {}) {
+  async function render(options: { items?: number; demoBanner?: boolean; signedIn?: boolean } = {}) {
+    const session = new FakeSession();
+    session.state.set(options.signedIn === false ? 'anonymous' : 'authenticated');
+    if (options.signedIn !== false) session.profile.set({ name: 'Maria Silva', email: 'maria@example.test', picture: '' });
     TestBed.configureTestingModule({
       providers: [
         provideRouter(routesWith(options.items ?? 1)),
         { provide: APP_CONFIG, useValue: { ...DEFAULT_APP_CONFIG, demoBanner: options.demoBanner ?? true } },
+        { provide: SessionService, useValue: session },
+        { provide: AccountApi, useValue: { me: () => of({ agency: '0211', number: '2022', balance: 5000 }) } },
       ],
     });
     const fixture = TestBed.createComponent(AppShellComponent);
     await fixture.whenStable();
     const el = fixture.nativeElement as HTMLElement;
-    return { fixture, el };
+    return { fixture, el, session };
   }
 
   it('has the landmarks and the skip link', async () => {
@@ -76,5 +85,66 @@ describe('AppShellComponent', () => {
     const { el } = await render();
     expect(el.querySelector('app-theme-toggle button')).not.toBeNull();
     expect(el.querySelector('app-site-footer')).not.toBeNull();
+  });
+
+  describe('signed out (landing, sign-in)', () => {
+    it('is the plain public frame: no rail, no bottom bar, no account menu - but the brand, the chip and the toggle', async () => {
+      const { el } = await render({ signedIn: false, items: 3 });
+
+      expect(el.querySelector('nav[aria-label="Main"]')).toBeNull();
+      expect(el.querySelector('nav[aria-label="Quick navigation"]')).toBeNull();
+      expect(el.querySelector('app-account-menu')).toBeNull();
+      expect(el.querySelector('header')?.textContent).toContain('Maia Bank');
+      expect(el.querySelector('app-theme-toggle button')).not.toBeNull();
+    });
+  });
+
+  describe('signed in', () => {
+    it('shows the account menu of the customer in the top bar', async () => {
+      const { el } = await render();
+      expect(el.querySelector('header app-account-menu')?.textContent).toContain('Maria Silva');
+    });
+
+    it('Sign out asks for confirmation, and only the confirmation signs out', async () => {
+      const { fixture, el, session } = await render();
+      el.querySelector<HTMLButtonElement>('app-account-menu button[aria-haspopup]')!.click();
+      await fixture.whenStable();
+      Array.from(el.querySelectorAll<HTMLButtonElement>('#account-menu-panel button')).find((b) => b.textContent?.includes('Sign out'))!.click();
+      await fixture.whenStable();
+
+      const dialog = el.querySelector('[role="dialog"]')!;
+      expect(dialog.textContent).toContain('Sign out of Maia Bank?');
+      expect(session.logoutCalls).toBe(0);
+
+      Array.from(dialog.querySelectorAll<HTMLButtonElement>('button')).find((b) => b.textContent?.includes('Sign out'))!.click();
+      expect(session.logoutCalls).toBe(1);
+    });
+
+    it('Cancel in the sign-out dialog keeps the session', async () => {
+      const { fixture, el, session } = await render();
+      el.querySelector<HTMLButtonElement>('app-account-menu button[aria-haspopup]')!.click();
+      await fixture.whenStable();
+      Array.from(el.querySelectorAll<HTMLButtonElement>('#account-menu-panel button')).find((b) => b.textContent?.includes('Sign out'))!.click();
+      await fixture.whenStable();
+
+      Array.from(el.querySelectorAll<HTMLButtonElement>('[role="dialog"] button')).find((b) => b.textContent?.includes('Cancel'))!.click();
+      await fixture.whenStable();
+
+      expect(el.querySelector('[role="dialog"]')).toBeNull();
+      expect(session.logoutCalls).toBe(0);
+    });
+
+    it('a session that expired shows the "session expired" dialog, and "Sign in again" starts a new login', async () => {
+      const { fixture, el, session } = await render();
+      expect(el.querySelector('[role="dialog"]')).toBeNull();
+
+      session.markExpired();
+      await fixture.whenStable();
+
+      const dialog = el.querySelector('[role="dialog"]')!;
+      expect(dialog.textContent).toContain('Your session expired');
+      Array.from(dialog.querySelectorAll<HTMLButtonElement>('button')).find((b) => b.textContent?.includes('Sign in again'))!.click();
+      expect(session.loginCalls).toHaveLength(1);
+    });
   });
 });

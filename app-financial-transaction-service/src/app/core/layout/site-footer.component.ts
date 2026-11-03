@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { TagComponent } from '../../shared/ui/tag.component';
 
 interface ProfileLink {
@@ -12,6 +12,8 @@ export const DEVELOPER = {
   name: 'Dowglas Maia',
   role: 'Senior Java Engineer',
   initials: 'DM',
+  /** 192 px square avatar served from `public/img` (the original 2.4 MB picture is not shipped). */
+  photo: 'img/dowglas.png',
 } as const;
 
 export const PROFILE_LINKS: readonly ProfileLink[] = [
@@ -35,12 +37,24 @@ export const STACK: readonly string[] = ['Angular 21', 'Tailwind CSS 4', 'Java 2
 
       <div class="grid gap-8 py-8 md:grid-cols-[1.2fr_1fr_1fr] md:gap-10">
         <section aria-labelledby="footer-author" class="flex items-start gap-4">
-          <span
-            class="grid size-12 shrink-0 place-items-center rounded-full border border-accent bg-accent/10 text-base font-medium text-accent shadow-[0_0_22px_color-mix(in_srgb,var(--accent)_30%,transparent)]"
-            aria-hidden="true"
-          >
-            {{ developer.initials }}
-          </span>
+          @if (photoFailed()) {
+            <span
+              class="grid size-12 shrink-0 place-items-center rounded-full border border-accent bg-accent/10 text-base font-medium text-accent shadow-[0_0_22px_color-mix(in_srgb,var(--accent)_30%,transparent)]"
+              aria-hidden="true"
+            >
+              {{ developer.initials }}
+            </span>
+          } @else {
+            <img
+              [src]="developer.photo"
+              alt="Photo of {{ developer.name }}"
+              width="48"
+              height="48"
+              loading="lazy"
+              class="size-12 shrink-0 rounded-full border border-accent object-cover shadow-[0_0_22px_color-mix(in_srgb,var(--accent)_30%,transparent)]"
+              (error)="photoFailed.set(true)"
+            />
+          }
           <div class="min-w-0">
             <p class="text-[11px] tracking-[0.14em] text-content-muted uppercase">Designed &amp; developed by</p>
             <h2 id="footer-author" class="mt-1 font-display text-lg font-medium tracking-tight">{{ developer.name }}</h2>
@@ -107,4 +121,5 @@ export class SiteFooterComponent {
   protected readonly links = PROFILE_LINKS;
   protected readonly stack = STACK;
   protected readonly year = new Date().getFullYear();
+  protected readonly photoFailed = signal(false);
 }
