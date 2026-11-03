@@ -2,6 +2,11 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { ThemeService } from '../../../core/theme/theme.service';
 import { AlertComponent } from '../../../shared/ui/alert.component';
 import { BalanceCardComponent } from '../../../shared/ui/balance-card.component';
+import { DialogComponent } from '../../../shared/ui/dialog.component';
+import { IconTileComponent, IconTileTone } from '../../../shared/ui/icon-tile.component';
+import { SegmentedComponent, SegmentedOption } from '../../../shared/ui/segmented.component';
+import { StepperComponent } from '../../../shared/ui/stepper.component';
+import { ToastService } from '../../../shared/ui/toast.service';
 import { ButtonDirective, ButtonVariant } from '../../../shared/ui/button.directive';
 import { ChipComponent } from '../../../shared/ui/chip.component';
 import { EmptyStateComponent } from '../../../shared/ui/empty-state.component';
@@ -25,17 +30,20 @@ const SWATCHES: readonly Swatch[] = [
   { name: 'surface-raised', background: 'bg-surface-raised', role: 'Cards, header' },
   { name: 'surface-sunken', background: 'bg-surface-sunken', role: 'Inputs, wells' },
   { name: 'surface-overlay', background: 'bg-surface-overlay', role: 'Menus, dialogs' },
-  { name: 'brand', background: 'bg-brand', role: 'Header' },
+  { name: 'brand', background: 'bg-brand', role: 'Rail and bottom bar' },
   { name: 'line', background: 'bg-line', role: 'Dividers (decorative)' },
   { name: 'line-input', background: 'bg-line-input', role: 'Control borders' },
   { name: 'content', background: 'bg-content', role: 'Text' },
   { name: 'content-muted', background: 'bg-content-muted', role: 'Secondary text' },
-  { name: 'accent', background: 'bg-accent', role: 'Primary action, focus' },
-  { name: 'accent-2', background: 'bg-accent-2', role: 'Gradient end' },
+  { name: 'primary', background: 'bg-primary', role: 'Primary action (gradient start)' },
+  { name: 'primary-strong', background: 'bg-primary-strong', role: 'Primary action (gradient end)' },
+  { name: 'on-primary', background: 'bg-on-primary', role: 'Text on primary and on the balance panel' },
+  { name: 'accent', background: 'bg-accent', role: 'Links, focus ring, selected chip' },
   { name: 'on-accent', background: 'bg-on-accent', role: 'Text on accent' },
   { name: 'income', background: 'bg-income', role: 'Money in' },
   { name: 'expense', background: 'bg-expense', role: 'Money out, errors' },
   { name: 'warning', background: 'bg-warning', role: 'Caution' },
+  { name: 'violet', background: 'bg-violet', role: 'Recharge tile' },
 ];
 
 @Component({
@@ -45,6 +53,10 @@ const SWATCHES: readonly Swatch[] = [
     AlertComponent,
     BalanceCardComponent,
     ButtonDirective,
+    DialogComponent,
+    IconTileComponent,
+    SegmentedComponent,
+    StepperComponent,
     ChipComponent,
     EmptyStateComponent,
     FieldControlDirective,
@@ -58,6 +70,7 @@ const SWATCHES: readonly Swatch[] = [
 })
 export class DesignPage {
   private readonly themeService = inject(ThemeService);
+  private readonly toast = inject(ToastService);
 
   protected readonly formatBrl = formatBrl;
   protected readonly theme = this.themeService.theme;
@@ -73,6 +86,24 @@ export class DesignPage {
   protected readonly chips = ['All', 'Deposit', 'Pix', 'Recharge', 'Withdrawal'];
   protected readonly selectedChip = signal('All');
 
+  protected readonly keyTypes: readonly SegmentedOption[] = [
+    { value: 'cpf', label: 'CPF' },
+    { value: 'email', label: 'E-mail' },
+    { value: 'phone', label: 'Mobile' },
+  ];
+  protected readonly keyType = signal('cpf');
+
+  protected readonly steps = ['Key', 'Amount', 'Review'] as const;
+  protected readonly step = signal(2);
+
+  protected readonly dialogOpen = signal(false);
+  protected readonly kinds: ReadonlyArray<{ label: string; tile: IconTileTone; icon: string }> = [
+    { label: 'Deposit', tile: 'income', icon: 'ph-bold ph-bank' },
+    { label: 'Pix', tile: 'accent', icon: 'ph-bold ph-diamonds-four' },
+    { label: 'Recharge', tile: 'violet', icon: 'ph-bold ph-device-mobile' },
+    { label: 'Withdrawal', tile: 'warning', icon: 'ph-bold ph-money' },
+  ];
+
   protected readonly loading = signal(false);
   protected readonly amount = signal('');
 
@@ -82,6 +113,10 @@ export class DesignPage {
     { type: 'PHONE_RECHARGE', amount: 30, date: '2026-10-29T18:40:00-03:00' },
     { type: 'WITHDRAW', amount: 200, date: '2026-10-27T09:05:00-03:00' },
   ];
+
+  protected showToast(): void {
+    this.toast.show('Transaction id copied');
+  }
 
   protected simulateLoading(): void {
     this.loading.set(true);

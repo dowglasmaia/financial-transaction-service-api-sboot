@@ -85,6 +85,8 @@ Approve the class mapping table and the security split (ARCH-01) and the transac
 | ARCH-01 | Draft (spec written 2026-11-03; not authorized) |
 | ARCH-02 | Draft (spec written 2026-11-03; not authorized) |
 | SL-00 … SL-06 | Draft (specs written 2026-11-03; not authorized) |
+| SL-00 | Implemented on `slice/00-visual-v2` (2026-11-03); **open: owner sign-off of the look + `app-ci` on the PR** |
+| SL-01 … SL-06 | Draft (specs written 2026-11-03; not authorized) |
 | BE-07 | Draft (Java 21 build already pre-applied locally, uncommitted; see the spec note) |
 | BE-08 | Draft |
 | FE-05 | Draft |
