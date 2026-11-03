@@ -1,28 +1,28 @@
 # Local development stack. Credentials come from the environment (copy .env.example to .env).
 services:
-  financial-transaction-api:
-    build:
-      context: ./api-financial-transaction-service
-      dockerfile: Dockerfile
-    ports:
-      - "8088:8088"
-    environment:
-      SPRING_PROFILES_ACTIVE: local        # enables the demo seed data (never use in production)
-      DB_URL: jdbc:postgresql://pg-db:5432/${POSTGRES_DB:?set POSTGRES_DB in .env}
-      DB_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-      MAIABANK_URL: http://maiabank-api:8089/api/v1/transactions
-      AUTH_ISSUER: ${AUTH_ISSUER:-https://dev-twljocmfwpvlxx1q.eu.auth0.com/}
-      AUTH_AUDIENCE: ${AUTH_AUDIENCE:-https://api.financial-transaction.local}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:4200}
-      SEED_SECOND_SUB: ${SEED_SECOND_SUB:-}       # optional second demo customer (account 3033)
-      SEED_OWNER_SUB: ${SEED_OWNER_SUB:-}        # token sub of the demo customer (local profile only)
-    networks:
-      - maianet
-    depends_on:
-      - pg-db
-      - kafka
+#  financial-transaction-api:
+#    build:
+#      context: ./api-financial-transaction-service
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8088:8088"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: local        # enables the demo seed data (never use in production)
+#      DB_URL: jdbc:postgresql://pg-db:5432/${POSTGRES_DB:?set POSTGRES_DB in .env}
+#      DB_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+#      DB_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+#      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+#      MAIABANK_URL: http://maiabank-api:8089/api/v1/transactions
+#      AUTH_ISSUER: ${AUTH_ISSUER:-https://dev-twljocmfwpvlxx1q.eu.auth0.com/}
+#      AUTH_AUDIENCE: ${AUTH_AUDIENCE:-https://api.financial-transaction.local}
+#      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:4200}
+#      SEED_SECOND_SUB: ${SEED_SECOND_SUB:-}       # optional second demo customer (account 3033)
+#      SEED_OWNER_SUB: ${SEED_OWNER_SUB:-}        # token sub of the demo customer (local profile only)
+#    networks:
+#      - maianet
+#    depends_on:
+#      - pg-db
+#      - kafka
 
   pg-db:
     container_name: pg-db
@@ -34,7 +34,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
       POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5433}:5432"   # 5433 on the host so it does not clash with a local Postgres on 5432
     volumes:
       - postgresql_data:/var/lib/postgresql/data
 
@@ -71,7 +71,7 @@ services:
     ports:
       - "19000:9000"
     environment:
-      KAFKA_BROKERCONNECT: kafka:9092
+      KAFKA_BROKERCONNECT: kafka:29092   # the in-network listener (9092 is advertised as localhost for the host only)
 
   maiabank-api:
     container_name: maiabank-api
