@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.controllers.validate;
+package com.dowglasmaia.financialtransaction.transaction.api;
 
 import com.dowglasmaia.provider.model.DepositRequestDTO;
 import com.dowglasmaia.provider.model.MobileRechargeRequestDTO;

@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.controllers;
+package com.dowglasmaia.financialtransaction.account.api;
 
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
 import com.dowglasmaia.financialtransaction.support.MockIssuer;

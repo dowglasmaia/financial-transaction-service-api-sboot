@@ -1,6 +1,6 @@
 package com.dowglasmaia.financialtransaction.characterization;
 
-import com.dowglasmaia.financialtransaction.controllers.validate.ValidateBodyRequest;
+import com.dowglasmaia.financialtransaction.transaction.api.ValidateBodyRequest;
 import com.dowglasmaia.financialtransaction.transaction.domain.CPFValidator;
 import com.dowglasmaia.financialtransaction.transaction.domain.EmailValidator;
 import com.dowglasmaia.financialtransaction.transaction.domain.PhoneValidator;

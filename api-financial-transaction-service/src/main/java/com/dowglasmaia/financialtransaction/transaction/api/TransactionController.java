@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.controllers;
+package com.dowglasmaia.financialtransaction.transaction.api;
 
 import com.dowglasmaia.financialtransaction.transaction.application.usecase.GetStatementUseCase;
 import com.dowglasmaia.financialtransaction.transaction.application.usecase.GetTransactionByIdUseCase;
@@ -20,9 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
-import static com.dowglasmaia.financialtransaction.controllers.validate.ValidateBodyRequest.*;
-import static com.dowglasmaia.financialtransaction.services.impl.mapper.TransactionMapper.toTransactionRequest;
-import static com.dowglasmaia.financialtransaction.services.impl.mapper.TransactionMapper.toTransactionsResponse;
+import static com.dowglasmaia.financialtransaction.transaction.api.ValidateBodyRequest.*;
+import static com.dowglasmaia.financialtransaction.transaction.api.TransactionMapper.toTransactionRequest;
+import static com.dowglasmaia.financialtransaction.transaction.api.TransactionMapper.toTransactionsResponse;
 
 /** Inbound adapter: validates the shape, maps the generated DTOs to domain values and calls one use case. */
 @RestController

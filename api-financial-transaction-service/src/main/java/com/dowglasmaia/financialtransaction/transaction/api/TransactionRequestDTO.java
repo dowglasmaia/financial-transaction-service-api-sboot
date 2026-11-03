@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.services.model;
+package com.dowglasmaia.financialtransaction.transaction.api;
 
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import lombok.AllArgsConstructor;

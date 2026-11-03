@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.controllers;
+package com.dowglasmaia.financialtransaction.transaction.api;
 
 
 import com.dowglasmaia.financialtransaction.transaction.application.usecase.GetStatementUseCase;

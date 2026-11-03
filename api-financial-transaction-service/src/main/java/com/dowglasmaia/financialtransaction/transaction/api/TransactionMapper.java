@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.services.impl.mapper;
+package com.dowglasmaia.financialtransaction.transaction.api;
 
 import com.dowglasmaia.financialtransaction.transaction.domain.Transaction;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
