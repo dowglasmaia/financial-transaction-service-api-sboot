@@ -46,10 +46,11 @@ public class DBService {
 
         var account = accountRepository.findByNumber("2022")
               .orElseGet(() -> createAccount(agency, createUser()));
-        linkOwner(account.getUser());
+        link(account.getUser(), ownerSubject);
 
         if (secondSubject != null && !secondSubject.isBlank()) {
-            accountRepository.findByNumber("3033").orElseGet(() -> createSecondAccount(agency));
+            var second = accountRepository.findByNumber("3033").orElseGet(() -> createSecondAccount(agency));
+            link(second.getUser(), secondSubject);
         }
     }
 
@@ -70,9 +71,10 @@ public class DBService {
               .build());
     }
 
-    private void linkOwner(User user){
-        if (ownerSubject != null && !ownerSubject.isBlank() && !ownerSubject.equals(user.getExternalSubject())) {
-            user.setExternalSubject(ownerSubject);
+    /** Points the demo customer at the configured token subject (also when the data already existed with another one). */
+    private void link(User user, String subject){
+        if (subject != null && !subject.isBlank() && !subject.equals(user.getExternalSubject())) {
+            user.setExternalSubject(subject);
             userRepository.save(user);
         }
     }

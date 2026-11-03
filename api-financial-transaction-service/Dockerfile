@@ -6,7 +6,8 @@ WORKDIR /exact
 RUN mvn dependency:resolve
 
 COPY src /exact/src
-RUN mvn clean install
+# Tests need Docker (Testcontainers) and run in CI / the IDE, not while building the image.
+RUN mvn -B clean package -DskipTests
 
 
 FROM amazoncorretto:17-alpine3.16

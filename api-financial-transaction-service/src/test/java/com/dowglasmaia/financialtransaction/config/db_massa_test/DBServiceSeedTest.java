@@ -83,4 +83,17 @@ class DBServiceSeedTest {
 
         verify(accounts, never()).save(any(Account.class));
     }
+
+    @Test
+    void anExistingSecondCustomerLinkedToAnotherSubjectIsRelinkedNotDuplicated() {
+        User secondUser = User.builder().id("user-2").externalSubject("auth0|old-subject").build();
+        when(accounts.findByNumber("3033")).thenReturn(Optional.of(Account.builder().id("acc-2").number("3033").user(secondUser).build()));
+        ReflectionTestUtils.setField(seed, "secondSubject", "auth0|second");
+
+        seed.instanciateTestDatabase();
+
+        assertThat(secondUser.getExternalSubject()).isEqualTo("auth0|second");
+        verify(users).save(secondUser);
+        verify(accounts, never()).save(any(Account.class));
+    }
 }
