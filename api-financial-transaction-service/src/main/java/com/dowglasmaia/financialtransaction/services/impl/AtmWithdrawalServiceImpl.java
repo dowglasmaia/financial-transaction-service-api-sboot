@@ -1,6 +1,8 @@
 package com.dowglasmaia.financialtransaction.services.impl;
 
-import com.dowglasmaia.financialtransaction.account.application.AccountService;
+import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAgencyUseCase;
+import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAccountUseCase;
+import com.dowglasmaia.financialtransaction.account.application.usecase.DebitAccountUseCase;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
 import com.dowglasmaia.financialtransaction.services.AtmWithdrawalService;
@@ -18,14 +20,20 @@ import java.util.Objects;
 @Service
 public class AtmWithdrawalServiceImpl implements AtmWithdrawalService {
 
-    private final AccountService accountService;
+    private final GetCurrentAgencyUseCase getCurrentAgency;
+    private final GetCurrentAccountUseCase getCurrentAccount;
+    private final DebitAccountUseCase debitAccount;
     private final TransactionService transactionService;
 
     @Autowired
-    public AtmWithdrawalServiceImpl(AccountService accountService,
+    public AtmWithdrawalServiceImpl(GetCurrentAgencyUseCase getCurrentAgency,
+                                    GetCurrentAccountUseCase getCurrentAccount,
+                                    DebitAccountUseCase debitAccount,
                                     TransactionService transactionService
     ){
-        this.accountService = accountService;
+        this.getCurrentAgency = getCurrentAgency;
+        this.getCurrentAccount = getCurrentAccount;
+        this.debitAccount = debitAccount;
         this.transactionService = transactionService;
     }
 
@@ -39,22 +47,22 @@ public class AtmWithdrawalServiceImpl implements AtmWithdrawalService {
     public void makeAtmWithdrawal(WithdrawRequestDTO withdrawRequest){
         log.info("Start makeAtmWithdrawal");
 
-        String agencyId = accountService.currentAgencyId();
+        String agencyId = getCurrentAgency.execute();
         log.info("AtmWithdrawal at agency: {}", agencyId);
 
-        var account = accountService.currentAccount();
+        var account = getCurrentAccount.execute();
 
         if (isCardBasedWithdrawal(withdrawRequest)) {
             log.info("AtmWithdrawal base card");
 
-            accountService.debitById(account.getId(), withdrawRequest.getAmount());
+            debitAccount.execute(account.getId(), withdrawRequest.getAmount());
         } else {
             log.info("AtmWithdrawal not based card");
 
             if (!Objects.equals(withdrawRequest.getNumberAccount(), account.getNumber())) {
                 throw new ObjectNotFoundExeption("Account not found.", HttpStatus.NOT_FOUND);
             }
-            accountService.debitById(account.getId(), withdrawRequest.getAmount());
+            debitAccount.execute(account.getId(), withdrawRequest.getAmount());
         }
 
         transactionService.save(TransactionTypeEnum.WITHDRAW, account.getId(), withdrawRequest.getAmount(), agencyId);

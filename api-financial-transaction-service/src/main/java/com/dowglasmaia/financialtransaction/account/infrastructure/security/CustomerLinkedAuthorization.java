@@ -1,6 +1,6 @@
 package com.dowglasmaia.financialtransaction.account.infrastructure.security;
 
-import com.dowglasmaia.financialtransaction.account.application.AccountService;
+import com.dowglasmaia.financialtransaction.account.application.usecase.CheckCallerLinkedUseCase;
 import java.util.function.Supplier;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
@@ -16,10 +16,10 @@ import org.springframework.stereotype.Component;
 @Component("customerLinkedAuthorization")
 class CustomerLinkedAuthorization implements AuthorizationManager<RequestAuthorizationContext> {
 
-    private final AccountService accountService;
+    private final CheckCallerLinkedUseCase checkCallerLinked;
 
-    CustomerLinkedAuthorization(AccountService accountService) {
-        this.accountService = accountService;
+    CustomerLinkedAuthorization(CheckCallerLinkedUseCase checkCallerLinked) {
+        this.checkCallerLinked = checkCallerLinked;
     }
 
     @Override
@@ -27,6 +27,6 @@ class CustomerLinkedAuthorization implements AuthorizationManager<RequestAuthori
         Authentication caller = authentication.get();
         boolean customer = caller != null && caller.getAuthorities().stream()
               .anyMatch(authority -> "ROLE_CUSTOMER".equals(authority.getAuthority()));
-        return new AuthorizationDecision(customer && accountService.isLinked());
+        return new AuthorizationDecision(customer && checkCallerLinked.execute());
     }
 }

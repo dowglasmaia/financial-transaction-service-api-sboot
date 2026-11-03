@@ -1,6 +1,6 @@
 package com.dowglasmaia.financialtransaction.services.impl;
 
-import com.dowglasmaia.financialtransaction.account.application.AccountService;
+import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAccountUseCase;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.entity.Transaction;
 import com.dowglasmaia.financialtransaction.entity.TransactionStatusEnum;
@@ -29,15 +29,15 @@ import static com.dowglasmaia.financialtransaction.services.impl.mapper.Transact
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
-    private final AccountService accountService;
+    private final GetCurrentAccountUseCase getCurrentAccount;
 
 
     @Autowired
     public TransactionServiceImpl(TransactionRepository transactionRepository,
-                                  AccountService accountService
+                                  GetCurrentAccountUseCase getCurrentAccount
     ){
         this.transactionRepository = transactionRepository;
-        this.accountService = accountService;
+        this.getCurrentAccount = getCurrentAccount;
     }
 
     @Override
@@ -72,7 +72,7 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionsResponseDTO findByDateRange(String initialDate, String finalDate){
         log.info("Start findByDateRange Transactions");
 
-        Account accountEntity = accountService.currentAccount();
+        Account accountEntity = getCurrentAccount.execute();
 
         var startDate = DateConverter.convertStringToOffsetDateTime(initialDate);
         log.info("startDate: {}", startDate);
@@ -92,7 +92,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public TransactionResponseDTO findById(String id){
-        Account account = accountService.currentAccount();
+        Account account = getCurrentAccount.execute();
 
         var transaction = transactionRepository.findByIdAndAccountId(id, account.getId())
               .orElseThrow(() -> new ObjectNotFoundExeption("Transaction not found", HttpStatus.FOUND));

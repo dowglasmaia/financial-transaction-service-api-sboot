@@ -1,6 +1,7 @@
 package com.dowglasmaia.financialtransaction.services.impl;
 
-import com.dowglasmaia.financialtransaction.account.application.AccountService;
+import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAccountUseCase;
+import com.dowglasmaia.financialtransaction.account.application.usecase.DebitAccountUseCase;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.config.kafka.KafkaAdminConfig;
 import com.dowglasmaia.financialtransaction.entity.OutboxEvent;
@@ -29,16 +30,19 @@ public class RechargeMobileServiceImpl implements RechargeMobileService {
     private static final JsonSerializer<MobileRechargeRequestDTO> PAYLOAD_SERIALIZER = new JsonSerializer<>();
 
     private final OutboxEventRepository outboxEventRepository;
-    private final AccountService accountService;
+    private final GetCurrentAccountUseCase getCurrentAccount;
+    private final DebitAccountUseCase debitAccount;
     private final TransactionService transactionService;
 
     @Autowired
     public RechargeMobileServiceImpl(OutboxEventRepository outboxEventRepository,
-                                     AccountService accountService,
+                                     GetCurrentAccountUseCase getCurrentAccount,
+                                     DebitAccountUseCase debitAccount,
                                      TransactionService transactionService
     ){
         this.outboxEventRepository = outboxEventRepository;
-        this.accountService = accountService;
+        this.getCurrentAccount = getCurrentAccount;
+        this.debitAccount = debitAccount;
         this.transactionService = transactionService;
     }
 
@@ -51,9 +55,9 @@ public class RechargeMobileServiceImpl implements RechargeMobileService {
     public void makeRecharge(MobileRechargeRequestDTO request){
         validatePhoneNumber(request);
 
-        Account account = accountService.currentAccount();
+        Account account = getCurrentAccount.execute();
 
-        accountService.debitById(account.getId(), request.getAmount());
+        debitAccount.execute(account.getId(), request.getAmount());
 
         transactionService.save(TransactionTypeEnum.PHONE_RECHARGE, account.getId(), request.getAmount(), null);
 
