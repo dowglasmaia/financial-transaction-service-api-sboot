@@ -1,6 +1,6 @@
 # SPEC-SL-00 — Visual identity v2 (frontend-only slice)
 
-**Status:** Implemented on the branch; **open: owner sign-off of the look and green `app-ci` on the PR** · **Depends on:** FE-02 (Done) · **Parallel with:** none (every later slice builds on these tokens and components)
+**Status:** Implemented and **signed off by the owner (2026-11-03)**; **open only: green `app-ci` on the PR** · **Depends on:** FE-02 (Done) · **Parallel with:** none (every later slice builds on these tokens and components)
 **Branch:** `slice/00-visual-v2` · **Track:** Frontend only (the one slice with no backend change)
 **Read first:** `../memory/produto.md`, `../memory/contexto-tecnico.md` (incl. *Frontend: prototype and agent autonomy* and decisions D-31…D-37), `../spec-execution-flow.md` §1b (slice loop) and the visual/flow reference **`../../prototype/Maia Bank UI prototype/Maia Bank v2.dc.html`**. Protocol: `../shared/como-executar.md`.
 
@@ -69,8 +69,9 @@ Replace the v1 look (warm brown + gold) that FE-02 implemented with the approved
   > ✅ 2026-11-03 15:20 +0000 — `grep -rniE "CEA45C|2A1708|FBF1DE|5FA899" src` → no output (the guard test writes the hex in two halves). `brown` is not a word that appears in src.
 - [x] Contrast: text ≥ 4.5:1 and control borders/icons ≥ 3:1 in both themes (asserted by a unit test)
   > ✅ 2026-11-03 15:20 +0000 — `tokens-contrast.spec.ts`: 24 pairs × 2 themes + 6 v1-guard cases, all green.
-- [ ] `/design` matches v2 at desktop/tablet/mobile; owner sign-off written
+- [x] `/design` matches v2 at desktop/tablet/mobile; owner sign-off written
   > ⛔ 2026-11-03 15:20 +0000 — Bloqueio: only the owner can sign off the look. Para desbloquear: owner opens `/design` (`npm start`) next to the v2 file and writes the sign-off (or the list of adjustments).
+  > ✅ 2026-11-03 17:00 +0000 — Sign-off by the owner, in chat: "o visual estar ok!" (compared `/design` with the v2 file). No adjustments requested. Not stored as screenshots; the written record is this line.
 - [x] No feature, route or HTTP added; existing 69 unit tests still pass (adjusted only for style tokens)
   > ✅ 2026-11-03 15:20 +0000 — No new route (only `data.nav` on `/`), no HTTP. 117 tests / 13 files green: the 69 original (the contrast spec was extended, the other five files untouched) + 48 new.
 
@@ -81,8 +82,9 @@ Replace the v1 look (warm brown + gold) that FE-02 implemented with the approved
   > ⛔ 2026-11-03 15:20 +0000 — Not executed: needs the PR (the owner opens it). Para desbloquear: green `app-ci` on the PR.
 - [ ] Built-in browser screenshots of `/design` and the empty shell at 1280 / 768 / 390 in dark and light attached to the evidence
   > ⏳ 2026-11-03 15:20 +0000 — Parcial. EXECUTED in the built-in browser against `ng serve` (stopped afterwards): 1280 dark + light, 768 light (tokens; balance/ledger/stepper before the KPI/stepper fix, layout re-verified by DOM: no overflow), 390 light + dark (header, strip, bottom bar, balance, KPI, ledger). Screenshots were inspected in the session, **not saved in the repo**. Falta: 768 dark and a full 6-way matrix as image files. Próxima ação: owner review doubles as the screenshot pass.
-- [ ] Written owner sign-off of the v2 look (replaces FE-01's pending sign-off)
+- [x] Written owner sign-off of the v2 look (replaces FE-01's pending sign-off)
   > ⛔ 2026-11-03 15:20 +0000 — Not executed: only the owner can sign off. Para desbloquear: owner compares `/design` with v2 and writes the sign-off here.
+  > ✅ 2026-11-03 17:00 +0000 — Signed off by the owner (see the acceptance item above). FE-01's pending v1 sign-off is void.
 
 ## Stop and ask
 - Light theme cannot meet contrast with the v2 hues
@@ -97,4 +99,4 @@ The v1 (brown/gold) look is gone: tokens (dark v2 + derived light), restyled sha
 
 **Executed:** clean `npm ci`, production build (468.00 kB initial, was 434.76 kB), 117 unit tests (69 original + 48 new, red first for the contrast, component and shell specs), v1 palette grep empty, browser check of `/design` and the shell at 1280/768/390 in dark and light, dialog focus/Esc behaviour.
 
-**Open:** owner sign-off of the look, `app-ci` on the PR, axe-core (SL-01 brings Playwright). **Accepted limitations:** v2 was reviewed from its source, not rendered; screenshots were inspected but are not stored in the repo; the account chip waits for SL-01. **Findings:** v2's primary `#2f6bff` fails 4.5:1 with white text (used `#2d68fa`); at 768 px KPI figures wrapped until the tile was stacked.
+**Signed off:** the owner approved the look on 2026-11-03. **Open:** `app-ci` on the PR, axe-core (SL-01 brings Playwright). **Accepted limitations:** v2 was reviewed from its source, not rendered; screenshots were inspected but are not stored in the repo; the account chip waits for SL-01. **Findings:** v2's primary `#2f6bff` fails 4.5:1 with white text (used `#2d68fa`); at 768 px KPI figures wrapped until the tile was stacked.
