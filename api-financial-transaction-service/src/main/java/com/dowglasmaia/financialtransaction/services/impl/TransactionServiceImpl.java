@@ -3,12 +3,12 @@ package com.dowglasmaia.financialtransaction.services.impl;
 import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAccountUseCase;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.entity.Transaction;
-import com.dowglasmaia.financialtransaction.entity.TransactionStatusEnum;
-import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
 import com.dowglasmaia.financialtransaction.repository.TransactionRepository;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
-import com.dowglasmaia.financialtransaction.utils.DateConverter;
+import com.dowglasmaia.financialtransaction.transaction.domain.DateConverter;
 import com.dowglasmaia.provider.model.TransactionResponseDTO;
 import com.dowglasmaia.provider.model.TransactionsResponseDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -42,13 +42,13 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    public void save(TransactionTypeEnum type, String accountId, BigDecimal amount, String agencyId){
-        record(type, accountId, amount, agencyId, TransactionStatusEnum.COMPLETED);
+    public void save(TransactionType type, String accountId, BigDecimal amount, String agencyId){
+        record(type, accountId, amount, agencyId, TransactionStatus.COMPLETED);
     }
 
     @Override
     @Transactional
-    public String record(TransactionTypeEnum type, String accountId, BigDecimal amount, String agencyId, TransactionStatusEnum status){
+    public String record(TransactionType type, String accountId, BigDecimal amount, String agencyId, TransactionStatus status){
         log.info("Start save Transaction");
         var transactionEntity = Transaction.builder()
               .transactionType(type)
@@ -64,7 +64,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    public void updateStatus(String id, TransactionStatusEnum status){
+    public void updateStatus(String id, TransactionStatus status){
         transactionRepository.updateStatus(id, status);
     }
 
@@ -81,7 +81,7 @@ public class TransactionServiceImpl implements TransactionService {
         log.info("endDate: {}", endDate);
 
         var transactionsEntity = transactionRepository.findByStatusAndAccountIdAndDateHourBetween(
-              TransactionStatusEnum.COMPLETED, accountEntity.getId(), startDate, endDate);
+              TransactionStatus.COMPLETED, accountEntity.getId(), startDate, endDate);
 
         var transactionsResponse = toTransactionsResponse(transactionsEntity);
 

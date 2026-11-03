@@ -1,6 +1,6 @@
 package com.dowglasmaia.financialtransaction.services.model;
 
-import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +18,6 @@ public class TransactionRequestDTO {
     private OffsetDateTime dateHour;
     private BigDecimal amount;
     private String accountId;
-    private TransactionTypeEnum transactionType;
+    private TransactionType transactionType;
 
 }

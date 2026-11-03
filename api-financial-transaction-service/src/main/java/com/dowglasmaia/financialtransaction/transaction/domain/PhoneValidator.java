@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.utils;
+package com.dowglasmaia.financialtransaction.transaction.domain;
 
 public class PhoneValidator {
     private static final String PHONE_NUMBER_PATTERN = "^[1-9]{2}9[0-9]{8}$";

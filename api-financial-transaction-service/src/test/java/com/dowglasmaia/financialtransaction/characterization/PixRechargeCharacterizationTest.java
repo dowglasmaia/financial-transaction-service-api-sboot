@@ -1,8 +1,8 @@
 package com.dowglasmaia.financialtransaction.characterization;
 
 import com.dowglasmaia.financialtransaction.entity.Transaction;
-import com.dowglasmaia.financialtransaction.entity.TransactionStatusEnum;
-import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
 import com.dowglasmaia.provider.model.MobileRechargeRequestDTO;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -51,10 +51,10 @@ class PixRechargeCharacterizationTest extends AbstractIntegrationTest {
         assertThat(sameValue(new BigDecimal("4500.00"), balanceOf(SEED_ACCOUNT))).isTrue();
         verify(maiaBankClient, times(1)).receiversPix(); // empty POST, no recipient data (F-09)
         Transaction row = transactionRepository.findAll().get(0);
-        assertThat(row.getTransactionType()).isEqualTo(TransactionTypeEnum.PIX);
+        assertThat(row.getTransactionType()).isEqualTo(TransactionType.PIX);
         assertThat(row.getAccountId()).isEqualTo(seedAccount().getId());
         assertThat(row.getAgencyId()).isEqualTo(seedAgency().getId()); // F-09 fixed: the agency is recorded
-        assertThat(row.getStatus()).isEqualTo(TransactionStatusEnum.COMPLETED);
+        assertThat(row.getStatus()).isEqualTo(TransactionStatus.COMPLETED);
     }
 
     @Test
@@ -106,7 +106,7 @@ class PixRechargeCharacterizationTest extends AbstractIntegrationTest {
         // the reservation is kept for audit as FAILED; it never appears in the statement
         List<Transaction> rows = transactionRepository.findAll();
         assertThat(rows).hasSize(1);
-        assertThat(rows.get(0).getStatus()).isEqualTo(TransactionStatusEnum.FAILED);
+        assertThat(rows.get(0).getStatus()).isEqualTo(TransactionStatus.FAILED);
     }
 
     @Test
@@ -132,7 +132,7 @@ class PixRechargeCharacterizationTest extends AbstractIntegrationTest {
         assertThat(sameValue(new BigDecimal("4950.00"), balanceOf(SEED_ACCOUNT))).isTrue();
 
         Transaction row = transactionRepository.findAll().get(0);
-        assertThat(row.getTransactionType()).isEqualTo(TransactionTypeEnum.PHONE_RECHARGE);
+        assertThat(row.getTransactionType()).isEqualTo(TransactionType.PHONE_RECHARGE);
         assertThat(row.getAccountId()).isEqualTo(seedAccount().getId()); // F-08 fixed: the account ID, like every other type
         assertThat(row.getAgencyId()).isNull();
 

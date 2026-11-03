@@ -1,9 +1,9 @@
 package com.dowglasmaia.financialtransaction.characterization;
 
 import com.dowglasmaia.financialtransaction.controllers.validate.ValidateBodyRequest;
-import com.dowglasmaia.financialtransaction.utils.CPFValidator;
-import com.dowglasmaia.financialtransaction.utils.EmailValidator;
-import com.dowglasmaia.financialtransaction.utils.PhoneValidator;
+import com.dowglasmaia.financialtransaction.transaction.domain.CPFValidator;
+import com.dowglasmaia.financialtransaction.transaction.domain.EmailValidator;
+import com.dowglasmaia.financialtransaction.transaction.domain.PhoneValidator;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

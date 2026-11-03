@@ -1,7 +1,7 @@
 package com.dowglasmaia.financialtransaction.services.impl.mapper;
 
 import com.dowglasmaia.financialtransaction.entity.Transaction;
-import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.provider.model.TransactionResponseDTO;
 import com.dowglasmaia.provider.model.TransactionsResponseDTO;
 
@@ -26,14 +26,14 @@ public class TransactionMapper {
 
         // sumIncoming e sumOutgoing
         BigDecimal sumIncoming = transactions.stream()
-              .filter(transaction -> transaction.getTransactionType() == TransactionTypeEnum.DEPOSIT)
+              .filter(transaction -> transaction.getTransactionType() == TransactionType.DEPOSIT)
               .map(Transaction::getAmount)
               .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal sumOutgoing = transactions.stream()
-              .filter(transaction -> transaction.getTransactionType() == TransactionTypeEnum.PIX ||
-                    transaction.getTransactionType() == TransactionTypeEnum.PHONE_RECHARGE ||
-                    transaction.getTransactionType() == TransactionTypeEnum.WITHDRAW)
+              .filter(transaction -> transaction.getTransactionType() == TransactionType.PIX ||
+                    transaction.getTransactionType() == TransactionType.PHONE_RECHARGE ||
+                    transaction.getTransactionType() == TransactionType.WITHDRAW)
               .map(Transaction::getAmount)
               .reduce(BigDecimal.ZERO, BigDecimal::add);
 

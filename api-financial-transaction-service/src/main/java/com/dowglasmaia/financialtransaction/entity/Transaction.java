@@ -1,5 +1,7 @@
 package com.dowglasmaia.financialtransaction.entity;
 
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,11 +32,11 @@ public class Transaction {
     private String agencyId;
 
     @Enumerated(EnumType.STRING)
-    private TransactionTypeEnum transactionType;
+    private TransactionType transactionType;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    private TransactionStatusEnum status = TransactionStatusEnum.COMPLETED;
+    private TransactionStatus status = TransactionStatus.COMPLETED;
 
 }
 

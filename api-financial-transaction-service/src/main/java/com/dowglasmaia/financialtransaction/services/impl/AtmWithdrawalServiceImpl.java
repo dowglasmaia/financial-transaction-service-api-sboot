@@ -3,7 +3,7 @@ package com.dowglasmaia.financialtransaction.services.impl;
 import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAgencyUseCase;
 import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAccountUseCase;
 import com.dowglasmaia.financialtransaction.account.application.usecase.DebitAccountUseCase;
-import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
 import com.dowglasmaia.financialtransaction.services.AtmWithdrawalService;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
@@ -65,7 +65,7 @@ public class AtmWithdrawalServiceImpl implements AtmWithdrawalService {
             debitAccount.execute(account.getId(), withdrawRequest.getAmount());
         }
 
-        transactionService.save(TransactionTypeEnum.WITHDRAW, account.getId(), withdrawRequest.getAmount(), agencyId);
+        transactionService.save(TransactionType.WITHDRAW, account.getId(), withdrawRequest.getAmount(), agencyId);
     }
 
     private boolean isCardBasedWithdrawal(WithdrawRequestDTO withdrawRequest){

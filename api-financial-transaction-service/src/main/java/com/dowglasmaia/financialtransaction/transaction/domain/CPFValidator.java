@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.utils;
+package com.dowglasmaia.financialtransaction.transaction.domain;
 
 public class CPFValidator {
     public static boolean isCpf(String cpf){

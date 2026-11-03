@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.utils;
+package com.dowglasmaia.financialtransaction.transaction.domain;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;

@@ -3,7 +3,7 @@ package com.dowglasmaia.financialtransaction.support;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AgencyEntity;
 import com.dowglasmaia.financialtransaction.entity.Transaction;
-import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.UserEntity;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountJpaRepository;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AgencyJpaRepository;
@@ -118,7 +118,7 @@ public abstract class AbstractIntegrationTest {
         return accountRepository.findByNumber(accountNumber).orElseThrow().getBalance();
     }
 
-    protected Transaction ledger(TransactionTypeEnum type, BigDecimal amount, String accountId, OffsetDateTime when) {
+    protected Transaction ledger(TransactionType type, BigDecimal amount, String accountId, OffsetDateTime when) {
         return transactionRepository.save(Transaction.builder()
               .transactionType(type).amount(amount).accountId(accountId).agencyId(null).dateHour(when).build());
     }

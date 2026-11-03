@@ -5,15 +5,15 @@ import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurre
 import com.dowglasmaia.financialtransaction.account.application.usecase.DebitAccountUseCase;
 import com.dowglasmaia.financialtransaction.account.application.usecase.CreditAccountUseCase;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
-import com.dowglasmaia.financialtransaction.entity.TransactionStatusEnum;
-import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;
 import com.dowglasmaia.financialtransaction.services.PixService;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
 import com.dowglasmaia.financialtransaction.services.client.maiaBank.MaiaBankClient;
-import com.dowglasmaia.financialtransaction.utils.CPFValidator;
-import com.dowglasmaia.financialtransaction.utils.EmailValidator;
-import com.dowglasmaia.financialtransaction.utils.PhoneValidator;
+import com.dowglasmaia.financialtransaction.transaction.domain.CPFValidator;
+import com.dowglasmaia.financialtransaction.transaction.domain.EmailValidator;
+import com.dowglasmaia.financialtransaction.transaction.domain.PhoneValidator;
 import com.dowglasmaia.provider.model.PixRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,14 +96,14 @@ public class PixServiceImpl implements PixService {
     private String reserve(Account account, String agencyId, BigDecimal amount){
         return transactionTemplate.execute(status -> {
             debitAccount.execute(account.getId(), amount);
-            return transactionService.record(TransactionTypeEnum.PIX, account.getId(), amount, agencyId, TransactionStatusEnum.PENDING);
+            return transactionService.record(TransactionType.PIX, account.getId(), amount, agencyId, TransactionStatus.PENDING);
         });
     }
 
     /** Tx 2 (success): MaiaBank accepted the Pix. If this fails the money was sent: keep the row PENDING and flag it. */
     private void confirm(String ledgerId){
         try {
-            transactionTemplate.executeWithoutResult(status -> transactionService.updateStatus(ledgerId, TransactionStatusEnum.COMPLETED));
+            transactionTemplate.executeWithoutResult(status -> transactionService.updateStatus(ledgerId, TransactionStatus.COMPLETED));
         } catch (RuntimeException e) {
             log.error("RECONCILIATION NEEDED: Pix {} was accepted by MaiaBank but could not be confirmed in the ledger", ledgerId, e);
         }
@@ -114,7 +114,7 @@ public class PixServiceImpl implements PixService {
         try {
             transactionTemplate.executeWithoutResult(status -> {
                 creditAccount.execute(accountId, amount);
-                transactionService.updateStatus(ledgerId, TransactionStatusEnum.FAILED);
+                transactionService.updateStatus(ledgerId, TransactionStatus.FAILED);
             });
         } catch (RuntimeException e) {
             log.error("RECONCILIATION NEEDED: Pix {} failed but the debit could not be reversed (account {}, amount {})", ledgerId, accountId, amount, e);

@@ -1,7 +1,7 @@
 package com.dowglasmaia.financialtransaction.services.impl.mapper;
 
 import com.dowglasmaia.financialtransaction.entity.Transaction;
-import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.provider.model.TransactionsResponseDTO;
 import org.junit.jupiter.api.Test;
 
@@ -14,17 +14,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 /** Pins the income/outgoing classification (BR-52) at unit level (spec BE-01). */
 class TransactionMapperTest {
 
-    private static Transaction tx(TransactionTypeEnum type, String amount) {
+    private static Transaction tx(TransactionType type, String amount) {
         return Transaction.builder().transactionType(type).amount(new BigDecimal(amount)).dateHour(OffsetDateTime.now()).build();
     }
 
     @Test
     void depositIsIncomingAndTheOtherThreeAreOutgoing() {
         TransactionsResponseDTO response = TransactionMapper.toTransactionsResponse(List.of(
-              tx(TransactionTypeEnum.DEPOSIT, "100.00"),
-              tx(TransactionTypeEnum.PIX, "10.00"),
-              tx(TransactionTypeEnum.WITHDRAW, "20.00"),
-              tx(TransactionTypeEnum.PHONE_RECHARGE, "5.00")));
+              tx(TransactionType.DEPOSIT, "100.00"),
+              tx(TransactionType.PIX, "10.00"),
+              tx(TransactionType.WITHDRAW, "20.00"),
+              tx(TransactionType.PHONE_RECHARGE, "5.00")));
 
         assertThat(response.getSumIncoming()).isEqualByComparingTo("100");
         assertThat(response.getSumOutgoing()).isEqualByComparingTo("35");

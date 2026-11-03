@@ -4,7 +4,7 @@ import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurre
 import com.dowglasmaia.financialtransaction.account.application.usecase.FindAccountByAgencyAndNumberUseCase;
 import com.dowglasmaia.financialtransaction.account.application.usecase.CreditAccountUseCase;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
-import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
 import com.dowglasmaia.financialtransaction.services.DepositService;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
@@ -51,7 +51,7 @@ public class DepositServiceImpl implements DepositService {
 
         creditAccount.execute(accountEntity.getId(), request.getAmount());
 
-        transactionService.save(TransactionTypeEnum.DEPOSIT, accountEntity.getId(), request.getAmount(), agencyId);
+        transactionService.save(TransactionType.DEPOSIT, accountEntity.getId(), request.getAmount(), agencyId);
 
         log.info("Deposit successfully");
     }

@@ -5,12 +5,12 @@ import com.dowglasmaia.financialtransaction.account.application.usecase.DebitAcc
 import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.config.kafka.KafkaAdminConfig;
 import com.dowglasmaia.financialtransaction.entity.OutboxEvent;
-import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;
 import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
 import com.dowglasmaia.financialtransaction.services.RechargeMobileService;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
-import com.dowglasmaia.financialtransaction.utils.PhoneValidator;
+import com.dowglasmaia.financialtransaction.transaction.domain.PhoneValidator;
 import com.dowglasmaia.provider.model.MobileRechargeRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +59,7 @@ public class RechargeMobileServiceImpl implements RechargeMobileService {
 
         debitAccount.execute(account.getId(), request.getAmount());
 
-        transactionService.save(TransactionTypeEnum.PHONE_RECHARGE, account.getId(), request.getAmount(), null);
+        transactionService.save(TransactionType.PHONE_RECHARGE, account.getId(), request.getAmount(), null);
 
         outboxEventRepository.save(OutboxEvent.builder()
               .topic(KafkaAdminConfig.RECHARGE_MOBILE_TOPIC)

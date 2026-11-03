@@ -1,7 +1,7 @@
 package com.dowglasmaia.financialtransaction.integrity;
 
 import com.dowglasmaia.financialtransaction.entity.Transaction;
-import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
 
@@ -57,8 +57,8 @@ class MoneyConcurrencyTest extends AbstractIntegrationTest {
         BigDecimal balance = balanceOf(SEED_ACCOUNT);
         List<Transaction> ledger = transactionRepository.findAll();
 
-        BigDecimal deposits = sum(ledger.stream().filter(t -> t.getTransactionType() == TransactionTypeEnum.DEPOSIT).toList());
-        BigDecimal withdrawals = sum(ledger.stream().filter(t -> t.getTransactionType() == TransactionTypeEnum.WITHDRAW).toList());
+        BigDecimal deposits = sum(ledger.stream().filter(t -> t.getTransactionType() == TransactionType.DEPOSIT).toList());
+        BigDecimal withdrawals = sum(ledger.stream().filter(t -> t.getTransactionType() == TransactionType.WITHDRAW).toList());
 
         assertThat(balance.signum()).isGreaterThanOrEqualTo(0);
         assertThat(ledger).hasSize((int) statuses.stream().filter(s -> s == 204).count());

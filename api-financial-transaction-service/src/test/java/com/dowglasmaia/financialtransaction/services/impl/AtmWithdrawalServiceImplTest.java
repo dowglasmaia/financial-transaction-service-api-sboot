@@ -4,7 +4,7 @@ import com.dowglasmaia.financialtransaction.account.application.usecase.DebitAcc
 import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAccountUseCase;
 import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAgencyUseCase;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
-import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,7 @@ class AtmWithdrawalServiceImplTest {
         service.makeAtmWithdrawal(request);
 
         verify(debitAccount).execute("acting-id", new BigDecimal("150.00"));
-        verify(transactionService).save(TransactionTypeEnum.WITHDRAW, "acting-id", new BigDecimal("150.00"), "agency-id");
+        verify(transactionService).save(TransactionType.WITHDRAW, "acting-id", new BigDecimal("150.00"), "agency-id");
         verify(getCurrentAgency).execute();
         verify(getCurrentAccount).execute();
         verifyNoMoreInteractions(debitAccount);
@@ -60,7 +60,7 @@ class AtmWithdrawalServiceImplTest {
         service.makeAtmWithdrawal(request);
 
         verify(debitAccount).execute("acting-id", new BigDecimal("80.00"));
-        verify(transactionService).save(eq(TransactionTypeEnum.WITHDRAW), eq("acting-id"), eq(new BigDecimal("80.00")), eq("agency-id"));
+        verify(transactionService).save(eq(TransactionType.WITHDRAW), eq("acting-id"), eq(new BigDecimal("80.00")), eq("agency-id"));
     }
 
     @Test

@@ -2,7 +2,7 @@ package com.dowglasmaia.financialtransaction.security;
 
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.entity.Transaction;
-import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
 import com.dowglasmaia.financialtransaction.support.MockIssuer;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,7 +33,7 @@ class OwnershipTest extends AbstractIntegrationTest {
         accountB = createOtherAccount("9999", new BigDecimal("1000.00"), MockIssuer.OTHER_SUB);
     }
 
-    private Transaction row(TransactionTypeEnum type, String amount, AccountEntity account) {
+    private Transaction row(TransactionType type, String amount, AccountEntity account) {
         return ledger(type, new BigDecimal(amount), account.getId(), OffsetDateTime.now().minusHours(1));
     }
 
@@ -41,7 +41,7 @@ class OwnershipTest extends AbstractIntegrationTest {
 
     @Test
     void aCustomerCannotReadAnotherCustomersTransactionById() throws Exception {
-        Transaction ofB = row(TransactionTypeEnum.DEPOSIT, "9.00", accountB);
+        Transaction ofB = row(TransactionType.DEPOSIT, "9.00", accountB);
 
         getAs(tokenA, "/" + ofB.getId()).andExpect(status().isNotFound())
               .andExpect(jsonPath("$.code").value("NOT_FOUND"))
@@ -51,9 +51,9 @@ class OwnershipTest extends AbstractIntegrationTest {
 
     @Test
     void theStatementAndItsTotalsContainOnlyTheCallersRows() throws Exception {
-        row(TransactionTypeEnum.DEPOSIT, "100.00", seedAccount());
-        row(TransactionTypeEnum.DEPOSIT, "77.00", accountB);
-        row(TransactionTypeEnum.WITHDRAW, "5.00", accountB);
+        row(TransactionType.DEPOSIT, "100.00", seedAccount());
+        row(TransactionType.DEPOSIT, "77.00", accountB);
+        row(TransactionType.WITHDRAW, "5.00", accountB);
 
         JsonNode a = bodyOf(getAs(tokenA, RANGE).andExpect(status().isOk()));
         assertThat(a.get("transaction")).hasSize(1);

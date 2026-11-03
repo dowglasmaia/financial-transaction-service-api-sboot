@@ -2,8 +2,8 @@ package com.dowglasmaia.financialtransaction.integrity;
 
 import com.dowglasmaia.financialtransaction.entity.OutboxEvent;
 import com.dowglasmaia.financialtransaction.entity.Transaction;
-import com.dowglasmaia.financialtransaction.entity.TransactionStatusEnum;
-import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
 import com.dowglasmaia.financialtransaction.repository.TransactionRepository;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
@@ -86,8 +86,8 @@ class FailureInjectionTest extends AbstractIntegrationTest {
         assertThat(sameValue(SEED_BALANCE, balanceOf(SEED_ACCOUNT))).as("debit reversed").isTrue();
         List<Transaction> rows = transactionRepository.findAll();
         assertThat(rows).hasSize(1);
-        assertThat(rows.get(0).getTransactionType()).isEqualTo(TransactionTypeEnum.PIX);
-        assertThat(rows.get(0).getStatus()).isEqualTo(TransactionStatusEnum.FAILED);
+        assertThat(rows.get(0).getTransactionType()).isEqualTo(TransactionType.PIX);
+        assertThat(rows.get(0).getStatus()).isEqualTo(TransactionStatus.FAILED);
         assertThat(sum(rows)).isEqualByComparingTo("500.00"); // the audit row keeps the amount, the statement ignores it
         assertThat(bodyOf(get("?initial-date=01/01/2000&final-date=31/12/2100")).get("transaction")).isEmpty();
     }

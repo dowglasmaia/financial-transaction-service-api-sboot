@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.utils;
+package com.dowglasmaia.financialtransaction.transaction.domain;
 
 public class EmailValidator {
     private static final String EMAIL_PATTERN = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
