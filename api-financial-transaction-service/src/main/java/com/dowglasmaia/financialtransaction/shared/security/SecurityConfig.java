@@ -1,16 +1,14 @@
-package com.dowglasmaia.financialtransaction.config.security;
+package com.dowglasmaia.financialtransaction.shared.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
-import com.dowglasmaia.financialtransaction.services.client.CurrentUser;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -60,7 +58,7 @@ public class SecurityConfig {
                                             CorsConfigurationSource corsConfigurationSource,
                                             AuthenticationEntryPoint authenticationEntryPoint,
                                             AccessDeniedHandler accessDeniedHandler,
-                                            CurrentUser currentUser) throws Exception {
+                                            @Qualifier("customerLinkedAuthorization") AuthorizationManager<RequestAuthorizationContext> customerLinkedAuthorization) throws Exception {
         return http
               .csrf(AbstractHttpConfigurer::disable) // bearer-only API: no cookies, nothing for CSRF to protect
               .cors(cors -> cors.configurationSource(corsConfigurationSource))
@@ -68,7 +66,7 @@ public class SecurityConfig {
               .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                     .requestMatchers("/actuator/**").hasRole("ADMIN") // no admin role is issued today: effectively closed
-                    .requestMatchers("/api/**").access(customerLinkedToAUser(currentUser))
+                    .requestMatchers("/api/**").access(customerLinkedAuthorization)
                     .anyRequest().authenticated())
               .exceptionHandling(handling -> handling
                     .authenticationEntryPoint(authenticationEntryPoint)
@@ -78,20 +76,6 @@ public class SecurityConfig {
                     .authenticationEntryPoint(authenticationEntryPoint)
                     .accessDeniedHandler(accessDeniedHandler))
               .build();
-    }
-
-    /**
-     * The whole business API needs the role {@code customer} AND a token subject linked to a local user (otherwise 403).
-     * Enforced here, in the filter chain, on purpose: the generated API interface exposes its handlers as default methods
-     * that call the controller methods internally, so annotation-based method security would be bypassed.
-     */
-    private static AuthorizationManager<RequestAuthorizationContext> customerLinkedToAUser(CurrentUser currentUser) {
-        return (authentication, context) -> {
-            Authentication caller = authentication.get();
-            boolean customer = caller != null && caller.getAuthorities().stream()
-                  .anyMatch(authority -> "ROLE_CUSTOMER".equals(authority.getAuthority()));
-            return new AuthorizationDecision(customer && currentUser.isLinked());
-        };
     }
 
     /**

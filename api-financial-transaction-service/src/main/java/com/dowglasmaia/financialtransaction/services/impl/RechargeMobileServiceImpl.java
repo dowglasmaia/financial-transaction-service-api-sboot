@@ -1,15 +1,14 @@
 package com.dowglasmaia.financialtransaction.services.impl;
 
+import com.dowglasmaia.financialtransaction.account.application.AccountService;
+import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.config.kafka.KafkaAdminConfig;
-import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.entity.OutboxEvent;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;
 import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
 import com.dowglasmaia.financialtransaction.services.RechargeMobileService;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
-import com.dowglasmaia.financialtransaction.services.client.account.AddAmountService;
-import com.dowglasmaia.financialtransaction.services.client.account.FindAccountByNumberAndUserIdService;
 import com.dowglasmaia.financialtransaction.utils.PhoneValidator;
 import com.dowglasmaia.provider.model.MobileRechargeRequestDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -30,20 +29,17 @@ public class RechargeMobileServiceImpl implements RechargeMobileService {
     private static final JsonSerializer<MobileRechargeRequestDTO> PAYLOAD_SERIALIZER = new JsonSerializer<>();
 
     private final OutboxEventRepository outboxEventRepository;
-    private final FindAccountByNumberAndUserIdService findAccountByNumberAndUserIdService;
+    private final AccountService accountService;
     private final TransactionService transactionService;
-    private final AddAmountService addAmountService;
 
     @Autowired
     public RechargeMobileServiceImpl(OutboxEventRepository outboxEventRepository,
-                                     FindAccountByNumberAndUserIdService findAccountByNumberAndUserIdService,
-                                     TransactionService transactionService,
-                                     AddAmountService addAmountService
+                                     AccountService accountService,
+                                     TransactionService transactionService
     ){
         this.outboxEventRepository = outboxEventRepository;
-        this.findAccountByNumberAndUserIdService = findAccountByNumberAndUserIdService;
+        this.accountService = accountService;
         this.transactionService = transactionService;
-        this.addAmountService = addAmountService;
     }
 
     /**
@@ -55,9 +51,9 @@ public class RechargeMobileServiceImpl implements RechargeMobileService {
     public void makeRecharge(MobileRechargeRequestDTO request){
         validatePhoneNumber(request);
 
-        AccountEntity account = findAccountByNumberAndUserIdService.findByNumberAndUserId();
+        Account account = accountService.currentAccount();
 
-        addAmountService.debitById(account.getId(), request.getAmount());
+        accountService.debitById(account.getId(), request.getAmount());
 
         transactionService.save(TransactionTypeEnum.PHONE_RECHARGE, account.getId(), request.getAmount(), null);
 

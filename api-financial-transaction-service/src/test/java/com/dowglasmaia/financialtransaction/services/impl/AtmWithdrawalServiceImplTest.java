@@ -1,11 +1,9 @@
 package com.dowglasmaia.financialtransaction.services.impl;
 
-import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
+import com.dowglasmaia.financialtransaction.account.application.AccountService;
+import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
-import com.dowglasmaia.financialtransaction.services.client.account.AddAmountService;
-import com.dowglasmaia.financialtransaction.services.client.account.FindAccountByNumberAndUserIdService;
-import com.dowglasmaia.financialtransaction.services.client.agency.AgencyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 
-import static com.dowglasmaia.financialtransaction.mock.MockBuild.userAccountBuild;
 import static com.dowglasmaia.financialtransaction.mock.MockBuild.withdrawRequestBuild;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -25,22 +22,18 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AtmWithdrawalServiceImplTest {
 
-    @Mock AgencyService agencyService;
-    @Mock AddAmountService addAmountService;
+    @Mock AccountService accountService;
     @Mock TransactionService transactionService;
-    @Mock FindAccountByNumberAndUserIdService findAccount;
 
     AtmWithdrawalServiceImpl service;
-    AccountEntity actingAccount;
+    Account actingAccount;
 
     @BeforeEach
     void setUp() {
-        service = new AtmWithdrawalServiceImpl(agencyService, addAmountService, transactionService, findAccount);
-        actingAccount = userAccountBuild();
-        actingAccount.setNumber("2022");
-        actingAccount.setId("acting-id");
-        when(agencyService.getCurrentAgency()).thenReturn("agency-id");
-        when(findAccount.findByNumberAndUserId()).thenReturn(actingAccount);
+        service = new AtmWithdrawalServiceImpl(accountService, transactionService);
+        actingAccount = Account.restore("acting-id", null, null, "2022", null);
+        when(accountService.currentAgencyId()).thenReturn("agency-id");
+        when(accountService.currentAccount()).thenReturn(actingAccount);
     }
 
     @Test
@@ -49,9 +42,11 @@ class AtmWithdrawalServiceImplTest {
 
         service.makeAtmWithdrawal(request);
 
-        verify(addAmountService).debitById("acting-id", new BigDecimal("150.00"));
+        verify(accountService).debitById("acting-id", new BigDecimal("150.00"));
         verify(transactionService).save(TransactionTypeEnum.WITHDRAW, "acting-id", new BigDecimal("150.00"), "agency-id");
-        verifyNoMoreInteractions(addAmountService);
+        verify(accountService).currentAgencyId();
+        verify(accountService).currentAccount();
+        verifyNoMoreInteractions(accountService);
     }
 
     @Test
@@ -60,7 +55,7 @@ class AtmWithdrawalServiceImplTest {
 
         service.makeAtmWithdrawal(request);
 
-        verify(addAmountService).debitById("acting-id", new BigDecimal("80.00"));
+        verify(accountService).debitById("acting-id", new BigDecimal("80.00"));
         verify(transactionService).save(eq(TransactionTypeEnum.WITHDRAW), eq("acting-id"), eq(new BigDecimal("80.00")), eq("agency-id"));
     }
 
@@ -72,6 +67,8 @@ class AtmWithdrawalServiceImplTest {
               .isInstanceOf(com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption.class)
               .hasMessage("Account not found.");
 
-        verifyNoMoreInteractions(addAmountService, transactionService);
+        verify(accountService).currentAgencyId();
+        verify(accountService).currentAccount();
+        verifyNoMoreInteractions(accountService, transactionService);
     }
 }

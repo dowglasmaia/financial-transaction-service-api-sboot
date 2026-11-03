@@ -1,13 +1,13 @@
 package com.dowglasmaia.financialtransaction.services.impl;
 
-import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
+import com.dowglasmaia.financialtransaction.account.application.AccountService;
+import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.entity.Transaction;
 import com.dowglasmaia.financialtransaction.entity.TransactionStatusEnum;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
 import com.dowglasmaia.financialtransaction.repository.TransactionRepository;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
-import com.dowglasmaia.financialtransaction.services.client.account.FindAccountByNumberAndUserIdService;
 import com.dowglasmaia.financialtransaction.utils.DateConverter;
 import com.dowglasmaia.provider.model.TransactionResponseDTO;
 import com.dowglasmaia.provider.model.TransactionsResponseDTO;
@@ -29,15 +29,15 @@ import static com.dowglasmaia.financialtransaction.services.impl.mapper.Transact
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
-    private final FindAccountByNumberAndUserIdService findAccountByNumberAndUserIdService;
+    private final AccountService accountService;
 
 
     @Autowired
     public TransactionServiceImpl(TransactionRepository transactionRepository,
-                                  FindAccountByNumberAndUserIdService findAccountByNumberAndUserIdService
+                                  AccountService accountService
     ){
         this.transactionRepository = transactionRepository;
-        this.findAccountByNumberAndUserIdService = findAccountByNumberAndUserIdService;
+        this.accountService = accountService;
     }
 
     @Override
@@ -72,7 +72,7 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionsResponseDTO findByDateRange(String initialDate, String finalDate){
         log.info("Start findByDateRange Transactions");
 
-        AccountEntity accountEntity = findAccountByNumberAndUserIdService.findByNumberAndUserId();
+        Account accountEntity = accountService.currentAccount();
 
         var startDate = DateConverter.convertStringToOffsetDateTime(initialDate);
         log.info("startDate: {}", startDate);
@@ -92,7 +92,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public TransactionResponseDTO findById(String id){
-        AccountEntity account = findAccountByNumberAndUserIdService.findByNumberAndUserId();
+        Account account = accountService.currentAccount();
 
         var transaction = transactionRepository.findByIdAndAccountId(id, account.getId())
               .orElseThrow(() -> new ObjectNotFoundExeption("Transaction not found", HttpStatus.FOUND));
