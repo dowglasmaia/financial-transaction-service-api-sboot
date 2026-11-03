@@ -59,6 +59,26 @@ describe('SiteFooterComponent', () => {
     expect(el.querySelectorAll('h2')).toHaveLength(3);
   });
 
+  it("shows the author's photo with a text alternative", async () => {
+    const { el } = await render();
+    const photo = el.querySelector('img');
+    expect(photo?.getAttribute('src')).toBe('img/dowglas.png');
+    expect(photo?.getAttribute('alt')).toBe('Photo of Dowglas Maia');
+    expect(photo?.getAttribute('width')).toBe('48');
+    expect(photo?.getAttribute('height')).toBe('48');
+  });
+
+  it('falls back to the initials when the photo cannot be loaded', async () => {
+    const fixture = TestBed.createComponent(SiteFooterComponent);
+    await fixture.whenStable();
+    const el = fixture.nativeElement as HTMLElement;
+    el.querySelector('img')!.dispatchEvent(new Event('error'));
+    await fixture.whenStable();
+
+    expect(el.querySelector('img')).toBeNull();
+    expect(el.textContent).toContain(DEVELOPER.initials);
+  });
+
   it('is hidden when printing', async () => {
     const { el } = await render();
     expect(el.classList.contains('print:hidden')).toBe(true);

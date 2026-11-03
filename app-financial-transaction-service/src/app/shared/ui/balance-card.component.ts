@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal } from '@angular/core';
 import { formatBrl } from '../util/money';
 
 /** The hero figure: current balance on the v2 blue panel with a privacy toggle. The amount always comes from the backend. */
@@ -23,11 +23,11 @@ import { formatBrl } from '../util/money';
           <i [class]="hidden() ? 'ph-bold ph-eye-slash' : 'ph-bold ph-eye'" aria-hidden="true"></i>
         </button>
       </div>
-      <p class="relative mt-1 font-display text-4xl font-semibold sm:text-5xl" aria-live="polite">
+      <p class="relative mt-1 font-display text-4xl font-semibold sm:text-5xl">
         @if (hidden()) {
           <span aria-label="Balance hidden">R$ ••••••</span>
         } @else {
-          <span class="mr-2 text-on-primary/75" aria-hidden="true">R$</span><span>{{ digits() }}</span>
+          <span aria-hidden="true"><span class="mr-2 text-on-primary/75">R$</span>{{ shownDigits() }}</span>
           <span class="sr-only">{{ formatted() }}</span>
         }
       </p>
@@ -41,8 +41,37 @@ export class BalanceCardComponent {
   readonly label = input('Current balance');
   readonly amount = input.required<number | string>();
   readonly updated = input('');
+  /** Animate from zero to the amount (skipped when the user prefers reduced motion). The final value is always the real one. */
+  readonly countUp = input(false);
 
   protected readonly hidden = signal(false);
   protected readonly formatted = computed(() => formatBrl(this.amount()));
-  protected readonly digits = computed(() => this.formatted().replace('R$ ', ''));
+  private readonly shown = signal<number | null>(null);
+  protected readonly shownDigits = computed(() => {
+    const value = this.shown();
+    return (value === null ? this.formatted() : formatBrl(value)).replace('R$ ', '');
+  });
+
+  private timer: ReturnType<typeof setInterval> | undefined;
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => clearInterval(this.timer));
+    effect(() => {
+      const target = Number(this.amount());
+      clearInterval(this.timer);
+      const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!this.countUp() || reduced || !Number.isFinite(target)) {
+        this.shown.set(null);
+        return;
+      }
+      const steps = 24;
+      let step = 0;
+      this.shown.set(0);
+      this.timer = setInterval(() => {
+        step++;
+        this.shown.set(step >= steps ? null : target * (1 - Math.pow(1 - step / steps, 3)));
+        if (step >= steps) clearInterval(this.timer);
+      }, 30);
+    });
+  }
 }
