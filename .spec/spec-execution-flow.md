@@ -22,13 +22,16 @@ Ready-made prompts per spec: `prompts.md`. **Every spec has a *Minimal validatio
 Generic prompt (the per-spec versions in `prompts.md` add the extras):
 > Execute SPEC-<ID> (`.spec/specs/<file>`). Read `.spec/memory/produto.md` and `.spec/memory/contexto-tecnico.md` first, then follow `.spec/spec-execution-flow.md` §4 for this spec. Stay in scope, tests first, tick tasks only with evidence, stop at the "Stop and ask" gates.
 
+## 1a. Backend architecture (D-39)
+All backend code follows the **Hexagonal Pragmática** model (`memory/contexto-tecnico.md` D-39…D-43; source of truth: the skill `java-spring-create-module`). `ARCH-01`/`ARCH-02` migrate the existing code (behaviour frozen); from then on every backend task of a slice or spec creates or changes a feature **with the skill (mode `create`)**, keeps `ArchitectureTest` green and runs `scripts/check-architecture.mjs` before closing.
+
 ## 1b. The slice loop (SL-00…SL-06)
 A slice is one branch `slice/<nn>-<slug>` created from a fresh `main`, one PR, and both pipelines (`api-ci`, `app-ci`) must be green on it. Inside a slice the order is fixed so the parts that connect never drift:
 
 1. **Gate** — dependencies Done, the spec's *Human action before* completed, spec *Approved*.
 2. **Prepare** — `git checkout main && git pull origin main`, new branch, run the baseline (`./mvnw -B verify`, `npm test`), start the stack (below) and record what is green today.
 3. **Contract first** — if the slice changes the API: preview with `openapi-rest-contract` → **explicit approval** → apply to the OpenAPI file. Nothing is generated or coded before the approval.
-4. **Backend** — failing tests first (show them red), smallest change, `./mvnw -B verify` green. One commit per task: `SL-NN: <task>`.
+4. **Backend** — failing tests first (show them red), smallest change, `./mvnw -B verify` green, **created/changed with the skill `java-spring-create-module` (domain/application/infra placement, `ArchitectureTest` green, checker 0 violations)**. One commit per task: `SL-NN: <task>`.
 5. **Types** — regenerate the frontend API types from the contract (`npm run api:types`, created in SL-01); commit the diff.
 6. **Frontend** — failing unit tests first (Vitest), implement, `npm run build && npm test` green. Tests mirror the backend rules (feedback only; the server decides).
 7. **E2E** — Playwright against the real stack with the **mock OIDC provider** (SL-01 creates it) so an agent can sign in without a password; axe inside the e2e on every new screen; 1280 / 768 / 390 viewports.
@@ -45,16 +48,17 @@ A slice is one branch `slice/<nn>-<slug>` created from a fresh `main`, one PR, a
 | 0 | **MONO-01** monorepo + isolated CI (Done) | both | — | both workflows trigger independently |
 | 1 | **BE-01 … BE-04** safety net, foundation, money integrity, auth (Done) | BE | Auth0 Action + 2 test users | 98+ tests green; two-user isolation |
 | 2 | **FE-01 / FE-02** prototype review + Angular foundation (Done; look replaced in SL-00) | FE | — | `npm run build` green |
-| 3 | **SL-00** visual identity v2 | FE only | (optional) screenshots of v2; owner sign-off of the look | build + tests green; `/design` matches v2; contrast test green |
-| 4 | **SL-01** sign in + `/accounts/me` + shell + Home header | BE+FE+E2E | Auth0 callback/logout URLs for `http://localhost:4200`; run API with seed subs | real browser sign-in for both users; e2e with mock IdP green |
-| 5 | **SL-02** statement + detail + Home summary (+ contract, dates, errors) | BE+FE+E2E | time zone; OpenAPI preview; 400-vs-422; summary endpoint | single-day statement end to end; contract = behaviour; `openapi-diff` in CI |
-| 6 | **SL-03** withdrawal + result panel + `Idempotency-Key` | BE+FE+E2E | idempotency design | replay does not double-debit; double click = one request |
-| 7 | **SL-04** deposit (boleto simulation) | BE+FE+E2E | approve the reconciliation | balance +amount once; `DEPOSIT` row |
-| 8 | **SL-05** mobile recharge | BE+FE+E2E | — | "requested" copy; Kafka payload identical |
-| 9 | **SL-06** Pix | BE+FE+E2E | MaiaBank contract only if the payload changes | success/failure/uncertain paths; validators agree client/server |
-| 10 | **BE-07** platform upgrade (backend-only) | BE | Boot version, JDK image | suite green on 17→21→25 |
-| 11 | **FE-05** final validation ∥ **BE-08** cleanup | FE ∥ BE | release sign-off | e2e + axe green on all flows; no PII in logs; memory updated |
-| 12 | **FINAL-01** final test round | both | all specs Done | `docs/test-report.md` with evidence; CI green on `main` |
+| 3 | **SL-00** visual identity v2 ∥ **ARCH-01** architecture foundation + `account` pilot | FE ∥ BE (different folders) | SL-00: (optional) screenshots of v2, owner sign-off of the look · ARCH-01: approve the class mapping table and the security split | SL-00: build + tests green, `/design` matches v2 · ARCH-01: suite green, checker 0 violations with the legacy list, `git diff` of resources empty |
+| 4 | **ARCH-02** `transaction` feature + legacy cleanup (backend only) | BE | approve the transaction-side mapping | no legacy package; strict checker 0 violations; Kafka payload, concurrency and failure tests unchanged and green |
+| 5 | **SL-01** sign in + `/accounts/me` + shell + Home header | BE+FE+E2E | Auth0 callback/logout URLs for `http://localhost:4200`; run API with seed subs | real browser sign-in for both users; e2e with mock IdP green |
+| 6 | **SL-02** statement + detail + Home summary (+ contract, dates, errors) | BE+FE+E2E | time zone; OpenAPI preview; 400-vs-422; summary endpoint | single-day statement end to end; contract = behaviour; `openapi-diff` in CI |
+| 7 | **SL-03** withdrawal + result panel + `Idempotency-Key` | BE+FE+E2E | idempotency design | replay does not double-debit; double click = one request |
+| 8 | **SL-04** deposit (boleto simulation) | BE+FE+E2E | approve the reconciliation | balance +amount once; `DEPOSIT` row |
+| 9 | **SL-05** mobile recharge | BE+FE+E2E | — | "requested" copy; Kafka payload identical |
+| 10 | **SL-06** Pix | BE+FE+E2E | MaiaBank contract only if the payload changes | success/failure/uncertain paths; validators agree client/server |
+| 11 | **BE-07** platform upgrade (backend-only) | BE | Boot version, JDK image | suite green on 17→21→25 |
+| 12 | **FE-05** final validation ∥ **BE-08** cleanup | FE ∥ BE | release sign-off | e2e + axe green on all flows; no PII in logs; memory updated |
+| 13 | **FINAL-01** final test round | both | all specs Done | `docs/test-report.md` with evidence; CI green on `main` |
 Rules: a row starts only when the rows it depends on are Done (dependency list in `specs/README.md`). **Slices are strictly sequential.** `∥` (only FE-05 ∥ BE-08) means separate branches that do not touch the same files.
 
 ## 3. Conventions
@@ -86,6 +90,12 @@ Rules: a row starts only when the rows it depends on are Done (dependency list i
 ### BE-05 / BE-06 — superseded
 Delivered through the slices: `/accounts/me` (SL-01); generator migration, contract corrections, dates, handler, statement evolution, openapi-diff (SL-02); `Idempotency-Key` + `V4` (SL-03); per-operation validators (SL-03…SL-06). Old text kept in `specs/be-05-behaviour-fixes.md` and `specs/be-06-api-contract-and-evolution.md` as the scope catalogue.
 
+### ARCH-01 Architecture foundation + `account` pilot (backend only)
+Skill `java-spring-create-module`, mode `migrate`. 1. Baseline suite green, record the count. 2. Inventory + class mapping table for all 50 classes → **owner approves**. 3. Foundation: ArchUnit dependency, `ArchitectureTest` with the legacy list, `shared` kit (`GlobalExceptionHandler`). 4. Migrate `account` (domain → persistence → service → security split → seed), tests first for the rules, `git mv` for moves. 5. Checker with `--legacy` → 0 violations. **Verify:** `mvn verify`, `git diff main -- src/main/resources` empty, compose smoke. **Skills:** `java-spring-create-module`, `java-persistence-performance`.
+
+### ARCH-02 `transaction` feature + legacy cleanup (backend only)
+Same skill and rules. 1. Confirm the transaction-side mapping (D4 service split, cross-feature relations, exception names). 2. Domain (`Transaction`, ports) → persistence adapter → services → MaiaBank client + outbox/Kafka behind ports → web (generated `TransactionsApi` stays in `infra.web`). 3. Exceptions to `shared.error` (own commit). 4. Delete empty legacy packages, strict checker + ArchUnit with an empty legacy list. **Verify:** unchanged Kafka payload, concurrency, failure-injection and characterization tests; compose smoke; code map rewritten in memory.
+
 ### SL-00 Visual identity v2 (frontend only)
 1. (Optional, human) screenshots of v2. 2. Review v2 against brief §13 and write the divergence list. 3. Contrast test red → tokens (dark + derived light). 4. Restyle shared components, add segmented/stepper/dialog/toast/icon tile. 5. Shell (rail, bottom nav + More, top bar, demo chip, footer). 6. `/design`. **Verify:** build + tests, v1-colors grep empty, screenshots at 3 widths in 2 themes, owner sign-off. **Skills:** `angular-tailwind-ui-specialist`, `ui-ux-pro-max`.
 
@@ -107,7 +117,7 @@ Same loop, one operation each (details in each spec). Common checks: body valida
 Three separate PRs/commits sets: (a) Java 17 build hygiene + Boot 3.5.x + Lombok; (b) Java 21; (c) Java 25 + Docker images. Before (a): save `dependency:tree` and Actuator/Prometheus output as baseline. After (c): `jdeprscan --release 25`, compose smoke. **Verify:** full suite green after each step; metrics unchanged. **Skill:** `java-modern-engineering` (version matrix, migration).
 
 ### BE-08 Cleanup and hardening
-`Money` + `Account` invariants, dead-code removal, ArchUnit, log masking, correlation id, management port, CI scans. **Verify:** no package moves (`git diff --name-status`), no PII in logs, scans green. **Skill:** `java-modern-engineering`.
+`Money` + `Account` invariants (inside the migrated `domain` packages), dead-code removal, extend the ArchUnit rules if needed, log masking, correlation id, management port, CI scans. **Verify:** `ArchitectureTest` and the strict checker stay green (no new package violations), no PII in logs, scans green. **Skill:** `java-modern-engineering`.
 
 ### FE-01 Design prototype — superseded by SL-00
 The v1 prototype review (static) stays recorded in `specs/fe-01-design-prototype.md`. The reference is now **`Maia Bank v2.dc.html`**; its review, divergence list and the owner's visual sign-off happen in **SL-00**.
@@ -126,7 +136,7 @@ Most e2e now exists per slice (SL-01…SL-06). FE-05 completes the matrix: Playw
 The prototype (**v2**) is the reference, **not a limit**. The agent proposes and applies improvements within the tiers defined in `memory/contexto-tecnico.md` (*Frontend: prototype and agent autonomy*): Tier 1 (refinements inside the same flow) → apply and log in `app-financial-transaction-service/docs/prototype-deviations.md`; Tier 2 (flow/screen/capability/backend changes) → write a proposal and stop for approval. Backend contract and `produto.md` rules always win over the prototype.
 
 ## 6. Parallelism and conflicts
-Backend and frontend of a slice move **together on one branch**, in the fixed order of §1b. Never run two slices (or a slice and a backend spec) at once: they share backend services and the app shell. The only allowed overlap is `FE-05 ∥ BE-08`. If the contract changes after the frontend started, stop, regenerate types, adapt, re-test; if a slice needs a contract change that was not previewed, that is a "Stop and ask".
+`ARCH-01` and `ARCH-02` are backend-only and strictly sequential; `ARCH-01` may run in parallel with `SL-00` (different folders). Backend and frontend of a slice move **together on one branch**, in the fixed order of §1b. Never run two slices (or a slice and a backend spec) at once: they share backend services and the app shell. The only allowed overlap is `FE-05 ∥ BE-08`. If the contract changes after the frontend started, stop, regenerate types, adapt, re-test; if a slice needs a contract change that was not previewed, that is a "Stop and ask".
 
 ## 7. Done for the whole programme
-All specs Done (foundation, SL-00…SL-06, BE-07, BE-08, FE-05, FINAL-01) · CI green (backend + e2e) · app runs with `docker compose up` and the Angular app against it · both pipelines green independently · `docs/prototype-deviations.md` reviewed · `memory/` matches reality · no open "Stop and ask" items.
+All specs Done (foundation, ARCH-01/02, SL-00…SL-06, BE-07, BE-08, FE-05, FINAL-01) · CI green (backend + e2e) · app runs with `docker compose up` and the Angular app against it · both pipelines green independently · `docs/prototype-deviations.md` reviewed · `memory/` matches reality · no open "Stop and ask" items.

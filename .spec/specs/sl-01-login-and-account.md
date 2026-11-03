@@ -1,6 +1,6 @@
 # SPEC-SL-01 — Sign in and account (Auth0 login + `GET /accounts/me` + shell + Home header)
 
-**Status:** Draft (not authorized) · **Depends on:** SL-00, BE-04 (merged; its manual sign-in is closed by this slice) · **Parallel with:** none
+**Status:** Draft (not authorized) · **Depends on:** SL-00, ARCH-02, BE-04 (merged; its manual sign-in is closed by this slice) · **Parallel with:** none
 **Branch:** `slice/01-login-and-account` · **Track:** Backend + Frontend + E2E
 **Absorbs:** FE-03 (auth part, Home header), BE-06 (`/accounts/me` only), BE-04's pending manual validation.
 **Read first:** `../memory/produto.md`, `../memory/contexto-tecnico.md`, `../auth-auth0.md` (frontend section and pitfalls), `../spec-execution-flow.md` §1b, and the v2 reference (`Maia Bank v2.dc.html`: landing, sign-in, shell, Home header/balance). Protocol: `../shared/como-executar.md`.
@@ -17,7 +17,7 @@ The first thing the owner can **open in the browser and use**: land on Maia Bank
 ## Scope
 **Contract (preview → approval → apply, `openapi-rest-contract`):** `GET /api/v1/accounts/me` → `200 {agency, number, balance}`; `401` (no/invalid token), `403` (valid token, no linked customer), documented with `bearerAuth`. Added to the existing OpenAPI file; generator migration waits for SL-02.
 
-**Backend:** `AccountController`-style endpoint in the existing `controllers` package using `CurrentUser.account()`; no new package; ownership by construction (never takes an id from the caller).
+**Backend:** `GET /accounts/me` is added to the **`account` feature** (created by ARCH-01/02): a method on `account.application.AccountService` (`currentAccount()`), the controller implementing the generated interface in `account.infra.web` (generated DTOs stay there), built with the skill `java-spring-create-module`; ownership by construction (never takes an id from the caller); `ArchitectureTest` stays green.
 
 **Frontend:**
 - Libraries: verify `@auth0/auth0-angular` against Angular 21 **zoneless**; if incompatible, propose the alternative and stop (carried over from BE-04). Token storage decision: in-memory + refresh-token rotation by default (`../auth-auth0.md`); `localStorage` cache only as an explicit, recorded trade-off.
