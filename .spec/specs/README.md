@@ -86,7 +86,7 @@ Approve the class mapping table and the security split (ARCH-01) and the transac
 | ARCH-02 | Draft (spec written 2026-11-03; not authorized) |
 | SL-00 … SL-06 | Draft (specs written 2026-11-03; not authorized) |
 | SL-00 | Done (PR #13 merged); owner signed off the look 2026-11-03 (record: commit `7a8a37e` on `slice/00-visual-v2`, not merged) |
-| SL-01 | **Implemented on `slice/01-login-and-account` (2026-11-03), verified with the mock IdP** (116 backend tests, 174 unit tests, 21 e2e). **Open:** owner's real Auth0 sign-in + portal URLs, token-storage decision, `api-ci`/`app-ci` on the PR. Prompt used: see `prompts.md` *Execution log* |
+| SL-01 | **Implemented on `slice/01-login-and-account` (2026-11-03), verified with the mock IdP** (116 backend tests, 174 unit tests, 21 e2e). **Open:** owner's real Auth0 sign-in + portal URLs, `api-ci`/`app-ci` on the PR. Tokens stay in memory (owner decision 2026-11-03). Prompt used: see `prompts.md` *Execution log* |
 | SL-02 … SL-06 | Draft (specs written 2026-11-03; not authorized) |
 | BE-07 | Draft (Java 21 build already pre-applied locally, uncommitted; see the spec note) |
 | BE-08 | Draft |
