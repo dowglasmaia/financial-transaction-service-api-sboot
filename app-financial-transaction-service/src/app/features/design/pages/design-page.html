@@ -3,7 +3,7 @@
     <p class="text-xs font-semibold tracking-[0.12em] text-accent uppercase">Design system</p>
     <h1 class="font-display text-3xl font-semibold sm:text-4xl">Tokens and components</h1>
     <p class="max-w-prose text-content-muted">
-      Extracted from the approved prototype. Active theme: <strong class="text-content">{{ theme() }}</strong> — use the toggle in the
+      Visual identity v2 (deep navy, blue and cyan). Dark is the default; the light theme is derived from the same hues. Active theme: <strong class="text-content">{{ theme() }}</strong> — use the toggle in the
       header to compare. Example data only.
     </p>
   </header>
@@ -13,7 +13,7 @@
     <h2 id="tokens-title" class="font-display text-xl font-semibold">Colour tokens</h2>
     <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       @for (swatch of swatches(); track swatch.name) {
-        <li class="overflow-hidden rounded-card border border-line bg-surface-raised">
+        <li class="overflow-hidden rounded-card border border-line bg-glass">
           <div class="h-14 border-b border-line" [class]="swatch.background"></div>
           <div class="p-3">
             <p class="text-sm font-semibold">{{ swatch.name }}</p>
@@ -28,7 +28,7 @@
   <!-- Typography -->
   <section aria-labelledby="type-title" class="flex flex-col gap-4">
     <h2 id="type-title" class="font-display text-xl font-semibold">Typography</h2>
-    <div class="flex flex-col gap-3 rounded-card border border-line bg-surface-raised p-6">
+    <div class="flex flex-col gap-3 rounded-card border border-line bg-glass p-6 shadow-card">
       <p class="font-display text-5xl font-semibold"><span class="text-content-muted">R$</span> 12,480.50</p>
       <p class="font-display text-3xl font-semibold">Heading — Sora 600</p>
       <p class="text-lg">Body large — Manrope 400, 18 px. Money and dates use tabular numerals.</p>
@@ -40,7 +40,7 @@
   <!-- Buttons -->
   <section aria-labelledby="buttons-title" class="flex flex-col gap-4">
     <h2 id="buttons-title" class="font-display text-xl font-semibold">Buttons</h2>
-    <div class="grid gap-4 rounded-card border border-line bg-surface-raised p-6 sm:grid-cols-3">
+    <div class="grid gap-4 rounded-card border border-line bg-glass p-6 shadow-card sm:grid-cols-3">
       @for (variant of variants; track variant) {
         <div class="flex flex-col items-start gap-3">
           <p class="text-sm font-medium text-content-muted capitalize">{{ variant }}</p>
@@ -56,7 +56,7 @@
   <!-- Forms -->
   <section aria-labelledby="forms-title" class="flex flex-col gap-4">
     <h2 id="forms-title" class="font-display text-xl font-semibold">Form fields</h2>
-    <div class="grid gap-6 rounded-card border border-line bg-surface-raised p-6 md:grid-cols-2">
+    <div class="grid gap-6 rounded-card border border-line bg-glass p-6 shadow-card lg:grid-cols-2">
       <app-form-field label="Pix key" hint="Check the key with the recipient before sending.">
         <input appFieldControl type="text" placeholder="CPF, email or phone" />
       </app-form-field>
@@ -75,7 +75,7 @@
   <!-- Chips -->
   <section aria-labelledby="chips-title" class="flex flex-col gap-4">
     <h2 id="chips-title" class="font-display text-xl font-semibold">Chips</h2>
-    <div class="flex flex-wrap gap-2 rounded-card border border-line bg-surface-raised p-6" role="group" aria-label="Type filter example">
+    <div class="flex flex-wrap gap-2 rounded-card border border-line bg-glass p-6 shadow-card" role="group" aria-label="Type filter example">
       @for (chip of chips; track chip) {
         <app-chip [selected]="selectedChip() === chip" (toggled)="selectedChip.set(chip)">{{ chip }}</app-chip>
       }
@@ -107,6 +107,53 @@
         <app-ledger-row [type]="row.type" [amount]="row.amount" [date]="row.date" />
       }
     </div>
+  </section>
+
+  <!-- Selection and flow -->
+  <section aria-labelledby="flow-title" class="flex flex-col gap-4">
+    <h2 id="flow-title" class="font-display text-xl font-semibold">Segmented control and stepper</h2>
+    <div class="grid gap-6 rounded-card border border-line bg-glass p-6 shadow-card lg:grid-cols-2">
+      <div class="flex flex-col gap-3">
+        <p class="text-sm font-semibold text-content-muted">Key type (arrow keys move, one tab stop)</p>
+        <app-segmented label="Key type" [options]="keyTypes" [(value)]="keyType" />
+      </div>
+      <div class="flex flex-col gap-3">
+        <p class="text-sm font-semibold text-content-muted">Pix steps (current: {{ step() }})</p>
+        <app-stepper [steps]="steps" [current]="step()" />
+        <div class="flex gap-2">
+          <button appButton variant="secondary" type="button" [disabled]="step() === 1" (click)="step.set(step() - 1)">Back</button>
+          <button appButton type="button" [disabled]="step() === 3" (click)="step.set(step() + 1)">Next</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Icon tiles -->
+  <section aria-labelledby="tiles-title" class="flex flex-col gap-4">
+    <h2 id="tiles-title" class="font-display text-xl font-semibold">Icon tiles by ledger kind</h2>
+    <ul class="flex flex-wrap gap-6 rounded-card border border-line bg-glass p-6 shadow-card">
+      @for (kind of kinds; track kind.label) {
+        <li class="flex items-center gap-3">
+          <app-icon-tile [icon]="kind.icon" [tone]="kind.tile" />
+          <span class="font-semibold">{{ kind.label }}</span>
+        </li>
+      }
+    </ul>
+    <p class="text-sm text-content-muted">Colour never works alone: every kind also carries its icon, a text label and the sign of the amount.</p>
+  </section>
+
+  <!-- Dialog and toast -->
+  <section aria-labelledby="overlay-title" class="flex flex-col gap-4">
+    <h2 id="overlay-title" class="font-display text-xl font-semibold">Dialog and toast</h2>
+    <div class="flex flex-wrap gap-3 rounded-card border border-line bg-glass p-6 shadow-card">
+      <button appButton variant="secondary" type="button" (click)="dialogOpen.set(true)">Open dialog</button>
+      <button appButton variant="secondary" type="button" (click)="showToast()">Show toast</button>
+    </div>
+    <p class="text-sm text-content-muted">Dialog: focus moves inside, Tab is trapped, Escape or the backdrop close it and focus returns here.</p>
+    <app-dialog [(open)]="dialogOpen" title="Sign out of Maia Bank?" description="You will need to sign in again to see your account.">
+      <button appButton variant="secondary" type="button" (click)="dialogOpen.set(false)">Cancel</button>
+      <button appButton type="button" (click)="dialogOpen.set(false)">Sign out</button>
+    </app-dialog>
   </section>
 
   <!-- Loading and empty -->
