@@ -6,7 +6,9 @@
     "build": "ng build",
     "test": "ng test --watch=false",
     "test:watch": "ng test",
-    "api:types": "openapi-typescript ../api-financial-transaction-service/src/main/resources/swagger/financial-transaction-openapi.yaml -o src/app/core/api/schema.d.ts"
+    "api:types": "openapi-typescript ../api-financial-transaction-service/src/main/resources/swagger/financial-transaction-openapi.yaml -o src/app/core/api/schema.d.ts",
+    "e2e": "playwright test",
+    "e2e:install": "playwright install chromium"
   },
   "private": true,
   "packageManager": "npm@11.12.1",

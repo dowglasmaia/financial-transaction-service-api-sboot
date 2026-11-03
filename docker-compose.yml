@@ -1,6 +1,8 @@
 # Local development stack. Credentials come from the environment (copy .env.example to .env).
 services:
+  # The API is optional here: run it from the IDE (profile local, port 8088) or add `--profile api` to run it in Docker.
   financial-transaction-api:
+    profiles: ["api"]
     build:
       context: ./api-financial-transaction-service
       dockerfile: Dockerfile
@@ -34,7 +36,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
       POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5433}:5432"   # 5433 on the host so it does not clash with a local Postgres on 5432
     volumes:
       - postgresql_data:/var/lib/postgresql/data
 
@@ -71,7 +73,7 @@ services:
     ports:
       - "19000:9000"
     environment:
-      KAFKA_BROKERCONNECT: kafka:9092
+      KAFKA_BROKERCONNECT: kafka:29092   # the in-network listener (9092 is advertised as localhost for the host only)
 
   maiabank-api:
     container_name: maiabank-api
