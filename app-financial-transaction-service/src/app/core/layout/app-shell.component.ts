@@ -1,9 +1,13 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AccountStore } from '../../features/account/data-access/account.store';
+import { SessionService } from '../auth/session.service';
 import { APP_CONFIG } from '../config/app-config';
+import { ButtonDirective } from '../../shared/ui/button.directive';
 import { DialogComponent } from '../../shared/ui/dialog.component';
 import { ThemeToggleComponent } from '../../shared/ui/theme-toggle.component';
 import { ToastHostComponent } from '../../shared/ui/toast-host.component';
+import { AccountMenuComponent } from './account-menu.component';
 import { navItemsFrom } from './nav-items';
 import { SiteFooterComponent } from './site-footer.component';
 
@@ -14,11 +18,13 @@ const BOTTOM_VISIBLE = 3;
  * Page frame (v2): skip link, left rail (labels on desktop, icons on tablet), bottom bar with a "More" dialog on phones,
  * top bar with the demo chip and theme toggle, main landmark and the portfolio credit footer.
  * Menu entries come from the route table (`data.nav`), so a slice only declares its route.
+ * Signed out (landing, sign-in) the frame is the plain public one: brand, demo chip, theme toggle. Signed in it adds the rail,
+ * the bottom bar and the account menu. It also hosts the sign-out confirmation and the "session expired" dialog.
  */
 @Component({
   selector: 'app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ThemeToggleComponent, SiteFooterComponent, DialogComponent, ToastHostComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ThemeToggleComponent, SiteFooterComponent, DialogComponent, ToastHostComponent, AccountMenuComponent, ButtonDirective],
   template: `
     <a
       href="#main"
@@ -28,6 +34,7 @@ const BOTTOM_VISIBLE = 3;
     </a>
 
     <div class="min-h-screen md:flex">
+      @if (showApp()) {
       <aside class="hidden shrink-0 flex-col border-r border-line bg-brand px-3.5 py-5 md:sticky md:top-0 md:flex md:h-screen md:w-20 lg:w-64">
         <a routerLink="/" class="flex items-center gap-2.5 rounded-control px-1.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent md:justify-center lg:justify-start">
           <span class="flex size-10 shrink-0 items-center justify-center rounded-control bg-linear-to-br from-accent via-primary to-violet text-xl text-on-primary shadow-glow-accent" aria-hidden="true">
@@ -52,10 +59,11 @@ const BOTTOM_VISIBLE = 3;
           }
         </nav>
       </aside>
+      }
 
       <div class="flex min-w-0 flex-1 flex-col">
         <header class="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-surface/80 px-4 backdrop-blur sm:px-6">
-          <a routerLink="/" class="flex items-center gap-2 rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent md:hidden">
+          <a routerLink="/" [class]="brandClass()" class="flex items-center gap-2 rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
             <span class="flex size-9 items-center justify-center rounded-control bg-linear-to-br from-accent via-primary to-violet text-on-primary" aria-hidden="true">
               <i class="ph-bold ph-bank"></i>
             </span>
@@ -70,6 +78,9 @@ const BOTTOM_VISIBLE = 3;
           }
 
           <span class="flex-1"></span>
+          @if (showApp() && session.user(); as user) {
+            <app-account-menu [user]="user" [account]="account.account()" (signOut)="signOutOpen.set(true)" />
+          }
           <app-theme-toggle />
         </header>
 
@@ -88,6 +99,7 @@ const BOTTOM_VISIBLE = 3;
       </div>
     </div>
 
+    @if (showApp()) {
     <nav aria-label="Quick navigation" class="fixed inset-x-0 bottom-0 z-40 flex border-t border-line bg-brand md:hidden">
       @for (item of bottomItems; track item.path) {
         <a
@@ -112,6 +124,7 @@ const BOTTOM_VISIBLE = 3;
         </button>
       }
     </nav>
+    }
 
     <app-dialog [(open)]="moreOpen" title="More">
       <div class="flex w-full flex-col gap-1">
@@ -128,15 +141,46 @@ const BOTTOM_VISIBLE = 3;
       </div>
     </app-dialog>
 
+    <app-dialog [(open)]="signOutOpen" title="Sign out of Maia Bank?" description="You will need to sign in again to see your account.">
+      <button appButton variant="secondary" type="button" (click)="signOutOpen.set(false)">Cancel</button>
+      <button appButton type="button" (click)="signOut()">Sign out</button>
+    </app-dialog>
+
+    <app-dialog [open]="session.expired()" (openChange)="onExpiredClosed($event)" title="Your session expired" description="For your security you were signed out. Sign in again to continue.">
+      <button appButton type="button" (click)="signInAgain()">Sign in again</button>
+    </app-dialog>
+
     <app-toast-host />
   `,
 })
 export class AppShellComponent {
   protected readonly config = inject(APP_CONFIG);
+  protected readonly session = inject(SessionService);
+  protected readonly account = inject(AccountStore);
+  private readonly router = inject(Router);
+  protected readonly showApp = computed(() => this.session.status() === 'authenticated');
+  protected readonly brandClass = computed(() => (this.showApp() ? 'md:hidden' : ''));
+  protected readonly signOutOpen = signal(false);
   protected readonly railActive = RAIL_ACTIVE;
   protected readonly moreOpen = signal(false);
 
-  protected readonly items = navItemsFrom(inject(Router).config);
+  protected readonly items = navItemsFrom(this.router.config);
   protected readonly bottomItems = this.items.length > BOTTOM_VISIBLE ? this.items.slice(0, BOTTOM_VISIBLE) : this.items;
   protected readonly moreItems = this.items.length > BOTTOM_VISIBLE ? this.items.slice(BOTTOM_VISIBLE) : [];
+
+  protected signOut(): void {
+    this.signOutOpen.set(false);
+    this.account.clear();
+    void this.session.logout();
+  }
+
+  protected signInAgain(): void {
+    this.account.clear();
+    void this.session.login(this.router.url);
+  }
+
+  /** The "session expired" dialog cannot be dismissed into a broken screen: closing it means signing in again. */
+  protected onExpiredClosed(open: boolean): void {
+    if (!open && this.session.expired()) this.signInAgain();
+  }
 }

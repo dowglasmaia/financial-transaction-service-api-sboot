@@ -1,16 +1,30 @@
-<section class="grid gap-6 py-10 sm:py-16" aria-labelledby="home-title">
-  <div class="flex max-w-2xl flex-col gap-5">
-    <p class="text-xs font-semibold tracking-[0.12em] text-accent uppercase">A calmer way to bank</p>
-    <h1 id="home-title" class="font-display text-4xl leading-tight font-semibold sm:text-5xl">Foundation ready.</h1>
-    <p class="text-lg text-content-muted">
-      The Angular foundation (runtime config, HTTP boundary, design tokens and shared components) is in place. The product
-      screens arrive with the next specs.
-    </p>
-    <div class="flex flex-wrap gap-3">
-      <a appButton routerLink="/design">
-        Open the design system
-        <i class="ph-bold ph-arrow-right" aria-hidden="true"></i>
-      </a>
+<section class="grid gap-6" aria-labelledby="home-title">
+  <header class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <p class="text-sm text-content-muted">Welcome back</p>
+      <h1 id="home-title" class="font-display text-3xl font-bold">Hello, {{ firstName() }}!</h1>
     </div>
-  </div>
+    @if (store.account(); as account) {
+      <p class="inline-flex items-center gap-2 rounded-full border border-line-input bg-surface-raised px-4 py-1.5 text-sm font-semibold">
+        <i class="ph-bold ph-bank text-accent" aria-hidden="true"></i>
+        Agency {{ account.agency }} · Account {{ account.number }}
+      </p>
+    }
+  </header>
+
+  @if (store.state() === 'error') {
+    <app-alert kind="error" title="We couldn't load your account">
+      {{ store.error()?.message }}
+      @if (store.error()?.requestId; as requestId) {
+        <span class="mt-1 block text-xs text-content-muted">Request id: {{ requestId }}</span>
+      }
+      <button appButton variant="secondary" type="button" class="mt-3" (click)="retry()">Try again</button>
+    </app-alert>
+  } @else if (store.account(); as account) {
+    <app-balance-card [amount]="account.balance" [countUp]="true" />
+  } @else {
+    <div aria-busy="true" aria-label="Loading your account">
+      <app-skeleton [height]="190" />
+    </div>
+  }
 </section>
