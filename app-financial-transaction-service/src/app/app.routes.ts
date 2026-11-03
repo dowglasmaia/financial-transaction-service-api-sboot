@@ -4,6 +4,8 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
+    // `data.nav` puts the route in the rail / bottom bar (see core/layout/nav-items.ts). Each slice declares its own entry.
+    data: { nav: { label: 'Home', icon: 'ph ph-house', order: 1 } },
     loadChildren: () => import('./features/home/home.routes').then((module) => module.HOME_ROUTES),
   },
   {
