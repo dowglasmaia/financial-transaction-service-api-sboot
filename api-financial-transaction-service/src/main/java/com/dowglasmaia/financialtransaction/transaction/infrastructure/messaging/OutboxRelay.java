@@ -1,5 +1,7 @@
 package com.dowglasmaia.financialtransaction.transaction.infrastructure.messaging;
 
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.OutboxEventEntity;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.OutboxEventJpaRepository;
 
 
 import lombok.extern.slf4j.Slf4j;

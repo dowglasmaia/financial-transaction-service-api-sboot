@@ -1,5 +1,7 @@
 package com.dowglasmaia.financialtransaction.transaction.infrastructure.messaging;
 
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.OutboxEventEntity;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.OutboxEventJpaRepository;
 import com.dowglasmaia.financialtransaction.transaction.application.port.RechargeEventPublisher;
 import com.dowglasmaia.financialtransaction.transaction.domain.MobileRecharge;
 import com.dowglasmaia.provider.model.MobileRechargeRequestDTO;

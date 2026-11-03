@@ -7,7 +7,7 @@ import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.UserEntity;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountJpaRepository;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AgencyJpaRepository;
-import com.dowglasmaia.financialtransaction.transaction.infrastructure.messaging.OutboxEventJpaRepository;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.OutboxEventJpaRepository;
 import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionJpaRepository;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.UserJpaRepository;
 import com.dowglasmaia.financialtransaction.transaction.infrastructure.client.MaiaBankClient;

@@ -1,5 +1,7 @@
 package com.dowglasmaia.financialtransaction.transaction.infrastructure.messaging;
 
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.OutboxEventEntity;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.OutboxEventJpaRepository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;

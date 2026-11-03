@@ -1,10 +1,10 @@
 package com.dowglasmaia.financialtransaction.integrity;
 
-import com.dowglasmaia.financialtransaction.transaction.infrastructure.messaging.OutboxEventEntity;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.OutboxEventEntity;
 import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionEntity;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
-import com.dowglasmaia.financialtransaction.transaction.infrastructure.messaging.OutboxEventJpaRepository;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.OutboxEventJpaRepository;
 import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionJpaRepository;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
