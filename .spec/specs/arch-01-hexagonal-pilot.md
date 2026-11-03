@@ -1,6 +1,6 @@
 # SPEC-ARCH-01 — Hexagonal Pragmática: foundation and the `account` pilot (backend only)
 
-**Status:** Draft (not authorized) · **Depends on:** BE-04 (Done) and the updated skill `java-spring-create-module` (D-39) · **Parallel with:** SL-00 (frontend only, different folder)
+**Status:** Draft (not authorized) · **Depends on:** BE-04 (Done), **SL-01** (owner decision 2026-11-03, D-44: the login flow is finished first) and the updated skill `java-spring-create-module` (D-39) · **Parallel with:** none. Note: `AccountController` (`GET /accounts/me`, SL-01) already exists in `controllers` and moves into the `account` feature here
 **Branch:** `spec/arch-01-hexagonal-pilot` · **Track:** Backend only · **Behaviour:** frozen (D-41)
 **Read first:** `../memory/produto.md`, `../memory/contexto-tecnico.md` (decisions D-39…D-43), the skill `~/.claude/skills/java-spring-create-module/` (`SKILL.md`, `references/architecture.md`, `decision-guide.md`, `migration.md`), `../spec-execution-flow.md` §1 and §4. Protocol: `../shared/como-executar.md`.
 

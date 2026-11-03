@@ -2,9 +2,22 @@
 
 Use **one fresh agent session per spec or slice** (open the PR of the previous one and merge it BEFORE starting the next), opened at the repo root. Before pasting: the spec status is *Approved* in `specs/README.md` and the *Human action before* is done. The agent must not close a spec unless its **Minimal validation** passes. After ALL specs are Done, run **FINAL-01** (final test round).
 
-Order: `MONO-01 → BE-01 → BE-02 → BE-03 → BE-04 → (FE-01, FE-02 done) → (SL-00 ∥ ARCH-01) → ARCH-02 → SL-01 → SL-02 → SL-03 → SL-04 → SL-05 → SL-06 → BE-07 → (FE-05 ∥ BE-08) → FINAL-01`.
-**`ARCH-01`/`ARCH-02` migrate the backend to the "Hexagonal Pragmática" model (D-39) with FROZEN behaviour, before the first backend slice; `ARCH-01` may run in parallel with `SL-00` (frontend only).**
+Order: `MONO-01 → BE-01 → BE-02 → BE-03 → BE-04 → (FE-01, FE-02 done) → SL-00 → SL-01 → ARCH-01 → ARCH-02 → SL-02 → SL-03 → SL-04 → SL-05 → SL-06 → BE-07 → (FE-05 ∥ BE-08) → FINAL-01`.
+**`ARCH-01`/`ARCH-02` migrate the backend to the "Hexagonal Pragmática" model (D-39) with FROZEN behaviour; by the owner's decision of 2026-11-03 (D-44) they run AFTER `SL-01` and before `SL-02`.**
 **Slices (`SL-xx`) carry backend + frontend + e2e on ONE branch and are strictly sequential** (D-31). `BE-05`, `BE-06`, `FE-03`, `FE-04` and `FE-01` no longer have prompts: they were superseded (see `specs/README.md`).
+
+## Execution log (which prompt was already used)
+
+Update this table whenever a prompt is used, so you always know where to continue. **A prompt marked USED is not pasted again**: use its *continuation prompt* (when one exists) or open a new session for the next prompt.
+
+| Prompt | Used? | When / where | State | Where to continue |
+|---|---|---|---|---|
+| MONO-01, BE-01, BE-02, BE-03, BE-04 | Used | 2026-11-02 (PRs #1–#9) | Done (BE-04's manual Auth0 sign-in moved to SL-01) | nothing |
+| FE-02 | Used | 2026-11-02 (PR #5) | Done (look replaced by SL-00) | nothing |
+| SL-00 | Used | 2026-11-03, branch `slice/00-visual-v2`, PR #13 | Done; owner signed off the look | nothing (the sign-off record, commit `7a8a37e`, is on the branch and not merged) |
+| **SL-01** | **USED** | 2026-11-03, branch `slice/01-login-and-account` (pushed, **no PR yet**) | **Implemented and verified with the mock IdP** (116 backend tests, 174 unit, 21 e2e). **Open:** real Auth0 sign-in (you), Auth0 portal URLs (you), token-storage decision, `api-ci`/`app-ci` on the PR | Use the **SL-01 continuation prompt** below. Do **not** paste the SL-01 prompt again |
+| ARCH-01, ARCH-02 | Not used | — | Draft. Order changed: they run **after SL-01**, before SL-02 | Paste `ARCH-01` when SL-01 is closed and merged |
+| SL-02 … SL-06, BE-07, BE-08, FE-05, FINAL-01 | Not used | — | Draft | in order |
 
 ## MONO-01 — mono-01-monorepo
 
@@ -182,6 +195,21 @@ Minimal validation (you may NOT mark the spec Done until all pass; paste the rea
   - OWNER: one real Auth0 sign-in per test user in the browser (this closes BE-04's manual validation)
   - `api-ci` and `app-ci` green on the PR
 Finish: fill the spec's Result section, set its status in .spec/specs/README.md, sync .spec/memory and app docs/prototype-deviations.md, commit on the slice branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
+```
+
+> **Status: USED on 2026-11-03.** Do not paste the prompt above again. Where it stopped and what is left are in `.spec/specs/sl-01-login-and-account.md` (*Result* and *Open items*). To continue, paste this **continuation prompt** in a fresh session:
+
+```text
+Continue SPEC-SL-01 (.spec/specs/sl-01-login-and-account.md) on the EXISTING branch `slice/01-login-and-account`: run `git checkout slice/01-login-and-account && git pull origin slice/01-login-and-account` (do NOT create a new branch, do NOT touch main).
+Read first: the spec's *Result* and *Open items*, and .spec/memory/contexto-tecnico.md (D-44, D-45, D-46, 'As built in SL-01').
+Already done and verified (do not redo): contract, GET /accounts/me (116 backend tests), core/auth + screens (174 unit tests), api:types, compose profiles + mock IdP, 21 Playwright tests on 3 viewports.
+What is left (ask the owner for the inputs; you never type a password):
+  1. The owner's manual sign-in with the REAL Auth0 tenant for both test users: help them run the stack (README 'Run back and front together'), record what they report in the spec evidence (account shown, status of /accounts/me), and tick the HUMAN tasks.
+  2. The token-storage decision for page reloads (memory vs localStorage): if the owner chooses localStorage, change `cacheLocation` in core/auth/auth.config.ts, flip the matching unit test, rerun the e2e, and record the trade-off.
+  3. If the owner reports a problem in the real flow, fix it with a test first, rerun `npm test` and `npm run e2e`.
+  4. When api-ci and app-ci are green on the PR the owner opened, tick the pipeline items, set SL-01 to Done in .spec/specs/README.md and update this Execution log.
+Git: commit on the same branch (one commit per task) and push it; do NOT open the PR and do NOT merge.
+Report which validations were actually executed vs only written.
 ```
 
 ## SL-02 - sl-02-statement-and-detail

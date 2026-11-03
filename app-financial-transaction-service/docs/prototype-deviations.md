@@ -33,6 +33,17 @@ History: seeded from the FE-01 review of the v1 prototype (brown/gold). SL-00 (2
 | 21 | New shared pieces: segmented control (radio group, arrow keys), stepper (`aria-current`, "completed" text), dialog (modal, focus trap, Esc/backdrop, focus restore), toast (polite live region, 2.4 s), icon tile | Needed by SL-01…SL-06 | `shared/ui` |
 | 22 | Fonts now load weights 800 for Manrope and Sora | v2 uses 800 for the wordmark and headings | `index.html` |
 
+## v2 — applied in SL-01 (Tier 1)
+| # | Deviation | Why | Where |
+|---|---|---|---|
+| 23 | The top bar now has the **account menu** (initials, name, e-mail, `Agency · Account`, Sign out with confirmation) | It was deferred in #18 until the signed-in user and `/accounts/me` exist | `core/layout/account-menu.component.ts` |
+| 24 | Landing "feature strip" shows three static benefits; **no statistics** (v2 showed a fixed balance and 30-day figures) | D-35 / no invented data; real numbers come from the API | `features/landing` |
+| 25 | Landing and sign-in icons use the `ph-bold` weight (v2 used `ph-fill`) | The fill-weight CSS is not shipped (deviation #9); the tiles rendered empty | `features/landing` |
+| 26 | Balance count-up is skipped under `prefers-reduced-motion`; the screen-reader text is always the final amount | Accessibility | `balance-card.component.ts` |
+| 27 | The footer shows the author's **photo** (192 px avatar) instead of the initials; initials are the fallback if the image fails | Owner request (2026-11-03) | `site-footer.component.ts`, `public/img/dowglas.png` |
+| 28 | Initial bundle budget warning raised from 500 kB to **800 kB** (725.6 kB now); the error limit stays 1 MB | The Auth0 SPA SDK is ~200 kB; code-splitting the SDK is a later option | `angular.json` |
+| 29 | While the identity provider callback is handled the landing page shows "Signing you in…" instead of the marketing page | Avoids a flash of the landing page and a leaked `?code=` in history (the URL is replaced) | `features/landing` |
+
 ## v2 — measured contrast (dark / light), asserted by `tokens-contrast.spec.ts`
 Text pairs ≥ 4.5:1 and control borders ≥ 3:1 for `content`, `content-muted`, `accent`, `on-accent`, `on-primary` on `primary` and `primary-strong`, `income`, `expense`, `warning`, `violet`, `on-brand` and `on-brand-muted` on `brand`, and `line-input` on all three surfaces. The same test also fails if any v1 hex (`#cea45c`, `#2a1708`, `#fbf1de`, `#5fa899`, `#d4ae6a`, `#110c09`) returns to `styles.scss`.
 

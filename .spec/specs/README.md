@@ -13,9 +13,9 @@ SDD: nothing is implemented without an approved spec. A spec starts when its dep
 `BE-05`, `BE-06`, `FE-03` and `FE-04` are **superseded**: their scope was split across the slices (mapping below). Their files stay as the scope catalogue.
 
 ## Order
-`MONO-01 · BE-01…BE-04 · FE-01 · FE-02` (done) → **`SL-00 ∥ ARCH-01`** → **`ARCH-02`** → **`SL-01 → SL-02 → SL-03 → SL-04 → SL-05 → SL-06`** → `BE-07` → `BE-08 ∥ FE-05` → `FINAL-01`
+`MONO-01 · BE-01…BE-04 · FE-01 · FE-02` (done) → **`SL-00`** → **`SL-01`** → **`ARCH-01 → ARCH-02`** → **`SL-02 → SL-03 → SL-04 → SL-05 → SL-06`** → `BE-07` → `BE-08 ∥ FE-05` → `FINAL-01`
 
-Slices are strictly sequential (they share backend services and the app shell). **`ARCH-01` and `ARCH-02` (backend architecture migration, D-39) come before the first backend slice** so every new endpoint is created in its final place with the skill `java-spring-create-module`; `ARCH-01` may run in parallel with `SL-00` because they touch different folders.
+Slices are strictly sequential (they share backend services and the app shell). **`ARCH-01` and `ARCH-02` (backend architecture migration, D-39) run right after `SL-01`** (owner decision 2026-11-03, D-44: finish the login flow first) and **before `SL-02`**, so every later endpoint is created in its final place with the skill `java-spring-create-module`. `SL-01` is the one slice built on the current layered backend.
 
 | Spec | Title | Depends on | Branch |
 |---|---|---|---|
@@ -26,11 +26,11 @@ Slices are strictly sequential (they share backend services and the app shell). 
 | [BE-04](be-04-auth-and-ownership.md) | Auth0 authentication, CurrentUser, ownership | BE-03 | `spec/be-04-auth-and-ownership` |
 | [FE-01](fe-01-design-prototype.md) | UI/UX prototype review (v1; **superseded by SL-00 for v2**) | — | `spec/fe-01-design-prototype` |
 | [FE-02](fe-02-foundation.md) | Angular foundation: scaffold, core, design system (v1 look) | BE-02, FE-01 | `spec/fe-02-foundation` |
-| [ARCH-01](arch-01-hexagonal-pilot.md) | **Hexagonal Pragmática: foundation + `account` pilot** (backend only, behaviour frozen) | BE-04, skill updated | `spec/arch-01-hexagonal-pilot` |
+| [ARCH-01](arch-01-hexagonal-pilot.md) | **Hexagonal Pragmática: foundation + `account` pilot** (backend only, behaviour frozen) | BE-04, SL-01, skill updated | `spec/arch-01-hexagonal-pilot` |
 | [ARCH-02](arch-02-hexagonal-transaction.md) | **Hexagonal Pragmática: `transaction` feature + legacy cleanup** (backend only) | ARCH-01 | `spec/arch-02-hexagonal-transaction` |
 | [SL-00](sl-00-visual-v2.md) | **Visual identity v2** (frontend-only) | FE-02 | `slice/00-visual-v2` |
-| [SL-01](sl-01-login-and-account.md) | **Sign in (Auth0) + `/accounts/me` + shell + Home header** | SL-00, ARCH-02, BE-04 | `slice/01-login-and-account` |
-| [SL-02](sl-02-statement-and-detail.md) | **Statement, detail, Home summary** (+ contract, dates, errors) | SL-01 | `slice/02-statement-and-detail` |
+| [SL-01](sl-01-login-and-account.md) | **Sign in (Auth0) + `/accounts/me` + shell + Home header** | SL-00, BE-04 | `slice/01-login-and-account` |
+| [SL-02](sl-02-statement-and-detail.md) | **Statement, detail, Home summary** (+ contract, dates, errors) | ARCH-02 | `slice/02-statement-and-detail` |
 | [SL-03](sl-03-withdrawal.md) | **Withdrawal** + result panel + `Idempotency-Key` | SL-02 | `slice/03-withdrawal` |
 | [SL-04](sl-04-deposit.md) | **Deposit** (boleto simulation over the real deposit) | SL-03 | `slice/04-deposit` |
 | [SL-05](sl-05-recharge.md) | **Mobile recharge** | SL-04 | `slice/05-recharge` |
@@ -85,8 +85,9 @@ Approve the class mapping table and the security split (ARCH-01) and the transac
 | ARCH-01 | Draft (spec written 2026-11-03; not authorized) |
 | ARCH-02 | Draft (spec written 2026-11-03; not authorized) |
 | SL-00 … SL-06 | Draft (specs written 2026-11-03; not authorized) |
-| SL-00 | Implemented on `slice/00-visual-v2` (2026-11-03); **open: owner sign-off of the look + `app-ci` on the PR** |
-| SL-01 … SL-06 | Draft (specs written 2026-11-03; not authorized) |
+| SL-00 | Done (PR #13 merged); owner signed off the look 2026-11-03 (record: commit `7a8a37e` on `slice/00-visual-v2`, not merged) |
+| SL-01 | **Implemented on `slice/01-login-and-account` (2026-11-03), verified with the mock IdP** (116 backend tests, 174 unit tests, 21 e2e). **Open:** owner's real Auth0 sign-in + portal URLs, token-storage decision, `api-ci`/`app-ci` on the PR. Prompt used: see `prompts.md` *Execution log* |
+| SL-02 … SL-06 | Draft (specs written 2026-11-03; not authorized) |
 | BE-07 | Draft (Java 21 build already pre-applied locally, uncommitted; see the spec note) |
 | BE-08 | Draft |
 | FE-05 | Draft |
