@@ -16,7 +16,8 @@ Update this table whenever a prompt is used, so you always know where to continu
 | FE-02 | Used | 2026-11-02 (PR #5) | Done (look replaced by SL-00) | nothing |
 | SL-00 | Used | 2026-11-03, branch `slice/00-visual-v2`, PR #13 | Done; owner signed off the look | nothing (the sign-off record, commit `7a8a37e`, is on the branch and not merged) |
 | **SL-01** | **USED** | 2026-11-03, branch `slice/01-login-and-account` (pushed, **no PR yet**) | **Implemented and verified with the mock IdP** (116 backend tests, 174 unit, 21 e2e). **Open:** real Auth0 sign-in (you), Auth0 portal URLs (you), `api-ci`/`app-ci` on the PR (token storage decided: in memory) | Use the **SL-01 continuation prompt** below. Do **not** paste the SL-01 prompt again |
-| ARCH-01, ARCH-02 | Not used | — | Draft. Order changed: they run **after SL-01**, before SL-02 | Paste `ARCH-01` when SL-01 is closed and merged |
+| **ARCH-01** | **USED** | 2026-11-03, branch `spec/arch-01-hexagonal-pilot` (pushed, **no PR yet**) | **Implemented and verified** (150 tests, checker 0 violations, compose smoke + e2e 21). **Open:** `api-ci` on the PR, your merge | Do **not** paste ARCH-01 again. After it is merged, paste `ARCH-02`. If something fails on the PR, ask for a fix on the same branch |
+| ARCH-02 | Not used | — | Draft; depends on ARCH-01 being merged | Paste `ARCH-02` after ARCH-01 is merged |
 | SL-02 … SL-06, BE-07, BE-08, FE-05, FINAL-01 | Not used | — | Draft | in order |
 
 ## MONO-01 — mono-01-monorepo
