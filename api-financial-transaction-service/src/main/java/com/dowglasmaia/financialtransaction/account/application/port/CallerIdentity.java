@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.account.domain;
+package com.dowglasmaia.financialtransaction.account.application.port;
 
 import java.util.Optional;
 

@@ -1,11 +1,11 @@
 package com.dowglasmaia.financialtransaction.account.application;
 
 import com.dowglasmaia.financialtransaction.account.domain.Account;
-import com.dowglasmaia.financialtransaction.account.domain.AccountRepository;
-import com.dowglasmaia.financialtransaction.account.domain.AgencyRepository;
-import com.dowglasmaia.financialtransaction.account.domain.CallerIdentity;
+import com.dowglasmaia.financialtransaction.account.application.port.AccountRepository;
+import com.dowglasmaia.financialtransaction.account.application.port.AgencyRepository;
+import com.dowglasmaia.financialtransaction.account.application.port.CallerIdentity;
 import com.dowglasmaia.financialtransaction.account.domain.User;
-import com.dowglasmaia.financialtransaction.account.domain.UserRepository;
+import com.dowglasmaia.financialtransaction.account.application.port.UserRepository;
 import com.dowglasmaia.financialtransaction.exeptions.ForbiddenExeption;
 import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
 import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;

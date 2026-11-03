@@ -1,15 +1,15 @@
 package com.dowglasmaia.financialtransaction.support;
 
-import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
-import com.dowglasmaia.financialtransaction.account.infra.persistence.AgencyEntity;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountEntity;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AgencyEntity;
 import com.dowglasmaia.financialtransaction.entity.Transaction;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
-import com.dowglasmaia.financialtransaction.account.infra.persistence.UserEntity;
-import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountJpaRepository;
-import com.dowglasmaia.financialtransaction.account.infra.persistence.AgencyJpaRepository;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.UserEntity;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountJpaRepository;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AgencyJpaRepository;
 import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
 import com.dowglasmaia.financialtransaction.repository.TransactionRepository;
-import com.dowglasmaia.financialtransaction.account.infra.persistence.UserJpaRepository;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.UserJpaRepository;
 import com.dowglasmaia.financialtransaction.services.client.maiaBank.MaiaBankClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

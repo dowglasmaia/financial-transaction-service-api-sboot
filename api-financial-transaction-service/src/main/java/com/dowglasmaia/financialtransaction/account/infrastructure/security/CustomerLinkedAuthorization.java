@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.account.infra.security;
+package com.dowglasmaia.financialtransaction.account.infrastructure.security;
 
 import com.dowglasmaia.financialtransaction.account.application.AccountService;
 import java.util.function.Supplier;

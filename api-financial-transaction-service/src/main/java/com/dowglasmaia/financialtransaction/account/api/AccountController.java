@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.account.infra.web;
+package com.dowglasmaia.financialtransaction.account.api;
 
 import com.dowglasmaia.financialtransaction.account.application.AccountService;
 import com.dowglasmaia.financialtransaction.account.domain.Account;

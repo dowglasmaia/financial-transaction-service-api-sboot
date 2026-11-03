@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.account.infra.seed;
+package com.dowglasmaia.financialtransaction.account.infrastructure.seed;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

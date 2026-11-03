@@ -1,6 +1,6 @@
-package com.dowglasmaia.financialtransaction.account.infra.persistence;
+package com.dowglasmaia.financialtransaction.account.infrastructure.persistence;
 
-import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

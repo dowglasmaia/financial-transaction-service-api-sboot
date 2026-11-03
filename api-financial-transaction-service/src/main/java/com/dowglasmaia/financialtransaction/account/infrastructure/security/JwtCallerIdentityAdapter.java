@@ -1,6 +1,6 @@
-package com.dowglasmaia.financialtransaction.account.infra.security;
+package com.dowglasmaia.financialtransaction.account.infrastructure.security;
 
-import com.dowglasmaia.financialtransaction.account.domain.CallerIdentity;
+import com.dowglasmaia.financialtransaction.account.application.port.CallerIdentity;
 import java.util.Optional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

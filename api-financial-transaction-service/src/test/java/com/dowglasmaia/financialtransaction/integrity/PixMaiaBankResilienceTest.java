@@ -1,9 +1,9 @@
 package com.dowglasmaia.financialtransaction.integrity;
 
-import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.entity.Transaction;
 import com.dowglasmaia.financialtransaction.entity.TransactionStatusEnum;
-import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountJpaRepository;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountJpaRepository;
 import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
 import com.dowglasmaia.financialtransaction.repository.TransactionRepository;
 import com.dowglasmaia.financialtransaction.support.MockIssuer;

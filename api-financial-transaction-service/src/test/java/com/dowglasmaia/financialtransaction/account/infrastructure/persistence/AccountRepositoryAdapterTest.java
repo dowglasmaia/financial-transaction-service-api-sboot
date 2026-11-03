@@ -1,12 +1,12 @@
-package com.dowglasmaia.financialtransaction.account.infra.persistence;
+package com.dowglasmaia.financialtransaction.account.infrastructure.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.dowglasmaia.financialtransaction.account.domain.Account;
-import com.dowglasmaia.financialtransaction.account.domain.AccountRepository;
-import com.dowglasmaia.financialtransaction.account.domain.AgencyRepository;
+import com.dowglasmaia.financialtransaction.account.application.port.AccountRepository;
+import com.dowglasmaia.financialtransaction.account.application.port.AgencyRepository;
 import com.dowglasmaia.financialtransaction.account.domain.User;
-import com.dowglasmaia.financialtransaction.account.domain.UserRepository;
+import com.dowglasmaia.financialtransaction.account.application.port.UserRepository;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.account.infra.persistence;
+package com.dowglasmaia.financialtransaction.account.infrastructure.persistence;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

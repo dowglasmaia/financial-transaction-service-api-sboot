@@ -1,7 +1,7 @@
-package com.dowglasmaia.financialtransaction.account.infra.persistence;
+package com.dowglasmaia.financialtransaction.account.infrastructure.persistence;
 
 import com.dowglasmaia.financialtransaction.account.domain.Agency;
-import com.dowglasmaia.financialtransaction.account.domain.AgencyRepository;
+import com.dowglasmaia.financialtransaction.account.application.port.AgencyRepository;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 

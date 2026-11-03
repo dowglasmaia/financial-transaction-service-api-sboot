@@ -1,6 +1,6 @@
 package com.dowglasmaia.financialtransaction.support;
 
-import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

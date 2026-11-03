@@ -1,8 +1,8 @@
 package com.dowglasmaia.financialtransaction.security;
 
-import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
-import com.dowglasmaia.financialtransaction.account.infra.persistence.UserEntity;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.UserEntity;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
 import com.dowglasmaia.financialtransaction.support.MockIssuer;
 import org.junit.jupiter.api.AfterEach;

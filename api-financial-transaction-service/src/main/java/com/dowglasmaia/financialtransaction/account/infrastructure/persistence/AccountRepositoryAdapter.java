@@ -1,7 +1,7 @@
-package com.dowglasmaia.financialtransaction.account.infra.persistence;
+package com.dowglasmaia.financialtransaction.account.infrastructure.persistence;
 
 import com.dowglasmaia.financialtransaction.account.domain.Account;
-import com.dowglasmaia.financialtransaction.account.domain.AccountRepository;
+import com.dowglasmaia.financialtransaction.account.application.port.AccountRepository;
 import com.dowglasmaia.financialtransaction.account.domain.Agency;
 import com.dowglasmaia.financialtransaction.account.domain.User;
 import java.math.BigDecimal;

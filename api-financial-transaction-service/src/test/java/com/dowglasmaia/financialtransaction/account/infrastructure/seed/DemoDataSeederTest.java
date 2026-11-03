@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.account.infra.seed;
+package com.dowglasmaia.financialtransaction.account.infrastructure.seed;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -8,11 +8,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.dowglasmaia.financialtransaction.account.domain.Account;
-import com.dowglasmaia.financialtransaction.account.domain.AccountRepository;
+import com.dowglasmaia.financialtransaction.account.application.port.AccountRepository;
 import com.dowglasmaia.financialtransaction.account.domain.Agency;
-import com.dowglasmaia.financialtransaction.account.domain.AgencyRepository;
+import com.dowglasmaia.financialtransaction.account.application.port.AgencyRepository;
 import com.dowglasmaia.financialtransaction.account.domain.User;
-import com.dowglasmaia.financialtransaction.account.domain.UserRepository;
+import com.dowglasmaia.financialtransaction.account.application.port.UserRepository;
 import java.math.BigDecimal;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;

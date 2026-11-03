@@ -1,8 +1,8 @@
 package com.dowglasmaia.financialtransaction.mock;
 
-import com.dowglasmaia.financialtransaction.account.infra.persistence.AccountEntity;
-import com.dowglasmaia.financialtransaction.account.infra.persistence.AgencyEntity;
-import com.dowglasmaia.financialtransaction.account.infra.persistence.UserEntity;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountEntity;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AgencyEntity;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.UserEntity;
 import com.dowglasmaia.provider.model.PixRequestDTO;
 import com.dowglasmaia.provider.model.TransactionResponseDTO;
 import com.dowglasmaia.provider.model.WithdrawRequestDTO;
