@@ -33,4 +33,8 @@ public class User {
     @Column(length = 2)
     private Integer areaCode;
 
+    /** The identity provider's subject (token "sub"). Set by hand or by the local seed; unique. */
+    @Column(name = "external_subject", length = 100, unique = true)
+    private String externalSubject;
+
 }

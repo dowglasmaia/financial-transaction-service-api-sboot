@@ -6,12 +6,11 @@ import com.dowglasmaia.financialtransaction.entity.User;
 import com.dowglasmaia.financialtransaction.repository.AccountRepository;
 import com.dowglasmaia.financialtransaction.repository.AgencyRepository;
 import com.dowglasmaia.financialtransaction.repository.UserRepository;
-import lombok.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Component
 public class DBService {
@@ -20,23 +19,10 @@ public class DBService {
     private final AgencyRepository agencyRepository;
     private final AccountRepository accountRepository;
 
-    private UserAccountDTO userAccountDTO = new UserAccountDTO();
 
-    public UserAccountDTO extractUserAccountFromJwt(){
-        return userAccountDTO;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public class UserAccountDTO {
-        private String id;
-        private String userId;
-        private String agencyNumber;
-        private String number;
-    }
-
+    /** The token subject to link to the demo customer (SEED_OWNER_SUB). Blank = leave the user unlinked. */
+    @Value("${app.seed.owner-subject:}")
+    private String ownerSubject;
 
     @Autowired
     public DBService(UserRepository userRepository,
@@ -49,23 +35,21 @@ public class DBService {
 
     /**
      * Idempotent: creates the demo agency/user/account only when they do not exist yet, so the app can restart
-     * on an existing database (the schema is no longer recreated). Always loads the acting identity.
+     * on an existing database (the schema is no longer recreated). Links the demo customer to the configured subject.
      */
-    @SneakyThrows
     public void instanciateTestDatabase()   {
         var agency = agencyRepository.findByNumber("0211").orElseGet(this::createAgency);
 
         var account = accountRepository.findByNumber("2022")
               .orElseGet(() -> createAccount(agency, createUser()));
-        var user = account.getUser();
+        linkOwner(account.getUser());
+    }
 
-        Thread.sleep(1000);
-
-        userAccountDTO.setId(String.valueOf(UUID.randomUUID()));
-        userAccountDTO.setUserId(user.getId());
-        userAccountDTO.setAgencyNumber(agency.getNumber());
-        userAccountDTO.setNumber(account.getNumber());
-
+    private void linkOwner(User user){
+        if (ownerSubject != null && !ownerSubject.isBlank() && !ownerSubject.equals(user.getExternalSubject())) {
+            user.setExternalSubject(ownerSubject);
+            userRepository.save(user);
+        }
     }
 
     private User createUser(){

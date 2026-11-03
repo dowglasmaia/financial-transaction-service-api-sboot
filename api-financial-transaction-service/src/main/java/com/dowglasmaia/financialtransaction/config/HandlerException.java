@@ -1,6 +1,7 @@
 package com.dowglasmaia.financialtransaction.config;
 
 
+import com.dowglasmaia.financialtransaction.exeptions.ForbiddenExeption;
 import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
 import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;
 import com.dowglasmaia.provider.model.ResponseErrorDTO;
@@ -21,6 +22,14 @@ public class HandlerException extends ResponseEntityExceptionHandler {
         exceptionResponse.setCode(HttpStatus.NOT_FOUND.name());
         exceptionResponse.setMessage(ex.getMessage());
         return new ResponseEntity<ResponseErrorDTO>(exceptionResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ForbiddenExeption.class)
+    public final ResponseEntity<ResponseErrorDTO> handlerForbiddenExeption(Exception ex){
+        ResponseErrorDTO exceptionResponse = new ResponseErrorDTO();
+        exceptionResponse.setCode(HttpStatus.FORBIDDEN.name());
+        exceptionResponse.setMessage(ex.getMessage());
+        return new ResponseEntity<ResponseErrorDTO>(exceptionResponse, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(UnprocessableEntityExeption.class)

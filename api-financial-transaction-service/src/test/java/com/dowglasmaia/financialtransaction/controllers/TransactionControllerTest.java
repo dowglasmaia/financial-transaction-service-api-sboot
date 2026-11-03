@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ActiveProfiles(value = "test")
 @WebMvcTest(controllers = TransactionController.class)
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false) // slice test of the controller: security is covered by the integration tests
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
 public class TransactionControllerTest {
 

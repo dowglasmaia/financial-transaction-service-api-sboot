@@ -5,6 +5,11 @@ spring:
   application:
     name: "financial-transaction-service"
   # No profile is forced here. Use SPRING_PROFILES_ACTIVE=local for development (seed data) or prod.
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${AUTH_ISSUER:https://dev-twljocmfwpvlxx1q.eu.auth0.com/}   # the trailing slash is part of the Auth0 issuer
   jpa:
     show-sql: false
     open-in-view: true
@@ -45,6 +50,14 @@ api:
 app:
   outbox:
     poll-interval-ms: 1000
+  security:
+    audience: ${AUTH_AUDIENCE:https://api.financial-transaction.local}
+    roles-claim: ${AUTH_ROLES_CLAIM:https://financial-transaction/roles}
+    cors:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+  seed:
+    # local/test profiles only: the token subject (e.g. auth0|65f...) to link to the demo customer
+    owner-subject: ${SEED_OWNER_SUB:}
 
 management:
   tracing:
@@ -52,7 +65,8 @@ management:
       probability: 1
   endpoint:
     health:
-      show-details: always
+      show-details: when-authorized   # /actuator/health is public; its details only for role ADMIN
+      roles: ADMIN
   endpoints:
     web:
       exposure:

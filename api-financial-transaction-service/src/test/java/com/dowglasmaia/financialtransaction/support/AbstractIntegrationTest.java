@@ -54,6 +54,7 @@ public abstract class AbstractIntegrationTest {
     @DynamicPropertySource
     static void database(DynamicPropertyRegistry registry) {
         SharedPostgres.register(registry);
+        MockIssuer.register(registry);
     }
 
     @Autowired protected MockMvc mvc;
@@ -95,11 +96,17 @@ public abstract class AbstractIntegrationTest {
         return agencyRepository.findByNumber(SEED_AGENCY).orElseThrow();
     }
 
-    /** A second account in the same agency, owned by another user. */
+    /** A second account in the same agency, owned by another user whose token subject is NOT linked. */
     protected Account createOtherAccount(String number, BigDecimal balance) {
+        return createOtherAccount(number, balance, null);
+    }
+
+    /** A second account in the same agency, owned by the user linked to {@code subject} (see {@link MockIssuer#OTHER_SUB}). */
+    protected Account createOtherAccount(String number, BigDecimal balance, String subject) {
         User user = userRepository.save(User.builder()
               .name("Other Test User").CPF(number + "000000000".substring(0, 11 - number.length()))
-              .email("other-" + number + "@example.test").areaCode(11).phoneNumber(988887777).build());
+              .email("other-" + number + "@example.test").areaCode(11).phoneNumber(988887777)
+              .externalSubject(subject).build());
         extraUsers.add(user);
         Account account = accountRepository.save(Account.builder()
               .agency(seedAgency()).user(user).number(number).balance(balance).build());
@@ -116,14 +123,26 @@ public abstract class AbstractIntegrationTest {
               .transactionType(type).amount(amount).accountId(accountId).agencyId(null).dateHour(when).build());
     }
 
+    /** Requests are made as the seeded owner (a valid token from the mock issuer) unless a test says otherwise. */
     protected ResultActions post(String path, String body) throws Exception {
-        return mvc.perform(MockMvcRequestBuilders.post("/api/v1/transactions" + path)
-              .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON).content(body));
+        return postAs(MockIssuer.ownerToken(), path, body);
     }
 
     protected ResultActions get(String pathAndQuery) throws Exception {
-        return mvc.perform(MockMvcRequestBuilders.get("/api/v1/transactions" + pathAndQuery)
-              .accept(MediaType.APPLICATION_JSON));
+        return getAs(MockIssuer.ownerToken(), pathAndQuery);
+    }
+
+    protected ResultActions postAs(String token, String path, String body) throws Exception {
+        var request = MockMvcRequestBuilders.post("/api/v1/transactions" + path)
+              .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON).content(body);
+        if (token != null) request.header("Authorization", "Bearer " + token);
+        return mvc.perform(request);
+    }
+
+    protected ResultActions getAs(String token, String pathAndQuery) throws Exception {
+        var request = MockMvcRequestBuilders.get("/api/v1/transactions" + pathAndQuery).accept(MediaType.APPLICATION_JSON);
+        if (token != null) request.header("Authorization", "Bearer " + token);
+        return mvc.perform(request);
     }
 
     protected JsonNode bodyOf(ResultActions result) throws Exception {

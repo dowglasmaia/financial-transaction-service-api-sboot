@@ -62,14 +62,14 @@ class StatementCharacterizationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void statementIncludesOtherAccountsTransactions() throws Exception { // characterizes F-04 / BR-51; BE-04 fixes
+    void statementExcludesOtherAccountsTransactions() throws Exception { // F-04 / BR-51 fixed by BE-04
         Account other = createOtherAccount("9999", new BigDecimal("10.00"));
         ledger(TransactionTypeEnum.DEPOSIT, new BigDecimal("77.00"), other.getId(), at(11, 12));
 
         JsonNode body = bodyOf(get("?initial-date=10/03/2026&final-date=11/03/2026").andExpect(status().isOk()));
 
-        assertThat(body.get("transaction")).hasSize(1);
-        assertThat(body.get("sumIncoming").decimalValue()).isEqualByComparingTo("77");
+        assertThat(body.get("transaction")).isEmpty();
+        assertThat(body.get("sumIncoming").decimalValue()).isEqualByComparingTo("0");
     }
 
     @Test
@@ -87,10 +87,11 @@ class StatementCharacterizationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void transactionByIdOfAnotherAccountIsStillReturned() throws Exception { // characterizes F-04: no ownership check
+    void transactionByIdOfAnotherAccountIsNotFound() throws Exception { // F-04 fixed by BE-04
         Account other = createOtherAccount("9999", new BigDecimal("10.00"));
         Transaction foreign = ledger(TransactionTypeEnum.DEPOSIT, new BigDecimal("9.00"), other.getId(), at(11, 12));
-        get("/" + foreign.getId()).andExpect(status().isOk());
+        get("/" + foreign.getId()).andExpect(status().isNotFound())
+              .andExpect(jsonPath("$.message").value("Transaction not found"));
     }
 
     @Test

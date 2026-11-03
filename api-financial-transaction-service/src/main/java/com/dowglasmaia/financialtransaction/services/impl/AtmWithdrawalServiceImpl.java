@@ -1,6 +1,7 @@
 package com.dowglasmaia.financialtransaction.services.impl;
 
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
 import com.dowglasmaia.financialtransaction.services.AtmWithdrawalService;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
 import com.dowglasmaia.financialtransaction.services.client.account.AddAmountService;
@@ -9,8 +10,11 @@ import com.dowglasmaia.financialtransaction.services.client.agency.AgencyService
 import com.dowglasmaia.provider.model.WithdrawRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -33,7 +37,11 @@ public class AtmWithdrawalServiceImpl implements AtmWithdrawalService {
         this.findAccountByNumberAndUserIdService = findAccountByNumberAndUserIdService;
     }
 
-    /** Debit + ledger row in ONE transaction. (Which account may be debited is decided later, spec BE-04.) */
+    /**
+     * Debit + ledger row in ONE transaction. Only the caller's own account can be debited: a card withdrawal uses it
+     * directly, a withdrawal that names an account must name the caller's (a foreign number is "not found", never debited).
+     * The ledger row follows the debited account.
+     */
     @Override
     @Transactional
     public void makeAtmWithdrawal(WithdrawRequestDTO withdrawRequest){
@@ -51,7 +59,10 @@ public class AtmWithdrawalServiceImpl implements AtmWithdrawalService {
         } else {
             log.info("AtmWithdrawal not based card");
 
-            addAmountService.debit(withdrawRequest.getNumberAccount(), withdrawRequest.getAmount());
+            if (!Objects.equals(withdrawRequest.getNumberAccount(), account.getNumber())) {
+                throw new ObjectNotFoundExeption("Account not found.", HttpStatus.NOT_FOUND);
+            }
+            addAmountService.debitById(account.getId(), withdrawRequest.getAmount());
         }
 
         transactionService.save(TransactionTypeEnum.WITHDRAW, account.getId(), withdrawRequest.getAmount(), agencyId);
