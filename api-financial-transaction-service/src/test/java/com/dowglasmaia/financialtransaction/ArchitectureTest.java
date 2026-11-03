@@ -37,7 +37,7 @@ class ArchitectureTest {
      * Top-level packages of the OLD layered structure that are not migrated yet (for example "controllers", "services").
      * Only used while a project is being migrated; it must be empty (strict) when the last feature is done.
      */
-    private static final Set<String> LEGACY_PACKAGES = Set.of("controllers", "services", "entity", "repository", "config", "exeptions", "utils");
+    private static final Set<String> LEGACY_PACKAGES = Set.of();
 
     /** Leaves the legacy packages out of the analysis. */
     public static final class ExcludeLegacyPackages implements ImportOption {
