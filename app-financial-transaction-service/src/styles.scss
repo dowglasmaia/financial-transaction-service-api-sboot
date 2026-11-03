@@ -1,9 +1,12 @@
 @use 'tailwindcss';
 
 /*
- * Design tokens - single source of truth (spec FE-02). Extracted from the approved prototype
- * (prototype/Maia Bank UI prototype) and measured for WCAG 2.2 AA (see tokens-contrast.spec.ts).
- * Deviation: dark --line-input is #75634F (prototype #6F5C4E gave 2.87:1 on raised surfaces; needs 3:1).
+ * Design tokens - single source of truth (SL-00, visual identity v2: deep navy surfaces, blue/cyan accents, glass cards).
+ * Extracted from prototype/Maia Bank UI prototype/Maia Bank v2.dc.html and measured for WCAG 2.2 AA (tokens-contrast.spec.ts).
+ * v2 is dark-only; the light theme is DERIVED from the same hues (decision D-34).
+ * Deviations from v2 (also in docs/prototype-deviations.md):
+ *  - primary #2d68fa instead of #2f6bff: white text on #2f6bff measures 4.4988:1 (needs 4.5:1).
+ *  - dark --line-input is a solid #6674b3 (v2 uses rgba(150,170,255,.38)); it measures >= 3.9:1 on every surface.
  * Never use hex values in templates: use the semantic Tailwind names (bg-surface, text-content, text-income...).
  */
 
@@ -11,51 +14,65 @@
 :root,
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --surface: #110c09;
-  --surface-raised: #1b1410;
-  --surface-sunken: #150f0c;
-  --surface-overlay: #251b15;
-  --brand: #0d0907;
-  --line: #2e221b;
-  --line-input: #75634f;
-  --content: #f5eee2;
-  --content-muted: #b3a28f;
-  --accent: #d4ae6a;
-  --accent-2: #c5be8b;
-  --on-accent: #24160a;
-  --on-brand: #f5eee2;
-  --on-brand-muted: #b3a28f;
-  --income: #7cc4b3;
-  --expense: #f08a66;
-  --warning: #e8c979;
-  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.03) inset, 0 8px 24px -12px rgb(0 0 0 / 0.6);
-  --shadow-overlay: 0 24px 60px -12px rgb(0 0 0 / 0.65);
-  --glow-accent: 0 10px 26px -8px rgb(212 174 106 / 0.55);
+  --surface: #060b1f;
+  --surface-raised: #0e1738;
+  --surface-sunken: #0a1233;
+  --surface-overlay: #121c47;
+  --brand: #081039;
+  --line: #1b2656;
+  --line-input: #6674b3;
+  --content: #f1f4ff;
+  --content-muted: #9aa6d1;
+  --accent: #38bdf8;
+  --on-accent: #031026;
+  --primary: #2d68fa;
+  --primary-strong: #1e4fe0;
+  --on-primary: #ffffff;
+  --on-brand: #f1f4ff;
+  --on-brand-muted: #9aa6d1;
+  --income: #34d399;
+  --expense: #ff6b8a;
+  --warning: #fbbf24;
+  --violet: #a78bfa;
+  --page-glow-a: rgb(59 91 255 / 0.22);
+  --page-glow-b: rgb(124 58 237 / 0.16);
+  --glass: linear-gradient(160deg, rgb(22 32 82 / 0.88), rgb(10 16 48 / 0.92));
+  --shadow-card: 0 24px 50px -24px rgb(0 0 0 / 0.8), inset 0 1px 0 rgb(255 255 255 / 0.05);
+  --shadow-overlay: 0 30px 80px rgb(0 0 0 / 0.6);
+  --glow-primary: 0 12px 28px -8px rgb(47 107 255 / 0.8), inset 0 1px 0 rgb(255 255 255 / 0.3);
+  --glow-accent: 0 0 18px -4px rgb(56 189 248 / 0.7);
 }
 
 /* theme:light */
 :root[data-theme='light'] {
   color-scheme: light;
-  --surface: #f6f2ea;
+  --surface: #f3f6ff;
   --surface-raised: #ffffff;
-  --surface-sunken: #efe9dc;
+  --surface-sunken: #e9eefc;
   --surface-overlay: #ffffff;
-  --brand: #2b1a12;
-  --line: #e4dbc9;
-  --line-input: #8c7a64;
-  --content: #26180f;
-  --content-muted: #65513f;
-  --accent: #8a6314;
-  --accent-2: #2f6b60;
-  --on-accent: #fff8ee;
-  --on-brand: #f5eee2;
-  --on-brand-muted: #b3a28f;
-  --income: #2f6b60;
-  --expense: #b9340b;
-  --warning: #7a4b00;
-  --shadow-card: 0 1px 2px rgb(38 24 15 / 0.06), 0 8px 24px -14px rgb(38 24 15 / 0.25);
-  --shadow-overlay: 0 24px 60px -16px rgb(38 24 15 / 0.35);
-  --glow-accent: 0 10px 26px -10px rgb(138 99 20 / 0.5);
+  --brand: #0b1445;
+  --line: #d5ddf5;
+  --line-input: #6272b0;
+  --content: #0b1234;
+  --content-muted: #4a5683;
+  --accent: #1d4fd7;
+  --on-accent: #ffffff;
+  --primary: #2d68fa;
+  --primary-strong: #1e4fe0;
+  --on-primary: #ffffff;
+  --on-brand: #f1f4ff;
+  --on-brand-muted: #9aa6d1;
+  --income: #047857;
+  --expense: #be123c;
+  --warning: #8a4b00;
+  --violet: #6d28d9;
+  --page-glow-a: rgb(59 91 255 / 0.1);
+  --page-glow-b: rgb(124 58 237 / 0.06);
+  --glass: linear-gradient(160deg, rgb(255 255 255 / 0.96), rgb(240 244 255 / 0.96));
+  --shadow-card: 0 1px 2px rgb(11 18 52 / 0.06), 0 14px 32px -18px rgb(11 18 52 / 0.3);
+  --shadow-overlay: 0 24px 60px -16px rgb(11 18 52 / 0.4);
+  --glow-primary: 0 10px 24px -10px rgb(45 104 250 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.3);
+  --glow-accent: 0 0 14px -4px rgb(29 79 215 / 0.35);
 }
 
 @theme inline {
@@ -69,23 +86,28 @@
   --color-content: var(--content);
   --color-content-muted: var(--content-muted);
   --color-accent: var(--accent);
-  --color-accent-2: var(--accent-2);
   --color-on-accent: var(--on-accent);
+  --color-primary: var(--primary);
+  --color-primary-strong: var(--primary-strong);
+  --color-on-primary: var(--on-primary);
   --color-on-brand: var(--on-brand);
   --color-on-brand-muted: var(--on-brand-muted);
   --color-income: var(--income);
   --color-expense: var(--expense);
   --color-warning: var(--warning);
+  --color-violet: var(--violet);
 
   --font-sans: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-display: 'Sora', 'Manrope', system-ui, sans-serif;
 
-  --radius-control: 8px;
-  --radius-card: 12px;
+  --radius-control: 12px;
+  --radius-card: 16px;
+  --radius-panel: 20px;
 
   --shadow-card: var(--shadow-card);
   --shadow-overlay: var(--shadow-overlay);
-  --shadow-glow: var(--glow-accent);
+  --shadow-glow: var(--glow-primary);
+  --shadow-glow-accent: var(--glow-accent);
 
   --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -98,7 +120,10 @@
   body {
     margin: 0;
     min-height: 100vh;
-    background: var(--surface);
+    background:
+      radial-gradient(900px 500px at 85% -5%, var(--page-glow-a), transparent 60%),
+      radial-gradient(800px 600px at -5% 40%, var(--page-glow-b), transparent 60%), var(--surface);
+    background-attachment: fixed;
     color: var(--content);
     font-family: var(--font-sans);
     font-size: 16px;
@@ -113,7 +138,7 @@
   }
 
   ::selection {
-    background: color-mix(in srgb, var(--accent) 35%, transparent);
+    background: color-mix(in srgb, var(--primary) 40%, transparent);
   }
 
   * {
@@ -133,6 +158,16 @@
   }
 }
 
+/* Glass card surface used by cards and panels (the v2 "glass" look). */
+@utility bg-glass {
+  background: var(--glass);
+}
+
+/* Hero panel (balance): the same blue gradient in both themes; text on it uses text-on-primary (>= 6:1). */
+@utility bg-hero {
+  background: linear-gradient(120deg, #0a1b66 0%, #1d3fd8 58%, #4f46e5 100%);
+}
+
 @keyframes shimmer {
   0% {
     background-position: 200% 0;
@@ -145,10 +180,35 @@
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  70% {
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ring {
+  0% {
+    opacity: 0.8;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.2);
   }
 }

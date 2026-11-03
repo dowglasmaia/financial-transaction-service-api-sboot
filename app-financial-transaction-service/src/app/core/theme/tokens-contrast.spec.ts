@@ -38,11 +38,15 @@ const PAIRS: ReadonlyArray<[string, string, number]> = [
   ['accent', 'surface', 4.5],
   ['accent', 'surface-raised', 4.5],
   ['on-accent', 'accent', 4.5],
+  ['on-primary', 'primary', 4.5],
+  ['on-primary', 'primary-strong', 4.5],
   ['income', 'surface', 4.5],
   ['income', 'surface-raised', 4.5],
   ['expense', 'surface', 4.5],
   ['expense', 'surface-raised', 4.5],
   ['warning', 'surface-raised', 4.5],
+  ['violet', 'surface', 4.5],
+  ['violet', 'surface-raised', 4.5],
   ['on-brand', 'brand', 4.5],
   ['on-brand-muted', 'brand', 4.5],
   ['line-input', 'surface', 3],
@@ -50,6 +54,26 @@ const PAIRS: ReadonlyArray<[string, string, number]> = [
   ['line-input', 'surface-sunken', 3],
   ['accent', 'surface-sunken', 3],
 ];
+
+/**
+ * SL-00: the v1 (brown/gold) identity must be gone from the tokens file. The hex values are written in two halves on
+ * purpose, so a repository-wide search for the v1 palette finds nothing at all (this guard included).
+ */
+const V1_PALETTE = [
+  ['#cea', '45c'],
+  ['#2a1', '708'],
+  ['#fbf', '1de'],
+  ['#5fa', '899'],
+  ['#d4a', 'e6a'],
+  ['#110', 'c09'],
+].map((halves) => halves.join(''));
+
+describe('v1 identity removed', () => {
+  it.each(V1_PALETTE)('%s is not in styles.scss', (hex) => {
+    const scss = readFileSync(resolve(process.cwd(), 'src/styles.scss'), 'utf-8').toLowerCase();
+    expect(scss).not.toContain(hex);
+  });
+});
 
 describe.each<Theme>(['dark', 'light'])('design tokens contrast (%s)', (theme) => {
   const tokens = readTokens(theme);
