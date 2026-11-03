@@ -82,6 +82,7 @@ Approve the class mapping table and the security split (ARCH-01) and the transac
 | BE-04 | Merged (PR #9); automated two-user scenario added; **manual Auth0 browser sign-in moves to SL-01** |
 | FE-01 | Superseded by SL-00 (v2 sign-off happens there) |
 | FE-02 | Done (PR #5 merged 2026-11-02; app-ci green on 48230d5). Look replaced by SL-00. Carried over: axe run → SL-01/FE-05, OpenAPI type generation → SL-01 |
+| SL-00 | Implemented on `slice/00-visual-v2` (2026-11-03); owner signed off the look (2026-11-03); **open: `app-ci` on the PR** |
 | ARCH-01 | Draft (spec written 2026-11-03; not authorized) |
 | ARCH-02 | Draft (spec written 2026-11-03; not authorized) |
 | SL-00 … SL-06 | Draft (specs written 2026-11-03; not authorized) |
