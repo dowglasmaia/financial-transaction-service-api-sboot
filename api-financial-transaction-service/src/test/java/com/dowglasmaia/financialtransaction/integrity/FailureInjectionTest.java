@@ -1,10 +1,10 @@
 package com.dowglasmaia.financialtransaction.integrity;
 
-import com.dowglasmaia.financialtransaction.entity.OutboxEvent;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.messaging.OutboxEventEntity;
 import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionEntity;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
-import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.messaging.OutboxEventJpaRepository;
 import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionJpaRepository;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.verify;
 class FailureInjectionTest extends AbstractIntegrationTest {
 
     @SpyBean TransactionJpaRepository ledger;
-    @SpyBean OutboxEventRepository outbox;
+    @SpyBean OutboxEventJpaRepository outbox;
 
     private void ledgerFails() {
         doThrow(new IllegalStateException("ledger unavailable")).when(ledger).save(any(TransactionEntity.class));
@@ -60,7 +60,7 @@ class FailureInjectionTest extends AbstractIntegrationTest {
 
     @Test
     void anOutboxFailureRollsBackTheWholeRecharge() {
-        doThrow(new IllegalStateException("outbox unavailable")).when(outbox).save(any(OutboxEvent.class));
+        doThrow(new IllegalStateException("outbox unavailable")).when(outbox).save(any(OutboxEventEntity.class));
         assertThatThrownBy(() -> post("/recharge-mobile", "{\"phoneNumber\":998877665,\"areaCode\":11,\"carrier\":\"VIVO\",\"amount\":50.00}"))
               .hasRootCauseInstanceOf(IllegalStateException.class);
         assertThat(sameValue(SEED_BALANCE, balanceOf(SEED_ACCOUNT))).as("debit rolled back").isTrue();

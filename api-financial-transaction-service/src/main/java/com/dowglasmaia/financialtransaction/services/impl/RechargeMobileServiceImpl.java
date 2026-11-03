@@ -3,11 +3,11 @@ package com.dowglasmaia.financialtransaction.services.impl;
 import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAccountUseCase;
 import com.dowglasmaia.financialtransaction.account.application.usecase.DebitAccountUseCase;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
-import com.dowglasmaia.financialtransaction.config.kafka.KafkaAdminConfig;
-import com.dowglasmaia.financialtransaction.entity.OutboxEvent;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.messaging.KafkaAdminConfig;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.messaging.OutboxEventEntity;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;
-import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.messaging.OutboxEventJpaRepository;
 import com.dowglasmaia.financialtransaction.services.RechargeMobileService;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
 import com.dowglasmaia.financialtransaction.transaction.domain.PhoneValidator;
@@ -29,13 +29,13 @@ public class RechargeMobileServiceImpl implements RechargeMobileService {
     /** Same serializer the Kafka producer used before the outbox, so the payload bytes are identical. */
     private static final JsonSerializer<MobileRechargeRequestDTO> PAYLOAD_SERIALIZER = new JsonSerializer<>();
 
-    private final OutboxEventRepository outboxEventRepository;
+    private final OutboxEventJpaRepository outboxEventRepository;
     private final GetCurrentAccountUseCase getCurrentAccount;
     private final DebitAccountUseCase debitAccount;
     private final TransactionService transactionService;
 
     @Autowired
-    public RechargeMobileServiceImpl(OutboxEventRepository outboxEventRepository,
+    public RechargeMobileServiceImpl(OutboxEventJpaRepository outboxEventRepository,
                                      GetCurrentAccountUseCase getCurrentAccount,
                                      DebitAccountUseCase debitAccount,
                                      TransactionService transactionService
@@ -61,7 +61,7 @@ public class RechargeMobileServiceImpl implements RechargeMobileService {
 
         transactionService.save(TransactionType.PHONE_RECHARGE, account.getId(), request.getAmount(), null);
 
-        outboxEventRepository.save(OutboxEvent.builder()
+        outboxEventRepository.save(OutboxEventEntity.builder()
               .topic(KafkaAdminConfig.RECHARGE_MOBILE_TOPIC)
               .payload(new String(PAYLOAD_SERIALIZER.serialize(KafkaAdminConfig.RECHARGE_MOBILE_TOPIC, request), StandardCharsets.UTF_8))
               .payloadType(MobileRechargeRequestDTO.class.getName())

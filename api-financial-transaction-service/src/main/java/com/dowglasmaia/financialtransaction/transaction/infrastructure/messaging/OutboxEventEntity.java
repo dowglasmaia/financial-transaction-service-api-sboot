@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.entity;
+package com.dowglasmaia.financialtransaction.transaction.infrastructure.messaging;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -15,7 +15,7 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "outbox_event")
-public class OutboxEvent {
+public class OutboxEventEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

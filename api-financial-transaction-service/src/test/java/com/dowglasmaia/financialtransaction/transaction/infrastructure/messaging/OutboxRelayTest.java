@@ -1,7 +1,7 @@
-package com.dowglasmaia.financialtransaction.config.kafka;
+package com.dowglasmaia.financialtransaction.transaction.infrastructure.messaging;
 
-import com.dowglasmaia.financialtransaction.entity.OutboxEvent;
-import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
+
+
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,16 +29,16 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OutboxRelayTest {
 
-    @Mock OutboxEventRepository repository;
+    @Mock OutboxEventJpaRepository repository;
     @Mock KafkaTemplate<String, String> kafkaTemplate;
 
     OutboxRelay relay;
-    OutboxEvent event;
+    OutboxEventEntity event;
 
     @BeforeEach
     void setUp() {
         relay = new OutboxRelay(repository, kafkaTemplate);
-        event = OutboxEvent.builder().id("evt-1").topic("recharge-mobile-topic")
+        event = OutboxEventEntity.builder().id("evt-1").topic("recharge-mobile-topic")
               .payload("{\"phoneNumber\":998877665}").payloadType("com.example.Type").createdAt(OffsetDateTime.now()).build();
         when(repository.findTop50ByPublishedAtIsNullOrderByCreatedAtAsc()).thenReturn(List.of(event));
     }

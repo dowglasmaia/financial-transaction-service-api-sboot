@@ -4,7 +4,7 @@ import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.A
 import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionEntity;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountJpaRepository;
-import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.messaging.OutboxEventJpaRepository;
 import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionJpaRepository;
 import com.dowglasmaia.financialtransaction.support.MockIssuer;
 import com.dowglasmaia.financialtransaction.support.SharedPostgres;
@@ -107,7 +107,7 @@ class PixMaiaBankResilienceTest {
     @Autowired MockMvc mvc;
     @Autowired AccountJpaRepository accounts;
     @Autowired TransactionJpaRepository ledger;
-    @Autowired OutboxEventRepository outbox;
+    @Autowired OutboxEventJpaRepository outbox;
     @Autowired CircuitBreakerRegistry breakers;
 
     @BeforeEach

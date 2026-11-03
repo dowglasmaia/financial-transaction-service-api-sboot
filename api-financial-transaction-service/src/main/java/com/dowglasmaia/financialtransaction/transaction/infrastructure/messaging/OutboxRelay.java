@@ -1,7 +1,7 @@
-package com.dowglasmaia.financialtransaction.config.kafka;
+package com.dowglasmaia.financialtransaction.transaction.infrastructure.messaging;
 
-import com.dowglasmaia.financialtransaction.entity.OutboxEvent;
-import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
+
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,10 +23,10 @@ public class OutboxRelay {
 
     private static final String TYPE_ID_HEADER = "__TypeId__"; // what Spring's JsonSerializer used to add
 
-    private final OutboxEventRepository outboxEventRepository;
+    private final OutboxEventJpaRepository outboxEventRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public OutboxRelay(OutboxEventRepository outboxEventRepository,
+    public OutboxRelay(OutboxEventJpaRepository outboxEventRepository,
                        @Qualifier("outboxKafkaTemplate") KafkaTemplate<String, String> kafkaTemplate
     ){
         this.outboxEventRepository = outboxEventRepository;
@@ -35,12 +35,12 @@ public class OutboxRelay {
 
     @Scheduled(fixedDelayString = "${app.outbox.poll-interval-ms:1000}")
     public void publishPending(){
-        for (OutboxEvent event : outboxEventRepository.findTop50ByPublishedAtIsNullOrderByCreatedAtAsc()) {
+        for (OutboxEventEntity event : outboxEventRepository.findTop50ByPublishedAtIsNullOrderByCreatedAtAsc()) {
             publish(event);
         }
     }
 
-    void publish(OutboxEvent event){
+    void publish(OutboxEventEntity event){
         try {
             var record = new ProducerRecord<>(event.getTopic(), event.getEventKey(), event.getPayload());
             if (event.getPayloadType() != null) {

@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.config.kafka;
+package com.dowglasmaia.financialtransaction.transaction.infrastructure.messaging;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.AdminClientConfig;

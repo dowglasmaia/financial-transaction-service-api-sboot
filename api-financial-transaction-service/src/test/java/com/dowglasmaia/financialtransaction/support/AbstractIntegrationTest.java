@@ -7,7 +7,7 @@ import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.UserEntity;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountJpaRepository;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AgencyJpaRepository;
-import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.messaging.OutboxEventJpaRepository;
 import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionJpaRepository;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.UserJpaRepository;
 import com.dowglasmaia.financialtransaction.services.client.maiaBank.MaiaBankClient;
@@ -63,7 +63,7 @@ public abstract class AbstractIntegrationTest {
     @Autowired protected AgencyJpaRepository agencyRepository;
     @Autowired protected UserJpaRepository userRepository;
     @Autowired protected TransactionJpaRepository transactionRepository;
-    @Autowired protected OutboxEventRepository outboxEventRepository;
+    @Autowired protected OutboxEventJpaRepository outboxEventRepository;
 
     @MockBean protected MaiaBankClient maiaBankClient;
 
