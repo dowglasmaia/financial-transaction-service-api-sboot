@@ -1,7 +1,16 @@
 package com.dowglasmaia.financialtransaction.controllers;
 
 
-import com.dowglasmaia.financialtransaction.services.*;
+import com.dowglasmaia.financialtransaction.transaction.application.usecase.GetStatementUseCase;
+import com.dowglasmaia.financialtransaction.transaction.application.usecase.GetTransactionByIdUseCase;
+import com.dowglasmaia.financialtransaction.transaction.application.usecase.MakeAtmWithdrawalUseCase;
+import com.dowglasmaia.financialtransaction.transaction.application.usecase.MakeDepositUseCase;
+import com.dowglasmaia.financialtransaction.transaction.application.usecase.MakePixTransferUseCase;
+import com.dowglasmaia.financialtransaction.transaction.application.usecase.RequestMobileRechargeUseCase;
+import com.dowglasmaia.financialtransaction.transaction.domain.PixTransfer;
+import com.dowglasmaia.financialtransaction.transaction.domain.Transaction;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.provider.model.PixRequestDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -43,15 +52,17 @@ public class TransactionControllerTest {
     MockMvc mvc;
 
     @MockBean
-    private PixService pixService;
+    private MakePixTransferUseCase makePixTransfer;
     @MockBean
-    private DepositService depositService;
+    private MakeDepositUseCase makeDeposit;
     @MockBean
-    private RechargeMobileService rechargeMobileService;
+    private RequestMobileRechargeUseCase requestMobileRecharge;
     @MockBean
-    private AtmWithdrawalService atmWithdrawalService;
+    private MakeAtmWithdrawalUseCase makeAtmWithdrawal;
     @MockBean
-    private TransactionService transactionService;
+    private GetStatementUseCase getStatement;
+    @MockBean
+    private GetTransactionByIdUseCase getTransactionById;
 
 
     @SneakyThrows
@@ -59,7 +70,7 @@ public class TransactionControllerTest {
     public void souldSendPixSuccessfully(){
         var pixRequest = pixRequestBuild();
 
-        willDoNothing().given(pixService).makeTransfer(Mockito.any(PixRequestDTO.class));
+        willDoNothing().given(makePixTransfer).execute(Mockito.any(PixTransfer.class));
 
         String json = new ObjectMapper().writeValueAsString(pixRequest);
 
@@ -79,7 +90,7 @@ public class TransactionControllerTest {
         var pixRequest = new PixRequestDTO();
         var msgError = "Pix key is required";
 
-        willDoNothing().given(pixService).makeTransfer(Mockito.any(PixRequestDTO.class));
+        willDoNothing().given(makePixTransfer).execute(Mockito.any(PixTransfer.class));
 
         String json = new ObjectMapper().writeValueAsString(pixRequest);
 
@@ -104,8 +115,9 @@ public class TransactionControllerTest {
 
         var id = UUID.randomUUID();
 
-        given(transactionService.findById(Mockito.any()))
-              .willReturn(response);
+        given(getTransactionById.execute(Mockito.any()))
+              .willReturn(Transaction.restore("t-1", TransactionType.valueOf(response.getTransactionType()), "acc-1", response.getAmount(), "agency-1",
+                    TransactionStatus.COMPLETED, response.getDateHour()));
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
               .get(URI_PATH.concat("/" + id))

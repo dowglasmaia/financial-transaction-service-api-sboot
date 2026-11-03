@@ -1,6 +1,7 @@
 package com.dowglasmaia.financialtransaction.services.impl.mapper;
 
-import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionEntity;
+import com.dowglasmaia.financialtransaction.transaction.domain.Transaction;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.provider.model.TransactionsResponseDTO;
 import org.junit.jupiter.api.Test;
@@ -14,8 +15,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /** Pins the income/outgoing classification (BR-52) at unit level (spec BE-01). */
 class TransactionMapperTest {
 
-    private static TransactionEntity tx(TransactionType type, String amount) {
-        return TransactionEntity.builder().transactionType(type).amount(new BigDecimal(amount)).dateHour(OffsetDateTime.now()).build();
+    private static Transaction tx(TransactionType type, String amount) {
+        return Transaction.create(type, "acc-1", new BigDecimal(amount), "agency-1", TransactionStatus.COMPLETED, OffsetDateTime.now());
     }
 
     @Test
