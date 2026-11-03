@@ -3,17 +3,17 @@ import { Directive, computed, input } from '@angular/core';
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 
 const BASE =
-  'relative inline-flex h-12 items-center justify-center gap-2 rounded-control px-5 text-[15px] font-semibold ' +
+  'relative inline-flex h-[50px] items-center justify-center gap-2 rounded-control px-[22px] text-[15px] font-bold ' +
   'transition duration-150 ease-standard select-none focus-visible:outline-2 focus-visible:outline-offset-2 ' +
-  'focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-45 aria-disabled:cursor-not-allowed aria-disabled:opacity-45 ' +
-  'active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100';
+  'focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-40 aria-disabled:cursor-not-allowed aria-disabled:opacity-40 ' +
+  'enabled:hover:-translate-y-0.5 active:scale-[0.97] motion-reduce:transition-none motion-reduce:enabled:hover:translate-y-0 motion-reduce:active:scale-100';
 
 const VARIANTS: Record<ButtonVariant, string> = {
   primary:
-    'bg-linear-to-br from-accent to-accent-2 text-on-accent shadow-glow hover:brightness-110 ' +
-    'after:border-on-accent',
-  secondary: 'border border-line-input bg-transparent text-content hover:bg-surface-sunken after:border-content',
-  ghost: 'bg-transparent text-content-muted hover:bg-surface-sunken hover:text-content after:border-content',
+    'bg-linear-to-br from-primary to-primary-strong text-on-primary shadow-glow enabled:hover:brightness-110 ' +
+    'disabled:shadow-none after:border-on-primary',
+  secondary: 'border border-line-input bg-transparent text-content hover:bg-surface-overlay after:border-content',
+  ghost: 'bg-transparent text-content-muted hover:bg-surface-overlay hover:text-content after:border-content',
 };
 
 const LOADING =

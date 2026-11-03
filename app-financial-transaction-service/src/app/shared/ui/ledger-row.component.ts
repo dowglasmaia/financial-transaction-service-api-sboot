@@ -1,22 +1,20 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { formatBrl } from '../util/money';
+import { IconTileComponent } from './icon-tile.component';
 import { TRANSACTION_TYPES, TransactionType } from './transaction-types';
 
 /**
- * One statement row. Direction is shown by a coloured rail, an icon, the type label and the sign of the amount —
- * never by colour alone.
+ * One statement row. Direction is shown by the icon tile of the kind, the type label, the sign of the amount and
+ * screen-reader text — never by colour alone.
  */
 @Component({
   selector: 'app-ledger-row',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe],
+  imports: [DatePipe, IconTileComponent],
   template: `
-    <div class="flex items-center gap-4 rounded-card border border-line bg-surface-raised py-3 pr-4 pl-0 shadow-card">
-      <span class="h-10 w-[3px] shrink-0 rounded-r" [class]="info().direction === 'in' ? 'bg-income' : 'bg-expense'" aria-hidden="true"></span>
-      <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-sunken" [class]="tone()">
-        <i [class]="info().icon" aria-hidden="true"></i>
-      </span>
+    <div class="flex items-center gap-3.5 rounded-card border border-line bg-glass px-4 py-3 shadow-card">
+      <app-icon-tile [icon]="info().icon" [tone]="info().tile" />
       <div class="min-w-0 flex-1">
         <p class="truncate font-semibold">{{ info().label }}</p>
         <p class="text-sm text-content-muted">{{ date() | date: 'MMM d, y, h:mm a' }}</p>

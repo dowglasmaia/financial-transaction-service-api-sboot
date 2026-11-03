@@ -3,14 +3,14 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 export type AlertTone = 'info' | 'success' | 'warning' | 'error';
 
 const TONES: Record<AlertTone, { icon: string; box: string; role: 'status' | 'alert' }> = {
-  info: { icon: 'ph-bold ph-info', box: 'border-line-input text-content', role: 'status' },
-  success: { icon: 'ph-bold ph-check-circle', box: 'border-income text-content', role: 'status' },
-  warning: { icon: 'ph-bold ph-warning', box: 'border-warning text-content', role: 'status' },
-  error: { icon: 'ph-bold ph-warning-circle', box: 'border-expense text-content', role: 'alert' },
+  info: { icon: 'ph-bold ph-info', box: 'border-primary/40 bg-primary/10 text-content', role: 'status' },
+  success: { icon: 'ph-bold ph-check-circle', box: 'border-income bg-income/10 text-content', role: 'status' },
+  warning: { icon: 'ph-bold ph-warning', box: 'border-warning bg-warning/10 text-content', role: 'status' },
+  error: { icon: 'ph-bold ph-warning-circle', box: 'border-expense bg-expense/10 text-content', role: 'alert' },
 };
 
 const ICON_COLOR: Record<AlertTone, string> = {
-  info: 'text-content-muted',
+  info: 'text-accent',
   success: 'text-income',
   warning: 'text-warning',
   error: 'text-expense',
@@ -21,7 +21,7 @@ const ICON_COLOR: Record<AlertTone, string> = {
   selector: 'app-alert',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div [attr.role]="tone().role" class="flex items-start gap-3 rounded-card border bg-surface-raised p-4 shadow-card" [class]="tone().box">
+    <div [attr.role]="tone().role" class="flex items-start gap-3 rounded-control border p-4" [class]="tone().box">
       <i [class]="icon()" aria-hidden="true" class="mt-0.5 text-lg"></i>
       <div class="min-w-0 flex-1">
         @if (title()) {
