@@ -58,6 +58,7 @@ app:
   seed:
     # local/test profiles only: the token subject (e.g. auth0|65f...) to link to the demo customer
     owner-subject: ${SEED_OWNER_SUB:}
+    second-subject: ${SEED_SECOND_SUB:}   # optional second demo customer (account 3033) for a second login
 
 management:
   tracing:

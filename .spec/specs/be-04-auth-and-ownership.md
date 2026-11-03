@@ -46,6 +46,7 @@ Replace the fake global identity with Auth0 JWT validation and make every read/w
 - [x] User A requests user B's transaction id → 404; user A cannot debit B's account — EXECUTED (`OwnershipTest`)
 - [x] Statement totals contain only the caller's rows — EXECUTED (`OwnershipTest`)
 - [ ] One manual sign-in against the real Auth0 tenant succeeds — **NOT EXECUTED**: needs the Action + a test user (human) and the owner typing the password, which is not an agent action. Procedure: set `SEED_OWNER_SUB` to the user `sub`, run the API (`SPRING_PROFILES_ACTIVE=local`), obtain an access token for audience `https://api.financial-transaction.local` (Authorization Code + PKCE, SPA `Transaction-app`), pipe only the token into the skill `decode-token.mjs`, then `GET /api/v1/transactions?initial-date=...&final-date=...` with it → 200.
+  > ✅ 2026-11-03 — AUTOMATED part closed with the two real test users (`auth0|6ae9a7d2…42`, `auth0|6ae9a8f5…f0`): `TwoRealUsersScenarioTest` (5 tests, tokens from the mock issuer, customers created and removed by the test, seed subject restored) + local seed `SEED_SECOND_SUB` (second customer, account 3033). Verification: `mvn verify` → 107 run, 0 failures, 1 skipped (opt-in live probe), 65.6 % lines. The REAL sign-in (user types the password at Auth0) is still the owner manual round; Postman collection updated for it (PKCE login + a folder with the expected status of each case).
 
 ## Stop and ask
 - Auth0 setup (human)
