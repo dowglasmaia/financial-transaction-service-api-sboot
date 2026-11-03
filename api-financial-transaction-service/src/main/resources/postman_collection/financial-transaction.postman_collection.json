@@ -1,28 +1,233 @@
 {
 	"info": {
 		"_postman_id": "0e987e6c-c654-4e02-8374-4e15c5652688",
-		"name": "Desafio Exacta",
+		"name": "Financial Transaction API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "5139994"
+		"_exporter_id": "5139994",
+		"description": "Auth0 sign-in (Authorization Code + PKCE, public SPA client, NO client secret).\n1. Fill the collection variables (auth0Domain, clientId are public values).\n2. Add https://oauth.pstmn.io/v1/callback to the Allowed Callback URLs of the Auth0 application.\n3. Collection > Authorization > Get New Access Token, sign in as the test user.\n4. Run the requests. The 'Auth and ownership checks' folder carries tests with the expected status of each case.\nLocal stack: docker compose up (API on baseUrl). Link the demo customer with SEED_OWNER_SUB (and the optional second one with SEED_SECOND_SUB)."
 	},
 	"item": [
+		{
+			"name": "Auth and ownership checks",
+			"description": "Run signed in as the user linked to the demo customer (account 2022). Each request asserts its expected status.",
+			"item": [
+				{
+					"name": "No token -> 401",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('401 without a token', () => pm.response.to.have.status(401));",
+									"pm.test('standard error body', () => pm.expect(pm.response.json().code).to.eql('UNAUTHORIZED'));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions?initial-date=01/01/2000&final-date=31/12/2100",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions"
+							],
+							"query": [
+								{
+									"key": "initial-date",
+									"value": "01/01/2000"
+								},
+								{
+									"key": "final-date",
+									"value": "31/12/2100"
+								}
+							]
+						},
+						"auth": {
+							"type": "noauth"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Statement with a valid user token -> 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('200 for a linked customer', () => pm.response.to.have.status(200));",
+									"pm.test('only my rows and my balance', () => pm.expect(pm.response.json()).to.have.property('balance'));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions?initial-date=01/01/2000&final-date=31/12/2100",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions"
+							],
+							"query": [
+								{
+									"key": "initial-date",
+									"value": "01/01/2000"
+								},
+								{
+									"key": "final-date",
+									"value": "31/12/2100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unknown transaction id -> 404",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('404 for an unknown or foreign id', () => pm.response.to.have.status(404));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions/00000000-0000-0000-0000-000000000000",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"00000000-0000-0000-0000-000000000000"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Withdraw from ANOTHER customer's account -> 404",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('404, nothing is debited', () => pm.response.to.have.status(404));",
+									"pm.test('same message as an unknown account', () => pm.expect(pm.response.json().message).to.eql('Account not found.'));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 10.00,\n  \"agency\": \"0211\",\n  \"numberAccount\": \"{{secondAccount}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions/atm-withdrawal",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"atm-withdrawal"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Withdraw from MY account by number -> 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('204 on my own account', () => pm.response.to.have.status(204));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 10.00,\n  \"agency\": \"0211\",\n  \"numberAccount\": \"{{ownAccount}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions/atm-withdrawal",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"atm-withdrawal"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
 		{
 			"name": "maia-bank-receivers-pix",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8089/api/v1/transactions",
-					"protocol": "http",
+					"raw": "{{maiabankUrl}}/api/v1/transactions",
 					"host": [
-						"localhost"
+						"{{maiabankUrl}}"
 					],
-					"port": "8089",
 					"path": [
 						"api",
 						"v1",
 						"transactions"
 					]
+				},
+				"auth": {
+					"type": "noauth"
 				}
 			},
 			"response": []
@@ -42,12 +247,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8088/api/v1/transactions/send-pix",
-					"protocol": "http",
+					"raw": "{{baseUrl}}/api/v1/transactions/send-pix",
 					"host": [
-						"localhost"
+						"{{baseUrl}}"
 					],
-					"port": "8088",
 					"path": [
 						"api",
 						"v1",
@@ -73,12 +276,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8088/api/v1/transactions/deposit",
-					"protocol": "http",
+					"raw": "{{baseUrl}}/api/v1/transactions/deposit",
 					"host": [
-						"localhost"
+						"{{baseUrl}}"
 					],
-					"port": "8088",
 					"path": [
 						"api",
 						"v1",
@@ -104,12 +305,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8088/api/v1/transactions/recharge-mobile",
-					"protocol": "http",
+					"raw": "{{baseUrl}}/api/v1/transactions/recharge-mobile",
 					"host": [
-						"localhost"
+						"{{baseUrl}}"
 					],
-					"port": "8088",
 					"path": [
 						"api",
 						"v1",
@@ -135,12 +334,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8088/api/v1/transactions/atm-withdrawal",
-					"protocol": "http",
+					"raw": "{{baseUrl}}/api/v1/transactions/atm-withdrawal",
 					"host": [
-						"localhost"
+						"{{baseUrl}}"
 					],
-					"port": "8088",
 					"path": [
 						"api",
 						"v1",
@@ -166,12 +363,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8088/api/v1/transactions/atm-withdrawal",
-					"protocol": "http",
+					"raw": "{{baseUrl}}/api/v1/transactions/atm-withdrawal",
 					"host": [
-						"localhost"
+						"{{baseUrl}}"
 					],
-					"port": "8088",
 					"path": [
 						"api",
 						"v1",
@@ -188,12 +383,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8088/api/v1/transactions?initial-date=20/05/2024&final-date=27/05/2025",
-					"protocol": "http",
+					"raw": "{{baseUrl}}/api/v1/transactions?initial-date=20/05/2024&final-date=27/05/2025",
 					"host": [
-						"localhost"
+						"{{baseUrl}}"
 					],
-					"port": "8088",
 					"path": [
 						"api",
 						"v1",
@@ -219,12 +412,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8088/api/v1/transactions/4f93014d-174b-4725-b275-5f58d1ac6c45",
-					"protocol": "http",
+					"raw": "{{baseUrl}}/api/v1/transactions/4f93014d-174b-4725-b275-5f58d1ac6c45",
 					"host": [
-						"localhost"
+						"{{baseUrl}}"
 					],
-					"port": "8088",
 					"path": [
 						"api",
 						"v1",
@@ -235,5 +426,97 @@
 			},
 			"response": []
 		}
-	]
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8088",
+			"type": "string"
+		},
+		{
+			"key": "maiabankUrl",
+			"value": "http://localhost:8089",
+			"type": "string"
+		},
+		{
+			"key": "auth0Domain",
+			"value": "dev-twljocmfwpvlxx1q.eu.auth0.com",
+			"type": "string"
+		},
+		{
+			"key": "audience",
+			"value": "https://api.financial-transaction.local",
+			"type": "string"
+		},
+		{
+			"key": "clientId",
+			"value": "Sy50My7UVdXFjIX7VCwm35LLyzNosKUr",
+			"type": "string"
+		},
+		{
+			"key": "ownAccount",
+			"value": "2022",
+			"type": "string"
+		},
+		{
+			"key": "secondAccount",
+			"value": "3033",
+			"type": "string"
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "grant_type",
+				"value": "authorization_code_with_pkce",
+				"type": "string"
+			},
+			{
+				"key": "authUrl",
+				"value": "https://{{auth0Domain}}/authorize?audience={{audience}}",
+				"type": "string"
+			},
+			{
+				"key": "accessTokenUrl",
+				"value": "https://{{auth0Domain}}/oauth/token",
+				"type": "string"
+			},
+			{
+				"key": "clientId",
+				"value": "{{clientId}}",
+				"type": "string"
+			},
+			{
+				"key": "scope",
+				"value": "openid profile email offline_access",
+				"type": "string"
+			},
+			{
+				"key": "redirect_uri",
+				"value": "https://oauth.pstmn.io/v1/callback",
+				"type": "string"
+			},
+			{
+				"key": "challengeAlgorithm",
+				"value": "S256",
+				"type": "string"
+			},
+			{
+				"key": "client_authentication",
+				"value": "body",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			},
+			{
+				"key": "tokenName",
+				"value": "Auth0 user token",
+				"type": "string"
+			}
+		]
+	}
 }

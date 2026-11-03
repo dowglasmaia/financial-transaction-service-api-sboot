@@ -24,6 +24,10 @@ public class DBService {
     @Value("${app.seed.owner-subject:}")
     private String ownerSubject;
 
+    /** Optional token subject of a SECOND demo customer (SEED_SECOND_SUB), to try two real logins side by side. */
+    @Value("${app.seed.second-subject:}")
+    private String secondSubject;
+
     @Autowired
     public DBService(UserRepository userRepository,
                      AgencyRepository agencyRepository,
@@ -43,6 +47,27 @@ public class DBService {
         var account = accountRepository.findByNumber("2022")
               .orElseGet(() -> createAccount(agency, createUser()));
         linkOwner(account.getUser());
+
+        if (secondSubject != null && !secondSubject.isBlank()) {
+            accountRepository.findByNumber("3033").orElseGet(() -> createSecondAccount(agency));
+        }
+    }
+
+    private Account createSecondAccount(Agency agency){
+        User user = userRepository.save(User.builder()
+              .name("Second Demo User")
+              .CPF("52998224725")
+              .email("second.user@example.test")
+              .areaCode(11)
+              .phoneNumber(999997777)
+              .externalSubject(secondSubject)
+              .build());
+        return accountRepository.save(Account.builder()
+              .agency(agency)
+              .user(user)
+              .number("3033")
+              .balance(BigDecimal.valueOf(1000.0))
+              .build());
     }
 
     private void linkOwner(User user){
