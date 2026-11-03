@@ -161,6 +161,14 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- ARCH-01: architecture rules (Hexagonal Pragmatica) enforced in the build -->
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <version>1.3.0</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <dependencyManagement>
@@ -218,7 +226,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.24</version>
+                            <version>1.18.42</version>
                         </path>
                         <!-- This is needed when using Lombok 1.18.16 and above -->
                         <path>

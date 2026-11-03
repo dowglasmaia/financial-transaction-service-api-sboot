@@ -15,16 +15,17 @@ The ARCH-01 constraints stay: HTTP contract, messages, Flyway schema, Kafka topi
 
 ## Scope
 **Feature `transaction`** (the ledger and the money operations; the single generated `TransactionsApi` controller lives here):
-- `transaction.domain`: `Transaction` (ledger entry with its `PENDING → COMPLETED/FAILED` transitions as methods), `TransactionType`, `TransactionStatus`, ports `TransactionRepository`, `PixGateway`, `RechargeEventPublisher`; pure Java.
-- `transaction.application`: `TransactionService` (statement, detail, deposit, withdrawal), `RechargeService` (outbox collaborator), `PixService` (its own transaction model) — split decided by D4 in the mapping task (proposal; the agent confirms with line counts).
-- `transaction.infra.web`: `TransactionController implements TransactionsApi`, shape validation, `TransactionMapper` (kept as is if it is used), generated DTOs never leave this package.
-- `transaction.infra.persistence`: `TransactionEntity`, `TransactionJpaRepository`, adapter (statement queries keep their aggregates and ordering).
-- `transaction.infra.client`: `MaiaBankFeignClient` + `MaiaBankPixGatewayAdapter` (timeouts, circuit breaker, fallback behaviour unchanged).
-- `transaction.infra.messaging`: `OutboxEventEntity`, its Spring Data repository, `OutboxRelay`, Kafka producer/admin config, `OutboxRechargeEventPublisher` implementing the port.
+- `transaction.domain`: `Transaction` (ledger entry with its `PENDING → COMPLETED/FAILED` transitions as methods), `TransactionType`, `TransactionStatus`; pure Java, flat.
+- `transaction.application.port`: `TransactionRepository`, `PixGateway`, `RechargeEventPublisher` (interfaces only).
+- `transaction.application.usecase`: **one class per operation** (layout v2, D-50): `MakeDepositUseCase`, `MakeAtmWithdrawalUseCase`, `RequestMobileRechargeUseCase`, `MakePixTransferUseCase` (keeps its own reserve → external call → confirm/compensate model with `TransactionTemplate`), `GetStatementUseCase`, `GetTransactionByIdUseCase`, plus the internal `SaveTransactionUseCase`/`RecordTransactionUseCase`/`UpdateTransactionStatusUseCase` the money flows share — names and the final list confirmed in the mapping task.
+- `transaction.api`: `TransactionController implements TransactionsApi`, shape validation, `TransactionMapper` (kept as is if it is used), generated DTOs never leave this package.
+- `transaction.infrastructure.persistence`: `TransactionEntity`, `TransactionJpaRepository`, adapter (statement queries keep their aggregates and ordering).
+- `transaction.infrastructure.client`: `MaiaBankFeignClient` + `MaiaBankPixGatewayAdapter` (timeouts, circuit breaker, fallback behaviour unchanged).
+- `transaction.infrastructure.messaging`: `OutboxEventEntity`, its Spring Data repository, `OutboxRelay`, Kafka producer/admin config, `OutboxRechargeEventPublisher` implementing the port.
 - Rules that live in the domain: Pix key formats (CPF/e-mail/phone validators move to `transaction.domain`, **same classes and behaviour**, characterization test untouched), `amount > 0`, the statement date conversion (`DateConverter`) stays as is, only relocated.
 
 **Legacy cleanup:** delete `controllers`, `services`, `entity`, `repository`, `config` (what remains), `exeptions`, `utils` once empty; `exeptions.*` → `shared.error.*` (typo fix in its **own** commit); dead classes found unused (`TransactionRequestDTO`, `AccountModel`) are only moved/ignored here and removed by BE-08 (decide in the mapping).
-**Cross-feature relations:** `Transaction ↔ Agency/Account` become plain id columns in `TransactionEntity` (the DB foreign key stays); anything that needs the related object goes through `account.application.AccountService` (D6). Owner approves this in task 1.
+**Cross-feature relations:** `Transaction ↔ Agency/Account` become plain id columns in `TransactionEntity` (the DB foreign key stays); anything that needs the related object goes through the `account.application.usecase` classes (D6). Owner approves this in task 1.
 
 **Out of scope:** new endpoints, contract changes, the `Idempotency-Key` (SL-03), removal of dead code (BE-08), Boot/Java upgrades (BE-07).
 
@@ -32,10 +33,10 @@ The ARCH-01 constraints stay: HTTP contract, messages, Flyway schema, Kafka topi
 - [ ] Baseline (after ARCH-01 is merged): `./mvnw -B verify` green, count recorded
 - [ ] Confirm the mapping for the transaction side (services split by D4, cross-feature relations, exception names, dead classes); owner approves (HUMAN gate)
 - [ ] Domain tests first for the rules found in the services (red) → `transaction.domain`: `Transaction` transitions, pure validators/value rules
-- [ ] `transaction.infra.persistence` + adapter; statement/aggregate/detail queries unchanged; adapter tests
-- [ ] `transaction.application`: services moved/merged, interfaces and `*Impl` removed, `@Transactional` boundaries identical; `MoneyConcurrencyTest`, `FailureInjectionTest`, `PixMaiaBankResilienceTest` green and unchanged
-- [ ] `transaction.infra.client` (MaiaBank) and `transaction.infra.messaging` (outbox/relay/Kafka) behind their ports; `OutboxRelayTest` and the recharge payload test green and unchanged
-- [ ] `transaction.infra.web`: controller + mapper moved; the four characterization suites and `TransactionControllerTest` green
+- [ ] `transaction.infrastructure.persistence` + adapter; statement/aggregate/detail queries unchanged; adapter tests
+- [ ] `transaction.application.usecase`: each service operation becomes a `<Verb><Noun>UseCase`, interfaces and `*Impl` removed, `@Transactional` boundaries identical; `MoneyConcurrencyTest`, `FailureInjectionTest`, `PixMaiaBankResilienceTest` green and unchanged
+- [ ] `transaction.infrastructure.client` (MaiaBank) and `transaction.infrastructure.messaging` (outbox/relay/Kafka) behind their ports; `OutboxRelayTest` and the recharge payload test green and unchanged
+- [ ] `transaction.api`: controller + mapper moved; the four characterization suites and `TransactionControllerTest` green
 - [ ] Exceptions → `shared.error` (own commit), tests follow
 - [ ] Delete the empty legacy packages; set `LEGACY_PACKAGES` to empty; checker without `--legacy` and with `--strict` → 0 violations
 - [ ] Docs: rewrite the *Code map* and *As built* sections of `memory/contexto-tecnico.md`; update README/`como-executar` run commands if any changed; note what BE-08 still owns

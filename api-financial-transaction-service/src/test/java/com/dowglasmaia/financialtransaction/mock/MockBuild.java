@@ -1,8 +1,8 @@
 package com.dowglasmaia.financialtransaction.mock;
 
-import com.dowglasmaia.financialtransaction.entity.Account;
-import com.dowglasmaia.financialtransaction.entity.Agency;
-import com.dowglasmaia.financialtransaction.entity.User;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountEntity;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AgencyEntity;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.UserEntity;
 import com.dowglasmaia.provider.model.PixRequestDTO;
 import com.dowglasmaia.provider.model.TransactionResponseDTO;
 import com.dowglasmaia.provider.model.WithdrawRequestDTO;
@@ -31,8 +31,8 @@ public class MockBuild {
         return response;
     }
 
-    public static Account userAccountBuild(){
-        return Account.builder()
+    public static AccountEntity userAccountBuild(){
+        return AccountEntity.builder()
               .user(userBuild())
               .balance(BigDecimal.valueOf(500))
               .number("")
@@ -42,15 +42,15 @@ public class MockBuild {
 
     }
 
-    public static Agency agencyBuild(){
-        return Agency.builder()
+    public static AgencyEntity agencyBuild(){
+        return AgencyEntity.builder()
               .id(String.valueOf(UUID.randomUUID()))
               .number("0220")
               .build();
     }
 
-    public static User userBuild(){
-        return User.builder()
+    public static UserEntity userBuild(){
+        return UserEntity.builder()
               .name("Dowglas")
               .CPF("09413184003")
               .build();

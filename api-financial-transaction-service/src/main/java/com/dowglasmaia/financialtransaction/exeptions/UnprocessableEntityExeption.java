@@ -11,6 +11,11 @@ public class UnprocessableEntityExeption extends RuntimeException{
     protected String message;
     protected HttpStatus httpStatus;
 
+    /** The status is what the handler answers for this exception ({@link HttpStatus#UNPROCESSABLE_ENTITY}); callers need not import it. */
+    public UnprocessableEntityExeption(String message) {
+        this(message, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
     public UnprocessableEntityExeption(String message, HttpStatus httpStatus) {
         super(message);
         this.message =  message;

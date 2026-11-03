@@ -1,6 +1,6 @@
 package com.dowglasmaia.financialtransaction.characterization;
 
-import com.dowglasmaia.financialtransaction.entity.Account;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.entity.Transaction;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
@@ -63,7 +63,7 @@ class StatementCharacterizationTest extends AbstractIntegrationTest {
 
     @Test
     void statementExcludesOtherAccountsTransactions() throws Exception { // F-04 / BR-51 fixed by BE-04
-        Account other = createOtherAccount("9999", new BigDecimal("10.00"));
+        AccountEntity other = createOtherAccount("9999", new BigDecimal("10.00"));
         ledger(TransactionTypeEnum.DEPOSIT, new BigDecimal("77.00"), other.getId(), at(11, 12));
 
         JsonNode body = bodyOf(get("?initial-date=10/03/2026&final-date=11/03/2026").andExpect(status().isOk()));
@@ -88,7 +88,7 @@ class StatementCharacterizationTest extends AbstractIntegrationTest {
 
     @Test
     void transactionByIdOfAnotherAccountIsNotFound() throws Exception { // F-04 fixed by BE-04
-        Account other = createOtherAccount("9999", new BigDecimal("10.00"));
+        AccountEntity other = createOtherAccount("9999", new BigDecimal("10.00"));
         Transaction foreign = ledger(TransactionTypeEnum.DEPOSIT, new BigDecimal("9.00"), other.getId(), at(11, 12));
         get("/" + foreign.getId()).andExpect(status().isNotFound())
               .andExpect(jsonPath("$.message").value("Transaction not found"));

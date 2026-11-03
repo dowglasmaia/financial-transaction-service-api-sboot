@@ -1,6 +1,6 @@
 package com.dowglasmaia.financialtransaction.characterization;
 
-import com.dowglasmaia.financialtransaction.entity.Account;
+import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.entity.Transaction;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;

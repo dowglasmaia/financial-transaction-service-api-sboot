@@ -1,15 +1,15 @@
 package com.dowglasmaia.financialtransaction.services.impl;
 
-import com.dowglasmaia.financialtransaction.entity.Account;
+import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAccountUseCase;
+import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAgencyUseCase;
+import com.dowglasmaia.financialtransaction.account.application.usecase.DebitAccountUseCase;
+import com.dowglasmaia.financialtransaction.account.application.usecase.CreditAccountUseCase;
+import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.entity.TransactionStatusEnum;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import com.dowglasmaia.financialtransaction.exeptions.UnprocessableEntityExeption;
-import com.dowglasmaia.financialtransaction.repository.AccountRepository;
 import com.dowglasmaia.financialtransaction.services.PixService;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
-import com.dowglasmaia.financialtransaction.services.client.account.AddAmountService;
-import com.dowglasmaia.financialtransaction.services.client.account.FindAccountByNumberAndUserIdService;
-import com.dowglasmaia.financialtransaction.services.client.agency.AgencyService;
 import com.dowglasmaia.financialtransaction.services.client.maiaBank.MaiaBankClient;
 import com.dowglasmaia.financialtransaction.utils.CPFValidator;
 import com.dowglasmaia.financialtransaction.utils.EmailValidator;
@@ -37,28 +37,28 @@ import java.math.BigDecimal;
 public class PixServiceImpl implements PixService {
 
     private final MaiaBankClient maiaBankClient;
-    private final FindAccountByNumberAndUserIdService findAccountByNumberAndUserIdService;
+    private final GetCurrentAccountUseCase getCurrentAccount;
+    private final GetCurrentAgencyUseCase getCurrentAgency;
+    private final DebitAccountUseCase debitAccount;
+    private final CreditAccountUseCase creditAccount;
     private final TransactionService transactionService;
-    private final AccountRepository accountRepository;
-    private final AddAmountService addAmountService;
-    private final AgencyService agencyService;
     private final TransactionTemplate transactionTemplate;
 
     @Autowired
     public PixServiceImpl(MaiaBankClient maiaBankClient,
-                          FindAccountByNumberAndUserIdService findAccountByNumberAndUserIdService,
+                          GetCurrentAccountUseCase getCurrentAccount,
+                          GetCurrentAgencyUseCase getCurrentAgency,
+                          DebitAccountUseCase debitAccount,
+                          CreditAccountUseCase creditAccount,
                           TransactionService transactionService,
-                          AccountRepository accountRepository,
-                          AddAmountService addAmountService,
-                          AgencyService agencyService,
                           TransactionTemplate transactionTemplate
     ){
         this.maiaBankClient = maiaBankClient;
-        this.findAccountByNumberAndUserIdService = findAccountByNumberAndUserIdService;
+        this.getCurrentAccount = getCurrentAccount;
+        this.getCurrentAgency = getCurrentAgency;
+        this.debitAccount = debitAccount;
+        this.creditAccount = creditAccount;
         this.transactionService = transactionService;
-        this.accountRepository = accountRepository;
-        this.addAmountService = addAmountService;
-        this.agencyService = agencyService;
         this.transactionTemplate = transactionTemplate;
     }
 
@@ -73,8 +73,8 @@ public class PixServiceImpl implements PixService {
             throw new UnprocessableEntityExeption(errorMessage, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
-        Account account = findAccountByNumberAndUserIdService.findByNumberAndUserId();
-        String agencyId = agencyService.getCurrentAgency();
+        Account account = getCurrentAccount.execute();
+        String agencyId = getCurrentAgency.execute();
         BigDecimal amount = request.getTransactionAmount();
 
         String ledgerId = reserve(account, agencyId, amount);
@@ -95,7 +95,7 @@ public class PixServiceImpl implements PixService {
     /** Tx 1: atomic debit (balance >= amount) + PENDING ledger row. A rejected debit rolls everything back (422). */
     private String reserve(Account account, String agencyId, BigDecimal amount){
         return transactionTemplate.execute(status -> {
-            addAmountService.debitById(account.getId(), amount);
+            debitAccount.execute(account.getId(), amount);
             return transactionService.record(TransactionTypeEnum.PIX, account.getId(), amount, agencyId, TransactionStatusEnum.PENDING);
         });
     }
@@ -113,7 +113,7 @@ public class PixServiceImpl implements PixService {
     private void compensate(String ledgerId, String accountId, BigDecimal amount){
         try {
             transactionTemplate.executeWithoutResult(status -> {
-                accountRepository.credit(accountId, amount);
+                creditAccount.execute(accountId, amount);
                 transactionService.updateStatus(ledgerId, TransactionStatusEnum.FAILED);
             });
         } catch (RuntimeException e) {

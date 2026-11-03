@@ -1,12 +1,12 @@
 package com.dowglasmaia.financialtransaction.services.impl;
 
+import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAgencyUseCase;
+import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAccountUseCase;
+import com.dowglasmaia.financialtransaction.account.application.usecase.DebitAccountUseCase;
 import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
 import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
 import com.dowglasmaia.financialtransaction.services.AtmWithdrawalService;
 import com.dowglasmaia.financialtransaction.services.TransactionService;
-import com.dowglasmaia.financialtransaction.services.client.account.AddAmountService;
-import com.dowglasmaia.financialtransaction.services.client.account.FindAccountByNumberAndUserIdService;
-import com.dowglasmaia.financialtransaction.services.client.agency.AgencyService;
 import com.dowglasmaia.provider.model.WithdrawRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,21 +20,21 @@ import java.util.Objects;
 @Service
 public class AtmWithdrawalServiceImpl implements AtmWithdrawalService {
 
-    private final AgencyService agencyService;
-    private final AddAmountService addAmountService;
+    private final GetCurrentAgencyUseCase getCurrentAgency;
+    private final GetCurrentAccountUseCase getCurrentAccount;
+    private final DebitAccountUseCase debitAccount;
     private final TransactionService transactionService;
-    private final FindAccountByNumberAndUserIdService findAccountByNumberAndUserIdService;
 
     @Autowired
-    public AtmWithdrawalServiceImpl(AgencyService agencyService,
-                                    AddAmountService addAmountService,
-                                    TransactionService transactionService,
-                                    FindAccountByNumberAndUserIdService findAccountByNumberAndUserIdService
+    public AtmWithdrawalServiceImpl(GetCurrentAgencyUseCase getCurrentAgency,
+                                    GetCurrentAccountUseCase getCurrentAccount,
+                                    DebitAccountUseCase debitAccount,
+                                    TransactionService transactionService
     ){
-        this.agencyService = agencyService;
-        this.addAmountService = addAmountService;
+        this.getCurrentAgency = getCurrentAgency;
+        this.getCurrentAccount = getCurrentAccount;
+        this.debitAccount = debitAccount;
         this.transactionService = transactionService;
-        this.findAccountByNumberAndUserIdService = findAccountByNumberAndUserIdService;
     }
 
     /**
@@ -47,22 +47,22 @@ public class AtmWithdrawalServiceImpl implements AtmWithdrawalService {
     public void makeAtmWithdrawal(WithdrawRequestDTO withdrawRequest){
         log.info("Start makeAtmWithdrawal");
 
-        String agencyId = agencyService.getCurrentAgency();
+        String agencyId = getCurrentAgency.execute();
         log.info("AtmWithdrawal at agency: {}", agencyId);
 
-        var account = findAccountByNumberAndUserIdService.findByNumberAndUserId();
+        var account = getCurrentAccount.execute();
 
         if (isCardBasedWithdrawal(withdrawRequest)) {
             log.info("AtmWithdrawal base card");
 
-            addAmountService.debitById(account.getId(), withdrawRequest.getAmount());
+            debitAccount.execute(account.getId(), withdrawRequest.getAmount());
         } else {
             log.info("AtmWithdrawal not based card");
 
             if (!Objects.equals(withdrawRequest.getNumberAccount(), account.getNumber())) {
                 throw new ObjectNotFoundExeption("Account not found.", HttpStatus.NOT_FOUND);
             }
-            addAmountService.debitById(account.getId(), withdrawRequest.getAmount());
+            debitAccount.execute(account.getId(), withdrawRequest.getAmount());
         }
 
         transactionService.save(TransactionTypeEnum.WITHDRAW, account.getId(), withdrawRequest.getAmount(), agencyId);
