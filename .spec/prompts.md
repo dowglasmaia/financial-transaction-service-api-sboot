@@ -2,7 +2,8 @@
 
 Use **one fresh agent session per spec or slice** (open the PR of the previous one and merge it BEFORE starting the next), opened at the repo root. Before pasting: the spec status is *Approved* in `specs/README.md` and the *Human action before* is done. The agent must not close a spec unless its **Minimal validation** passes. After ALL specs are Done, run **FINAL-01** (final test round).
 
-Order: `MONO-01 → BE-01 → BE-02 → BE-03 → BE-04 → (FE-01, FE-02 done) → SL-00 → SL-01 → SL-02 → SL-03 → SL-04 → SL-05 → SL-06 → BE-07 → (FE-05 ∥ BE-08) → FINAL-01`.
+Order: `MONO-01 → BE-01 → BE-02 → BE-03 → BE-04 → (FE-01, FE-02 done) → (SL-00 ∥ ARCH-01) → ARCH-02 → SL-01 → SL-02 → SL-03 → SL-04 → SL-05 → SL-06 → BE-07 → (FE-05 ∥ BE-08) → FINAL-01`.
+**`ARCH-01`/`ARCH-02` migrate the backend to the "Hexagonal Pragmática" model (D-39) with FROZEN behaviour, before the first backend slice; `ARCH-01` may run in parallel with `SL-00` (frontend only).**
 **Slices (`SL-xx`) carry backend + frontend + e2e on ONE branch and are strictly sequential** (D-31). `BE-05`, `BE-06`, `FE-03`, `FE-04` and `FE-01` no longer have prompts: they were superseded (see `specs/README.md`).
 
 ## MONO-01 — mono-01-monorepo
@@ -99,6 +100,46 @@ Minimal validation (you may NOT mark the spec Done until all pass; paste the rea
 Finish: fill the spec's Result section, set its status in .spec/specs/README.md, commit on the spec branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
 ```
 
+## ARCH-01 - arch-01-hexagonal-pilot
+
+**Human action before:** Approve the spec. Be ready to approve (a) the class mapping table for the whole backend and (b) the security split (`CallerIdentity` port + `shared.security` receiving the authorization bean from the `account` feature). The skill `java-spring-create-module` must be the updated version.
+
+```text
+Execute SPEC-ARCH-01 (.spec/specs/arch-01-hexagonal-pilot.md) - a BACKEND-ONLY architecture migration with FROZEN behaviour (D-39, D-41).
+Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (decisions D-39..D-43), then the skill ~/.claude/skills/java-spring-create-module/SKILL.md with references/architecture.md, references/decision-guide.md and references/migration.md. Follow the skill in mode `migrate` (its scripts: scaffold-module.mjs, check-architecture.mjs).
+Process: follow .spec/spec-execution-flow.md section 1 and the ARCH-01 runbook in section 4. Tests first (domain tests red before the domain class exists), one commit per task (`ARCH-01: <task>`), `git mv` for every move, NEVER mix a move with a behaviour change, tick a task only with an evidence line (.spec/shared/como-executar.md).
+Behaviour is frozen: same HTTP statuses/JSON/messages, same OpenAPI file, same Flyway schema, same Kafka topic and payload bytes, test count not lower and no test deleted. Present the mapping table and the security split and STOP for approval before moving any code. Migrate only the `account` feature, foundation and shared kit here; the `transaction` side is ARCH-02. The atomic conditional debit stays one atomic SQL update behind a port method.
+Git: FIRST run `git checkout main && git pull origin main`, then create the branch `spec/arch-01-hexagonal-pilot` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually. Never commit or push to main.
+Stay strictly in the spec scope; stop and ask at its 'Stop and ask' items.
+Minimal validation (you may NOT mark the spec Done until all pass; paste the real outputs in the PR):
+  - `./mvnw -B verify` green; state the test count versus the baseline
+  - `node ~/.claude/skills/java-spring-create-module/scripts/check-architecture.mjs --src api-financial-transaction-service/src/main/java --base-package com.dowglasmaia.financialtransaction --legacy controllers,services,entity,repository,config,exeptions,utils` -> 0 violations
+  - `git diff main -- api-financial-transaction-service/src/main/resources` is empty; Kafka payload and the ownership/auth matrix tests are green and unchanged
+  - `docker compose up` starts and `/actuator/health` is UP; one authenticated call returns the same status as before (state what was run)
+  - `api-ci` green on the PR
+Finish: fill the spec's Result section, set its status in .spec/specs/README.md, sync .spec/memory (code map), commit on the spec branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
+```
+
+## ARCH-02 - arch-02-hexagonal-transaction
+
+**Human action before:** ARCH-01 is merged. Be ready to approve the transaction-side mapping (service split by D4, cross-feature relations as plain id columns, exception class names, dead classes).
+
+```text
+Execute SPEC-ARCH-02 (.spec/specs/arch-02-hexagonal-transaction.md) - a BACKEND-ONLY architecture migration with FROZEN behaviour (D-39, D-41).
+Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (decisions D-39..D-43), then the skill ~/.claude/skills/java-spring-create-module/SKILL.md with references/architecture.md, references/decision-guide.md and references/migration.md. Follow the skill in mode `migrate` (its scripts: scaffold-module.mjs, check-architecture.mjs).
+Process: follow .spec/spec-execution-flow.md section 1 and the ARCH-02 runbook in section 4. Tests first (domain tests red before the domain class exists), one commit per task (`ARCH-02: <task>`), `git mv` for every move, NEVER mix a move with a behaviour change, tick a task only with an evidence line (.spec/shared/como-executar.md).
+Behaviour is frozen: same HTTP statuses/JSON/messages, same OpenAPI file, same Flyway schema, same Kafka topic and payload bytes, test count not lower and no test deleted. Money rules do not change: the atomic debit stays one atomic update, Pix keeps reserve -> commit -> MaiaBank -> confirm/compensate with the remote call OUTSIDE any database transaction, recharge keeps debit + ledger + outbox in one transaction and the relay publishes identical bytes. Typo fixes of the `exeptions` classes go in their own commit.
+Git: FIRST run `git checkout main && git pull origin main`, then create the branch `spec/arch-02-hexagonal-transaction` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually. Never commit or push to main.
+Stay strictly in the spec scope; stop and ask at its 'Stop and ask' items.
+Minimal validation (you may NOT mark the spec Done until all pass; paste the real outputs in the PR):
+  - `./mvnw -B verify` green; state the test count versus the baseline
+  - `node ~/.claude/skills/java-spring-create-module/scripts/check-architecture.mjs --src api-financial-transaction-service/src/main/java --base-package com.dowglasmaia.financialtransaction --strict` -> 0 violations; `ArchitectureTest` green with an empty legacy list
+  - Kafka payload, concurrency and failure-injection tests are green and unchanged; `git diff main -- api-financial-transaction-service/src/main/resources` is empty
+  - Compose smoke reported as executed or not: health UP, one authenticated read, one write, the recharge event visible in Kafdrop
+  - `api-ci` green on the PR
+Finish: fill the spec's Result section, set its status in .spec/specs/README.md, sync .spec/memory (code map), commit on the spec branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
+```
+
 ## SL-00 - sl-00-visual-v2
 
 **Human action before:** (Optional) export screenshots of every v2 screen/state into `prototype/screens-v2/` if the HTML does not render locally. Be ready to give a written sign-off of the look at the end.
@@ -129,6 +170,7 @@ Execute SPEC-SL-01 (.spec/specs/sl-01-login-and-account.md) - a VERTICAL SLICE: 
 Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (including decisions D-31..D-38 and 'Frontend: prototype and agent autonomy'), the slice loop in .spec/spec-execution-flow.md section 1b, and open the CURRENT visual reference prototype/Maia Bank UI prototype/Maia Bank v2.dc.html (the v1 file is history). UI copy is English and the brand is Maia Bank (D-33).
 Process: follow .spec/spec-execution-flow.md section 1b in order (contract first -> backend red/green -> API types -> frontend red/green -> e2e -> browser proof). Tests first (show them failing before the fix), one commit per task (`SL-01: <task>`), tick a task only with an evidence line (.spec/shared/como-executar.md).
 Verify `@auth0/auth0-angular` against Angular 21 zoneless before using it (stop and ask if incompatible or if tokens must leave memory). New devDependencies (Playwright, type generator) and the mock-IdP image are 'Stop and ask'. Tokens never go to URLs, console or logs.
+Backend structure (D-39): create or change backend code with the skill ~/.claude/skills/java-spring-create-module (mode `create`; feature placement domain/application/infra, one service per feature, ports only for outputs). Keep `ArchitectureTest` green and run its check-architecture.mjs --strict before closing. ARCH-02 must be merged.
 Git: FIRST run `git checkout main && git pull origin main`, then create the branch `slice/01-login-and-account` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually. Never commit or push to main.
 Stay strictly in the slice scope; stop and ask at its 'Stop and ask' items. A contract change needs the openapi-rest-contract preview and explicit approval BEFORE anything is generated or coded.
 Local stack: `docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api` (Postgres on localhost:5433), API on 8088 with profile local, app on 4200. You never type a password: automated e2e uses the mock IdP; the real Auth0 login is a manual step for the owner.
@@ -151,6 +193,7 @@ Execute SPEC-SL-02 (.spec/specs/sl-02-statement-and-detail.md) - a VERTICAL SLIC
 Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (including decisions D-31..D-38 and 'Frontend: prototype and agent autonomy'), the slice loop in .spec/spec-execution-flow.md section 1b, and open the CURRENT visual reference prototype/Maia Bank UI prototype/Maia Bank v2.dc.html (the v1 file is history). UI copy is English and the brand is Maia Bank (D-33).
 Process: follow .spec/spec-execution-flow.md section 1b in order (contract first -> backend red/green -> API types -> frontend red/green -> e2e -> browser proof). Tests first (show them failing before the fix), one commit per task (`SL-02: <task>`), tick a task only with an evidence line (.spec/shared/como-executar.md).
 Preview ALL contract changes (every operation) with the openapi-rest-contract skill and wait for approval. Migrate to openapi-generator (jakarta) keeping generated package names; record whether bean validation is now enforced. Keep every existing message and the 204/404/422 contract. Totals come from the backend; the UI never computes a balance.
+Backend structure (D-39): create or change backend code with the skill ~/.claude/skills/java-spring-create-module (mode `create`; feature placement domain/application/infra, one service per feature, ports only for outputs). Keep `ArchitectureTest` green and run its check-architecture.mjs --strict before closing. ARCH-02 must be merged.
 Git: FIRST run `git checkout main && git pull origin main`, then create the branch `slice/02-statement-and-detail` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually. Never commit or push to main.
 Stay strictly in the slice scope; stop and ask at its 'Stop and ask' items. A contract change needs the openapi-rest-contract preview and explicit approval BEFORE anything is generated or coded.
 Local stack: `docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api` (Postgres on localhost:5433), API on 8088 with profile local, app on 4200. You never type a password: automated e2e uses the mock IdP; the real Auth0 login is a manual step for the owner.
@@ -172,6 +215,7 @@ Execute SPEC-SL-03 (.spec/specs/sl-03-withdrawal.md) - a VERTICAL SLICE: backend
 Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (including decisions D-31..D-38 and 'Frontend: prototype and agent autonomy'), the slice loop in .spec/spec-execution-flow.md section 1b, and open the CURRENT visual reference prototype/Maia Bank UI prototype/Maia Bank v2.dc.html (the v1 file is history). UI copy is English and the brand is Maia Bank (D-33).
 Process: follow .spec/spec-execution-flow.md section 1b in order (contract first -> backend red/green -> API types -> frontend red/green -> e2e -> browser proof). Tests first (show them failing before the fix), one commit per task (`SL-03: <task>`), tick a task only with an evidence line (.spec/shared/como-executar.md).
 Write the replay/concurrency tests FIRST and show them failing. The result panel (success / business failure / uncertain) and the operation shell (one in-flight request, no automatic POST retry) are shared by SL-04..06: build them reusable. Withdrawal body is `{amount}` only.
+Backend structure (D-39): create or change backend code with the skill ~/.claude/skills/java-spring-create-module (mode `create`; feature placement domain/application/infra, one service per feature, ports only for outputs). Keep `ArchitectureTest` green and run its check-architecture.mjs --strict before closing. ARCH-02 must be merged.
 Git: FIRST run `git checkout main && git pull origin main`, then create the branch `slice/03-withdrawal` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually. Never commit or push to main.
 Stay strictly in the slice scope; stop and ask at its 'Stop and ask' items. A contract change needs the openapi-rest-contract preview and explicit approval BEFORE anything is generated or coded.
 Local stack: `docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api` (Postgres on localhost:5433), API on 8088 with profile local, app on 4200. You never type a password: automated e2e uses the mock IdP; the real Auth0 login is a manual step for the owner.
@@ -193,6 +237,7 @@ Execute SPEC-SL-04 (.spec/specs/sl-04-deposit.md) - a VERTICAL SLICE: backend + 
 Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (including decisions D-31..D-38 and 'Frontend: prototype and agent autonomy'), the slice loop in .spec/spec-execution-flow.md section 1b, and open the CURRENT visual reference prototype/Maia Bank UI prototype/Maia Bank v2.dc.html (the v1 file is history). UI copy is English and the brand is Maia Bank (D-33).
 Process: follow .spec/spec-execution-flow.md section 1b in order (contract first -> backend red/green -> API types -> frontend red/green -> e2e -> browser proof). Tests first (show them failing before the fix), one commit per task (`SL-04: <task>`), tick a task only with an evidence line (.spec/shared/como-executar.md).
 No server-side boleto, no new endpoint. Label every boleto surface as demo. Third-party deposits stay allowed in the API but are not offered in the UI.
+Backend structure (D-39): create or change backend code with the skill ~/.claude/skills/java-spring-create-module (mode `create`; feature placement domain/application/infra, one service per feature, ports only for outputs). Keep `ArchitectureTest` green and run its check-architecture.mjs --strict before closing. ARCH-02 must be merged.
 Git: FIRST run `git checkout main && git pull origin main`, then create the branch `slice/04-deposit` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually. Never commit or push to main.
 Stay strictly in the slice scope; stop and ask at its 'Stop and ask' items. A contract change needs the openapi-rest-contract preview and explicit approval BEFORE anything is generated or coded.
 Local stack: `docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api` (Postgres on localhost:5433), API on 8088 with profile local, app on 4200. You never type a password: automated e2e uses the mock IdP; the real Auth0 login is a manual step for the owner.
@@ -213,6 +258,7 @@ Execute SPEC-SL-05 (.spec/specs/sl-05-recharge.md) - a VERTICAL SLICE: backend +
 Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (including decisions D-31..D-38 and 'Frontend: prototype and agent autonomy'), the slice loop in .spec/spec-execution-flow.md section 1b, and open the CURRENT visual reference prototype/Maia Bank UI prototype/Maia Bank v2.dc.html (the v1 file is history). UI copy is English and the brand is Maia Bank (D-33).
 Process: follow .spec/spec-execution-flow.md section 1b in order (contract first -> backend red/green -> API types -> frontend red/green -> e2e -> browser proof). Tests first (show them failing before the fix), one commit per task (`SL-05: <task>`), tick a task only with an evidence line (.spec/shared/como-executar.md).
 Keep the Kafka topic `recharge-mobile-topic` and payload byte-identical to the BE-01/BE-03 characterization. Success copy says the recharge was 'requested', never 'completed'.
+Backend structure (D-39): create or change backend code with the skill ~/.claude/skills/java-spring-create-module (mode `create`; feature placement domain/application/infra, one service per feature, ports only for outputs). Keep `ArchitectureTest` green and run its check-architecture.mjs --strict before closing. ARCH-02 must be merged.
 Git: FIRST run `git checkout main && git pull origin main`, then create the branch `slice/05-recharge` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually. Never commit or push to main.
 Stay strictly in the slice scope; stop and ask at its 'Stop and ask' items. A contract change needs the openapi-rest-contract preview and explicit approval BEFORE anything is generated or coded.
 Local stack: `docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api` (Postgres on localhost:5433), API on 8088 with profile local, app on 4200. You never type a password: automated e2e uses the mock IdP; the real Auth0 login is a manual step for the owner.
@@ -233,6 +279,7 @@ Execute SPEC-SL-06 (.spec/specs/sl-06-pix.md) - a VERTICAL SLICE: backend + fron
 Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md (including decisions D-31..D-38 and 'Frontend: prototype and agent autonomy'), the slice loop in .spec/spec-execution-flow.md section 1b, and open the CURRENT visual reference prototype/Maia Bank UI prototype/Maia Bank v2.dc.html (the v1 file is history). UI copy is English and the brand is Maia Bank (D-33).
 Process: follow .spec/spec-execution-flow.md section 1b in order (contract first -> backend red/green -> API types -> frontend red/green -> e2e -> browser proof). Tests first (show them failing before the fix), one commit per task (`SL-06: <task>`), tick a task only with an evidence line (.spec/shared/como-executar.md).
 Do not credit a local Pix recipient. Keep reserve -> MaiaBank -> confirm/compensate and the Feign timeouts/circuit breaker as built in BE-03. Client validators must agree with the server on the shared CPF/e-mail/phone cases; never log or show a full Pix key.
+Backend structure (D-39): create or change backend code with the skill ~/.claude/skills/java-spring-create-module (mode `create`; feature placement domain/application/infra, one service per feature, ports only for outputs). Keep `ArchitectureTest` green and run its check-architecture.mjs --strict before closing. ARCH-02 must be merged.
 Git: FIRST run `git checkout main && git pull origin main`, then create the branch `slice/06-pix` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually. Never commit or push to main.
 Stay strictly in the slice scope; stop and ask at its 'Stop and ask' items. A contract change needs the openapi-rest-contract preview and explicit approval BEFORE anything is generated or coded.
 Local stack: `docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api` (Postgres on localhost:5433), API on 8088 with profile local, app on 4200. You never type a password: automated e2e uses the mock IdP; the real Auth0 login is a manual step for the owner.
@@ -271,13 +318,13 @@ Finish: fill the spec's Result section, set its status in .spec/specs/README.md,
 Execute SPEC-BE-08 (.spec/specs/be-08-cleanup-hardening.md).
 Read first: .spec/memory/produto.md and .spec/memory/contexto-tecnico.md.
 Process: follow .spec/spec-execution-flow.md section 1 (the loop) and the runbook for this spec in section 4. Tests first, one commit per task, tick a task only with an evidence line (.spec/shared/como-executar.md).
-Do not move or rename any package or class.
+Do not move features between packages or change the architecture (it is frozen by ARCH-01/02 and `ArchitectureTest`); work inside the existing feature modules.
 Git: FIRST run `git checkout main && git pull origin main`, then create the branch `spec/be-08-cleanup-hardening` from main (if main lacks a dependency spec, stop and ask). Commit when the spec's minimal validation passes (one commit per task while working). Then push the branch (`git push -u origin <branch>`). Do NOT open the PR and do NOT merge: the owner opens PRs and merges manually.
 Stay strictly in the spec scope; stop and ask at its 'Stop and ask' items.
 Minimal validation (you may NOT mark the spec Done until all pass; paste the real outputs in the PR):
-  - `git diff --name-status` shows no renames/moves under `api-financial-transaction-service/src`
+  - `check-architecture.mjs --strict` reports 0 violations and `ArchitectureTest` is green (no new violations)
   - Log output of a full flow contains no account number, Pix key or CPF
-  - ArchUnit tests and CI scans pass
+  - CI scans pass
 Finish: fill the spec's Result section, set its status in .spec/specs/README.md, commit on the spec branch and push it (no PR, no merge), and report which validations were actually executed vs only written.
 ```
 
@@ -337,7 +384,7 @@ Finish: fill the spec's Result section, set its status in .spec/specs/README.md,
 
 ## Rules for every prompt
 - **Git:** always `git checkout main && git pull origin main` before creating the branch (`spec/<id>-<slug>` or `slice/<nn>-<slug>`); commit after the minimal validation passes, then push the branch; never open PRs or merge (the owner does it manually); never commit or push to `main`. If the dependency specs are not merged into main yet, stop and ask.
-- Fresh session per spec or slice; never combine two in one session. **A slice never leaves the other side for later:** if a field, status or message is needed by the frontend, the backend change is in the same slice (and the contract was previewed first).
+- Fresh session per spec or slice; never combine two in one session. **Backend code is created/changed with the skill `java-spring-create-module` (D-39); a package move never shares a commit with a behaviour change.** **A slice never leaves the other side for later:** if a field, status or message is needed by the frontend, the backend change is in the same slice (and the contract was previewed first).
 - If a validation cannot be run (e.g. no Docker or no Auth0 tenant), the agent reports it as **not executed** and the spec stays open. The agent never types a password.
 - If the agent proposes a change outside the spec, it writes a proposal and stops (backend contract wins over the prototype).
 - Language: docs and code in English, chat answers in Portuguese; UI copy English; brand Maia Bank (D-33).

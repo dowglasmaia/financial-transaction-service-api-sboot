@@ -13,9 +13,9 @@ SDD: nothing is implemented without an approved spec. A spec starts when its dep
 `BE-05`, `BE-06`, `FE-03` and `FE-04` are **superseded**: their scope was split across the slices (mapping below). Their files stay as the scope catalogue.
 
 ## Order
-`MONO-01 · BE-01…BE-04 · FE-01 · FE-02` (done) → **`SL-00 → SL-01 → SL-02 → SL-03 → SL-04 → SL-05 → SL-06`** → `BE-07` → `BE-08 ∥ FE-05` → `FINAL-01`
+`MONO-01 · BE-01…BE-04 · FE-01 · FE-02` (done) → **`SL-00 ∥ ARCH-01`** → **`ARCH-02`** → **`SL-01 → SL-02 → SL-03 → SL-04 → SL-05 → SL-06`** → `BE-07` → `BE-08 ∥ FE-05` → `FINAL-01`
 
-Slices are strictly sequential (they share backend services and the app shell).
+Slices are strictly sequential (they share backend services and the app shell). **`ARCH-01` and `ARCH-02` (backend architecture migration, D-39) come before the first backend slice** so every new endpoint is created in its final place with the skill `java-spring-create-module`; `ARCH-01` may run in parallel with `SL-00` because they touch different folders.
 
 | Spec | Title | Depends on | Branch |
 |---|---|---|---|
@@ -26,8 +26,10 @@ Slices are strictly sequential (they share backend services and the app shell).
 | [BE-04](be-04-auth-and-ownership.md) | Auth0 authentication, CurrentUser, ownership | BE-03 | `spec/be-04-auth-and-ownership` |
 | [FE-01](fe-01-design-prototype.md) | UI/UX prototype review (v1; **superseded by SL-00 for v2**) | — | `spec/fe-01-design-prototype` |
 | [FE-02](fe-02-foundation.md) | Angular foundation: scaffold, core, design system (v1 look) | BE-02, FE-01 | `spec/fe-02-foundation` |
+| [ARCH-01](arch-01-hexagonal-pilot.md) | **Hexagonal Pragmática: foundation + `account` pilot** (backend only, behaviour frozen) | BE-04, skill updated | `spec/arch-01-hexagonal-pilot` |
+| [ARCH-02](arch-02-hexagonal-transaction.md) | **Hexagonal Pragmática: `transaction` feature + legacy cleanup** (backend only) | ARCH-01 | `spec/arch-02-hexagonal-transaction` |
 | [SL-00](sl-00-visual-v2.md) | **Visual identity v2** (frontend-only) | FE-02 | `slice/00-visual-v2` |
-| [SL-01](sl-01-login-and-account.md) | **Sign in (Auth0) + `/accounts/me` + shell + Home header** | SL-00, BE-04 | `slice/01-login-and-account` |
+| [SL-01](sl-01-login-and-account.md) | **Sign in (Auth0) + `/accounts/me` + shell + Home header** | SL-00, ARCH-02, BE-04 | `slice/01-login-and-account` |
 | [SL-02](sl-02-statement-and-detail.md) | **Statement, detail, Home summary** (+ contract, dates, errors) | SL-01 | `slice/02-statement-and-detail` |
 | [SL-03](sl-03-withdrawal.md) | **Withdrawal** + result panel + `Idempotency-Key` | SL-02 | `slice/03-withdrawal` |
 | [SL-04](sl-04-deposit.md) | **Deposit** (boleto simulation over the real deposit) | SL-03 | `slice/04-deposit` |
@@ -60,14 +62,15 @@ Slices are strictly sequential (they share backend services and the app shell).
 ## Why this order
 1. Foundation first (BE-01…04, FE-02): tests, schema, money integrity and auth must exist before any screen is real.
 2. **SL-00 before SL-01:** the visual identity changed (v2), so tokens, shared components and the shell are replaced once, before any screen is written.
-3. **SL-01 first slice:** the smallest end-to-end chain (browser → Auth0 → API → DB) that the owner can try; everything later relies on it.
-4. **SL-02 before the operations:** you can only judge an operation by what it does to the balance and the statement.
-5. **SL-03 before SL-04…06:** it creates the shared result panel and the idempotency protection the other three flows reuse; withdrawal is the simplest body.
-6. **Pix last:** it has the external call, the most validators and the uncertain-outcome path.
-7. **BE-07 after the slices:** functional work first, platform upgrades last, so regressions are attributable.
+3. **ARCH-01/02 before the first backend slice:** SL-01…SL-06 add and change backend code; doing it on the old layered packages and migrating later would mean writing it twice. The migration is behaviour-frozen and guarded by the 100+ existing tests; `account` goes first as the pilot because it is the smallest feature.
+4. **SL-01 first slice:** the smallest end-to-end chain (browser → Auth0 → API → DB) that the owner can try; everything later relies on it.
+5. **SL-02 before the operations:** you can only judge an operation by what it does to the balance and the statement.
+6. **SL-03 before SL-04…06:** it creates the shared result panel and the idempotency protection the other three flows reuse; withdrawal is the simplest body.
+7. **Pix last:** it has the external call, the most validators and the uncertain-outcome path.
+8. **BE-07 after the slices:** functional work first, platform upgrades last, so regressions are attributable.
 
 ## Human actions required
-Auth0 portal for SPA callback URLs + two test users (SL-01) · approve OpenAPI previews (SL-01, SL-02, SL-03) · time zone and 400-vs-422 (SL-02) · idempotency design (SL-03) · boleto reconciliation (SL-04) · MaiaBank contract only if the Pix payload must change (SL-06) · owner sign-off of the v2 look (SL-00) · rotate old DB credential `maia/maiapw` (BE-02 carry-over) · rounding rule (BE-08) · Boot version / JDK image (BE-07).
+Approve the class mapping table and the security split (ARCH-01) and the transaction-side mapping (ARCH-02) · Auth0 portal for SPA callback URLs + two test users (SL-01) · approve OpenAPI previews (SL-01, SL-02, SL-03) · time zone and 400-vs-422 (SL-02) · idempotency design (SL-03) · boleto reconciliation (SL-04) · MaiaBank contract only if the Pix payload must change (SL-06) · owner sign-off of the v2 look (SL-00) · rotate old DB credential `maia/maiapw` (BE-02 carry-over) · rounding rule (BE-08) · Boot version / JDK image (BE-07).
 
 ## Status
 | Spec | Status |
@@ -80,6 +83,10 @@ Auth0 portal for SPA callback URLs + two test users (SL-01) · approve OpenAPI p
 | FE-01 | Superseded by SL-00 (v2 sign-off happens there) |
 | FE-02 | Done (PR #5 merged 2026-11-02; app-ci green on 48230d5). Look replaced by SL-00. Carried over: axe run → SL-01/FE-05, OpenAPI type generation → SL-01 |
 | SL-00 | Implemented on `slice/00-visual-v2` (2026-11-03); owner signed off the look (2026-11-03); **open: `app-ci` on the PR** |
+| ARCH-01 | Draft (spec written 2026-11-03; not authorized) |
+| ARCH-02 | Draft (spec written 2026-11-03; not authorized) |
+| SL-00 … SL-06 | Draft (specs written 2026-11-03; not authorized) |
+| SL-00 | Implemented on `slice/00-visual-v2` (2026-11-03); **open: owner sign-off of the look + `app-ci` on the PR** |
 | SL-01 … SL-06 | Draft (specs written 2026-11-03; not authorized) |
 | BE-07 | Draft (Java 21 build already pre-applied locally, uncommitted; see the spec note) |
 | BE-08 | Draft |

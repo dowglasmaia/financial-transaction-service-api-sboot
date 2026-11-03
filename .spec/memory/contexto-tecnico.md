@@ -16,12 +16,13 @@ docker-compose.yml                   local stack (builds the API from its folder
 ```
 Each app has an isolated, path-filtered pipeline. Run backend commands from `api-financial-transaction-service/`, frontend commands from `app-financial-transaction-service/`.
 
-## Code map (package root `com.dowglasmaia.financialtransaction`, under `api-financial-transaction-service/src/main/java/`) — **do not move or rename packages**
+## Code map (package root `com.dowglasmaia.financialtransaction`, under `api-financial-transaction-service/src/main/java/`) — **legacy layered layout; the target is feature modules (D-39), migrated by ARCH-01 and ARCH-02**
 `controllers` (`TransactionController` implements generated `TransactionsApi`; `validate.ValidateBodyRequest`) · `services` (+`impl`: Pix, Deposit, RechargeMobile, AtmWithdrawal, Transaction; `impl.mapper.TransactionMapper`) · `services.client.account|agency|maiaBank` (local helpers + Feign client) · `entity` (User→table `usuario`, Agency, Account, Transaction, TransactionTypeEnum) · `repository` · `config` (`HandlerException`, `kafka`, `db_massa_test`) · `exeptions` (sic) · `utils` (CPF/e-mail/phone validators, `DateConverter`).
 Schema is owned by **Flyway** (`db/migration/V1__baseline.sql`; Hibernate `ddl-auto: validate`; `transaction.account_id` has no FK until BE-03 fixes F-08). Data: `usuario(id,name,cpf uniq,email uniq,phone_number,area_code)`, `agency(id,number)`, `account(id,agency_id,user_id,number,balance)`, `transaction(id,date_hour,amount,account_id,agency_id,transaction_type)` — UUID strings as ids, FK only on `transaction.agency_id`, index `(account_id, date_hour desc)`.
 
 ## Hard constraints
-* **Package structure and architecture stay** (controller → service → repository). Improve inside existing packages; new classes go into existing packages.
+* **Architecture = "Hexagonal Pragmática" (D-39):** package-by-feature (`<feature>.{domain,application,infra}` + a minimal `shared`), dependencies point inward, `domain` is framework-free, one service per feature, ports only for outputs, JPA/web/clients are infra. New backend code is created with the skill `java-spring-create-module`; **until ARCH-02 is merged the old layered packages still exist** (listed as legacy in the `ArchitectureTest`). The rules are enforced by `ArchitectureTest` (ArchUnit) and `scripts/check-architecture.mjs`.
+* **Moves vs behaviour (D-41):** a package move never changes behaviour; moves use `git mv` and never share a commit with a logic change.
 * Behaviour contract in `produto.md` is frozen except the listed decided changes.
 * Money is `BigDecimal` (scale 2). No float math.
 * Every behaviour change needs a test first (characterization → flip).
@@ -60,9 +61,9 @@ One conditional UPDATE enforces `balance >= amount` (`AccountRepository.debit`, 
 * `GET /accounts/me`. Idempotency-Key on POSTs (store in DB).
 
 ## Decisions log (final)
-Auth0 free plan, tenant `dev-twljocmfwpvlxx1q.eu.auth0.com` (D-29, supersedes Okta; details in `auth-auth0.md`) · Boot 3.5.x via Java 21 then 25 · keep architecture/packages · `>=` balance rule · Pix behaviour kept (no local credit) · owner-only debits · English UI · visual identity = the approved prototype in `prototype/` (supersedes the earlier "Grafite Ciano" proposal; skills' stack assumptions ignored) · additive API (`/accounts/me`, row `id`) · manual user↔Auth0 linking, role `customer` only · disposable DB, clean Flyway V1 · no Kafka consumer, payload frozen · one account per user · GitHub Actions + Docker · web-only portfolio prototype · AI Assistant = future concept only.
+Auth0 free plan, tenant `dev-twljocmfwpvlxx1q.eu.auth0.com` (D-29, supersedes Okta; details in `auth-auth0.md`) · Boot 3.5.x via Java 21 then 25 · architecture/packages: superseded by D-39 (Hexagonal Pragmática, package-by-feature) · `>=` balance rule · Pix behaviour kept (no local credit) · owner-only debits · English UI · visual identity = the approved prototype in `prototype/` (supersedes the earlier "Grafite Ciano" proposal; skills' stack assumptions ignored) · additive API (`/accounts/me`, row `id`) · manual user↔Auth0 linking, role `customer` only · disposable DB, clean Flyway V1 · no Kafka consumer, payload frozen · one account per user · GitHub Actions + Docker · web-only portfolio prototype · AI Assistant = future concept only.
 
-## Decisions added 2026-11-03 (vertical slices and visual v2)
+## Decisions added 2026-11-03 (vertical slices, visual v2, architecture)
 | # | Decision |
 |---|---|
 | D-31 | **Vertical slices.** From SL-00 on, each user-visible capability is one branch/PR carrying backend + frontend + e2e (`slice/<nn>-<slug>`); slices run strictly in order. BE-05, BE-06, FE-03, FE-04 are superseded by SL-01…SL-06 (mapping in `specs/README.md`). |
@@ -73,6 +74,11 @@ Auth0 free plan, tenant `dev-twljocmfwpvlxx1q.eu.auth0.com` (D-29, supersedes Ok
 | D-36 | Recharge carriers are the backend enum `VIVO · CLARO · TIM · ALGAR`; v2's "Oi" becomes Algar. |
 | D-37 | Automated e2e signs in through a **mock OIDC provider** (compose profile `e2e`); the real Auth0 login is a manual owner check (SL-01 and FINAL-01). |
 | D-38 | Local ports: Postgres `localhost:5433` (5432 was taken), Kafka 9092, Kafdrop 19000, MaiaBank stub 8089, API 8088, app 4200. The build JDK is 21 (Lombok ≥ 1.18.42). |
+| D-39 | **Architecture = "Hexagonal Pragmática"** (package-by-feature, framework-free `domain`, one `<Feature>Service` per feature without interfaces, output ports only, `@Transactional` on service methods, JPA/web/clients/messaging as `infra`, CRUD-only modules may use the JPA entity in a flat package). Supersedes D-19 ("no package changes") and the old controller → service → repository constraint. Source of truth: the skill `java-spring-create-module` (`references/architecture.md`). |
+| D-40 | **Enforced by tests:** `ArchitectureTest` (ArchUnit, rules A01-A10) runs in `mvn verify`/`api-ci`; `scripts/check-architecture.mjs` (A01-A11, offline) is the quick check. During the migration the old packages are listed as *legacy*; ARCH-02 empties the list (strict). |
+| D-41 | **Migration plan:** ARCH-01 (foundation + `account` pilot) then ARCH-02 (`transaction` + legacy cleanup), both backend-only, **before SL-01**, behaviour frozen: same HTTP contract/messages, same OpenAPI file, same Flyway schema, same Kafka topic and payload bytes, test count not lower. ARCH-01 may run in parallel with SL-00 (frontend only). |
+| D-42 | `shared` depends on **no feature** (rule A10). Anything that needs a feature's classes lives in that feature: demo seed in `account.infra.seed`, the caller resolution as a port `CallerIdentity` in `account.domain` with a JWT adapter in `account.infra.security`; `shared.security` stays generic and receives feature rules as framework beans. |
+| D-43 | Cross-feature JPA relations become **plain id columns** (the database foreign key stays); anything that needs the related object goes through the other feature's `application` service (decision D6 of the skill). |
 
 ## Frontend: prototype and agent autonomy
 > **Current reference:** `prototype/Maia Bank UI prototype/Maia Bank v2.dc.html` (D-32…D-36). The next paragraph describes the **superseded v1** file and is kept for history; for tokens, screens and copy follow SL-00 and the v2 file.
@@ -95,7 +101,7 @@ Screens in the prototype: landing/sign-in, Home, Statement (+detail), Pix (3 ste
 2. Work **only** within the spec scope; list extra ideas as proposals.
 3. Tests first for behaviour changes; run the suite; record an evidence line per task (`shared/como-executar.md`).
 4. Stop and ask at the spec's approval gates.
-5. Skills: `java-modern-engineering` (Java/Spring code, Mode A: keep existing architecture) · `java-persistence-performance` (SQL, JPA, transactions, Flyway) · `openapi-rest-contract` (contract) · `angular-frontend-scaffold` (once, project creation) · `angular-module-scaffold` (feature modules) · `angular-tailwind-ui-specialist` (UI) · `angular-architect` (Angular design) · `ui-ux-pro-max` (UX review). Skills mention a different project ("Finance Controller": Boot 4.1.1, Modulith, `owner_id`) — ignore those stack assumptions.
+5. Skills: `java-spring-create-module` (feature modules: create/migrate/review, owns where code lives, D-39) · `java-modern-engineering` (code-level Java/Spring) · `java-persistence-performance` (SQL, JPA, transactions, Flyway) · `openapi-rest-contract` (contract) · `angular-frontend-scaffold` (once, project creation) · `angular-module-scaffold` (feature modules) · `angular-tailwind-ui-specialist` (UI) · `angular-architect` (Angular design) · `ui-ux-pro-max` (UX review). Skills mention a different project ("Finance Controller": Boot 4.1.1, Modulith, `owner_id`) — ignore those stack assumptions.
 
 ## Run / verify (expected, unverified here)
 `cd api-financial-transaction-service && ./mvnw -B verify` · `cp .env.example .env` then `docker compose up --build` from the repo root (API on 8088; DB credentials come from `.env`, never from tracked files) · Postman collection in `src/main/resources/postman_collection/`.
