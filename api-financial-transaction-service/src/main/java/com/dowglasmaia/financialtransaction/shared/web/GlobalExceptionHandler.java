@@ -1,4 +1,4 @@
-package com.dowglasmaia.financialtransaction.config;
+package com.dowglasmaia.financialtransaction.shared.web;
 
 
 import com.dowglasmaia.financialtransaction.exeptions.ForbiddenExeption;
@@ -14,7 +14,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @EnableWebMvc
 @RestControllerAdvice
-public class HandlerException extends ResponseEntityExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ObjectNotFoundExeption.class)
     public final ResponseEntity<ResponseErrorDTO> handlerObjectNotFoundExeption(Exception ex){
