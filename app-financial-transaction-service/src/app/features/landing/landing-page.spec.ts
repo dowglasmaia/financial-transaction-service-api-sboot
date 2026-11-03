@@ -32,6 +32,15 @@ describe('LandingPage', () => {
     expect(el.querySelectorAll('ul[aria-label="What you can do"] li')).toHaveLength(3);
   });
 
+  it('uses only icon weights that are loaded (the fill weight is not shipped), so no tile is empty', async () => {
+    const { fixture, el } = setup();
+    await fixture.whenStable();
+    const icons = Array.from(el.querySelectorAll('ul[aria-label="What you can do"] i')).map((i) => i.className);
+    expect(icons).toHaveLength(3);
+    for (const icon of icons) expect(icon.startsWith('ph-bold ')).toBe(true);
+    expect(el.innerHTML).not.toContain('ph-fill');
+  });
+
   it('says plainly that it is a demo with fictitious data', async () => {
     const { fixture, el } = setup();
     await fixture.whenStable();

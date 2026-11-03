@@ -1,6 +1,10 @@
 import { expect, test } from '@playwright/test';
 import { expectNoSeriousA11yViolations, signInAs, useMockIdp, watchLeaks } from './support';
 
+/** A real token: three base64url segments, the first two JSON (`eyJ…`). The SDK's harmless telemetry param also starts with eyJ, so the shape matters. */
+const JWT = /eyJ[\w-]+\.eyJ[\w-]+\.[\w-]+/;
+const TOKEN_PARAM = /[?&#](access_token|id_token|refresh_token)=/;
+
 test.beforeEach(async ({ page }) => {
   await useMockIdp(page);
 });
@@ -34,10 +38,10 @@ test.describe('sign in with the mock IdP', () => {
     await expectNoSeriousA11yViolations(page);
 
     // tokens never leak: not in a URL, not in the console, not in web storage
-    expect(leaks.urls.filter((url) => /eyJ|access_token|id_token|refresh_token/.test(url))).toEqual([]);
-    expect(leaks.console.filter((line) => /eyJ[A-Za-z0-9_-]{10,}/.test(line))).toEqual([]);
+    expect(leaks.urls.filter((url) => JWT.test(url) || TOKEN_PARAM.test(url))).toEqual([]);
+    expect(leaks.console.filter((line) => JWT.test(line))).toEqual([]);
     const storage = await page.evaluate(() => JSON.stringify({ ...localStorage }) + JSON.stringify({ ...sessionStorage }));
-    expect(storage).not.toMatch(/eyJ[A-Za-z0-9_-]{10,}/);
+    expect(storage).not.toMatch(JWT);
   });
 
   test('user 2 sees a different account and balance', async ({ page }) => {

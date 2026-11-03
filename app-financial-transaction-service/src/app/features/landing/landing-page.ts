@@ -12,9 +12,9 @@ interface Feature {
 }
 
 const FEATURES: readonly Feature[] = [
-  { icon: 'ph-fill ph-chart-bar', tone: 'accent', title: 'Total control', text: 'Follow your spending and income in one place.' },
-  { icon: 'ph-fill ph-shield-check', tone: 'violet', title: 'Secure transactions', text: 'Sign-in handled by a dedicated identity provider.' },
-  { icon: 'ph-fill ph-lightning', tone: 'income', title: 'Fast payments', text: 'Pix, deposits and mobile recharge, with clear results.' },
+  { icon: 'ph-bold ph-chart-bar', tone: 'accent', title: 'Total control', text: 'Follow your spending and income in one place.' },
+  { icon: 'ph-bold ph-shield-check', tone: 'violet', title: 'Secure transactions', text: 'Sign-in handled by a dedicated identity provider.' },
+  { icon: 'ph-bold ph-lightning', tone: 'income', title: 'Fast payments', text: 'Pix, deposits and mobile recharge, with clear results.' },
 ];
 
 /**
