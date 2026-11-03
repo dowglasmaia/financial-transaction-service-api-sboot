@@ -1,33 +1,67 @@
 # Prototype deviations and proposals
 
-The approved prototype (`prototype/Maia Bank UI prototype/`) is the starting point for look, flows and copy — not a limit.
+The approved prototype (**v2**: `prototype/Maia Bank UI prototype/Maia Bank v2.dc.html`, decision D-32) is the starting point for look, flows and copy — not a limit.
 This file logs every deviation. **Tier 1** = refinement inside the same flow (applied, logged here). **Tier 2** = changes a flow,
 adds/removes a screen or capability, or needs the backend (written as a proposal, needs the owner's decision).
 
-Seeded from the FE-01 review (`.spec/specs/fe-01-design-prototype.md`).
+History: seeded from the FE-01 review of the v1 prototype (brown/gold). SL-00 (2026-11-03) replaced the look with v2; v1 rows that no longer apply are kept below as *superseded*.
 
-## Applied (Tier 1)
+## v2 — decisions already taken by the owner (D-33…D-36)
+| # | v2 as delivered | Treatment |
+|---|---|---|
+| V1 | Portuguese copy, brand "Banco MaisVida", "Login seguro via Okta" | UI stays **English**, brand **Maia Bank**, sign-in note will read "Secure sign-in with Auth0" (built in SL-01) |
+| V2 | Search field, notification bell with count, support-phone strip, "Learn more" security link | **Not built** — no endpoint (D-35) |
+| V3 | Recharge carriers Claro / Vivo / TIM / **Oi** | Backend enum is VIVO / CLARO / TIM / **ALGAR** → Algar (D-36, SL-05) |
+| V4 | Dark only | Dark default + **derived light theme** from the v2 hues, contrast-tested (D-34) |
+| V5 | No AI Assistant screen | Dropped from scope; reinstate only if the owner asks |
+| V6 | Prototype control bar (data / outcome simulators, screen jump) | Never shipped; the states are reproduced in unit tests and `/design` |
+
+## v2 — applied in SL-00 (Tier 1)
 | # | Deviation | Why | Where |
 |---|---|---|---|
-| 1 | Dark `--line-input` `#6F5C4E` → `#75634F` | The prototype value gave 2.87:1 on raised surfaces; WCAG 2.2 AA needs 3:1 for control borders (now 3.17:1) | `src/styles.scss`, asserted by `tokens-contrast.spec.ts` |
-| 2 | Added `--on-brand` / `--on-brand-muted` tokens (`#F5EEE2` / `#B3A28F`) | In the light theme the header is dark (`--brand` `#2B1A12`); text must not use the page content colour there (found during the visual check) | `src/styles.scss`, header, theme toggle |
-| 3 | Tokens named semantically (`surface`, `surface-raised`, `content`, `accent`, `income`, `expense`…) instead of the prototype's short vars (`--s`, `--sr`, `--c`, `--a`…) | Readability, Tailwind utility names (`bg-surface`, `text-income`) | `src/styles.scss` |
-| 4 | Icons via the `@phosphor-icons/web` package (regular + bold CSS) instead of loading from unpkg at runtime | No third-party script/CSS at runtime for icons; works offline in dev | `angular.json` styles |
-| 5 | Fonts (Manrope, Sora) still come from Google Fonts like the prototype | Matches the design; self-hosting is a future privacy/perf improvement | `src/index.html` |
-| 6 | Money rendered as `R$ 12,480.50` through one util (`formatBrl`) and never recomputed in the UI | Single formatting rule; backend is the authority for balances | `shared/util/money.ts` |
-| 7 | Ledger row shows direction by rail + icon + label + sign + screen-reader text | Colour must not be the only cue (a11y) | `shared/ui/ledger-row.component.ts` |
-| 8 | **Portfolio credit footer** replicated from the check-in app (`check-in-api-kotlin/app-check-in-api-angular`, `site-footer`): author block, "Find me" profile links, "Built with" stack tags, fictitious/demo notices. Not in the prototype; requested by the owner | Owner request; same layout and content structure, restyled with this app's tokens (`content`, `content-muted`, `accent`, `line`); stack list adapted (Java 25, Spring Boot, PostgreSQL, Kafka) | `core/layout/site-footer.component.ts`, `shared/ui/tag.component.ts` |
-| 9 | LinkedIn/GitHub logos use the Phosphor **regular** weight instead of the reference's filled weight | The fill weight CSS added ~84 kB to the initial bundle (508 kB, over the 500 kB budget); only two icons need it | footer |
+| 10 | Primary blue `#2d68fa` instead of v2's `#2f6bff` | White text on `#2f6bff` measures **4.4988:1** (< 4.5:1); `#2d68fa` gives 4.70:1 | `styles.scss` (`--primary`), `tokens-contrast.spec.ts` |
+| 11 | Dark `--line-input` is a solid `#6674b3` instead of `rgba(150,170,255,.38)` | A solid value can be measured; it gives ≥ 3.9:1 on surface, raised and sunken | `styles.scss` |
+| 12 | Token `--accent` is cyan `#38bdf8` (links, focus ring, selected chip) and the **primary action** gets its own tokens `--primary` / `--primary-strong` / `--on-primary` | v2 uses two blues for two jobs; separating them keeps contrast checkable per job | `styles.scss` |
+| 13 | Added `--violet` (recharge tile) | v2's recharge colour; measured ≥ 6.4:1 on raised surfaces | `styles.scss`, `icon-tile` |
+| 14 | Light theme palette (derived): surface `#f3f6ff`, raised `#ffffff`, content `#0b1234`, accent `#1d4fd7`, income `#047857`, expense `#be123c`, warning `#8a4b00`, violet `#6d28d9`; the rail/bottom bar stay deep navy in both themes | v2 has no light theme (D-34) | `styles.scss` |
+| 15 | The balance panel keeps the v2 blue gradient in **both** themes and its text uses `--on-primary` | Hero identity of v2; white on `#1d3fd8`/`#4f46e5` ≥ 6:1 | `balance-card`, `bg-hero` utility |
+| 16 | Ledger row has no coloured left rail; direction = icon tile of the kind + type label + sign + screen-reader text | v2 look; colour is still never the only cue | `ledger-row`, `icon-tile` |
+| 17 | KPI tile stacks icon + label above the value (v2: icon at the left of a two-line block) | At 768 px a three-up row left only ~80 px for the figure, so amounts wrapped | `kpi-tile` |
+| 18 | The top bar has **no account chip / avatar / menu** yet | It needs the signed-in user and `/accounts/me` — arrives with SL-01 | `app-shell` |
+| 19 | The demo notice is shown twice on phones: a slim strip under the top bar (the pill does not fit) and the footer line | "Demo environment · test data only" must be on every screen | `app-shell` |
+| 20 | Rail/bottom-bar entries come from the route table (`data.nav`), not a hard-coded list; bottom bar shows 3 + a "More" dialog when there are more | A slice adds its menu entry by declaring its route | `core/layout/nav-items.ts` |
+| 21 | New shared pieces: segmented control (radio group, arrow keys), stepper (`aria-current`, "completed" text), dialog (modal, focus trap, Esc/backdrop, focus restore), toast (polite live region, 2.4 s), icon tile | Needed by SL-01…SL-06 | `shared/ui` |
+| 22 | Fonts now load weights 800 for Manrope and Sora | v2 uses 800 for the wordmark and headings | `index.html` |
 
-## Proposals / open (Tier 2 — need the owner)
+## v2 — measured contrast (dark / light), asserted by `tokens-contrast.spec.ts`
+Text pairs ≥ 4.5:1 and control borders ≥ 3:1 for `content`, `content-muted`, `accent`, `on-accent`, `on-primary` on `primary` and `primary-strong`, `income`, `expense`, `warning`, `violet`, `on-brand` and `on-brand-muted` on `brand`, and `line-input` on all three surfaces. The same test also fails if any v1 hex (`#cea45c`, `#2a1708`, `#fbf1de`, `#5fa899`, `#d4ae6a`, `#110c09`) returns to `styles.scss`.
+
+## Still open — Tier 2 (need the owner)
 | # | Proposal | Detail |
 |---|---|---|
-| A | **Deposit flow** | The prototype models deposit as an online *boleto* (client-side demo with "Simulate payment"). The backend is `POST /transactions/deposit {agency, account, amount}`. Suggested reconciliation: keep the boleto screen as a UI simulation; "Simulate payment" calls the real deposit for the caller's own account (from `GET /accounts/me`). Decide in FE-04. |
-| B | **Sample data in the prototype** | "Agency 0001 · Account 12345-6" is placeholder data; real values come from `/accounts/me`. No action unless the owner wants it mirrored. |
-| C | **`_ds/nocturne-*` bundle** | A bundled design-system export (blurple, Inter) that the main prototype page does not use. Treated as non-authoritative and not imported. |
-| D | **Handoff artifacts** | The prototype has no tokens JSON, copy deck or a11y annotations; tokens/copy were extracted from the HTML. Request them only if the owner wants a formal handoff. |
+| A | **Deposit flow** | v2 still models deposit as an online *boleto* (client-side demo with "Simulate payment"). The backend is `POST /transactions/deposit {agency, account, amount}`. Decided in SL-04: keep the boleto as a UI simulation; "Simulate payment" calls the real deposit for the caller's own account (from `/accounts/me`). |
+| B | **Sample data in the prototype** | "Agency 0001 · Account 12345-6", "Dowglas Maia", fixed balance — placeholders; real values come from `/accounts/me` and the ID token (SL-01). |
+| C | **`_ds/nocturne-*` bundle** | A bundled design-system export (blurple, Inter) that the prototype does not use. Treated as non-authoritative and not imported. |
+| D | **Handoff artifacts** | No tokens JSON, copy deck or a11y annotations; tokens/copy are extracted from the HTML. Request them only if the owner wants a formal handoff. |
+
+## Superseded (v1 look, FE-02) — kept for history
+| # | Deviation | Status |
+|---|---|---|
+| 1 | Dark `--line-input` `#6F5C4E` → `#75634F` | Superseded by #11 |
+| 2 | Added `--on-brand` / `--on-brand-muted` | Kept (now `#f1f4ff` / `#9aa6d1`, both themes) |
+| 3 | Tokens named semantically instead of the prototype's short vars | Kept (`surface`, `surface-raised`, `content`, `accent`, `income`, `expense`…) |
+
+## Applied earlier and still valid (Tier 1)
+| # | Deviation | Why | Where |
+|---|---|---|---|
+| 4 | Icons via the `@phosphor-icons/web` package (regular + bold CSS) instead of unpkg at runtime | No third-party script/CSS at runtime for icons; works offline in dev | `angular.json` styles |
+| 5 | Fonts (Manrope, Sora) still come from Google Fonts like the prototype | Matches the design; self-hosting is a future privacy/perf improvement | `src/index.html` |
+| 6 | Money rendered as `R$ 12,480.50` through one util (`formatBrl`) and never recomputed in the UI | Single formatting rule; backend is the authority for balances | `shared/util/money.ts` |
+| 7 | Direction shown by icon + label + sign + screen-reader text | Colour must not be the only cue (a11y) | `shared/ui/ledger-row.component.ts` |
+| 8 | **Portfolio credit footer** replicated from the check-in app (`site-footer`), restyled with this app's tokens; not in the prototype, requested by the owner | Owner request | `core/layout/site-footer.component.ts`, `shared/ui/tag.component.ts` |
+| 9 | LinkedIn/GitHub logos use the Phosphor **regular** weight | The fill weight CSS added ~84 kB to the initial bundle | footer |
 
 ## Decisions recorded in FE-02
 - **Test runner:** Vitest via Angular's `@angular/build:unit-test` (`npm test`), jsdom. Reason: Angular 21's default runner, no Karma/Jasmine stack.
-- **Chart library:** none. The prototype's charts are hand-made SVG/CSS; Home (FE-03) builds them the same way (zero dependency, full control of the accessible table fallback).
-- **New dependencies:** `@phosphor-icons/web` (icons, design-mandated), `vitest`, `jsdom`, `@types/node` (dev). No UI/state library.
+- **Chart library:** none. The prototype's charts are hand-made SVG/CSS; Home (SL-02) builds them the same way (zero dependency, full control of the accessible table fallback).
+- **New dependencies:** `@phosphor-icons/web` (icons, design-mandated), `vitest`, `jsdom`, `@types/node` (dev). No UI/state library. SL-00 added **no** dependency.

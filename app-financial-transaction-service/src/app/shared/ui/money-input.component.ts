@@ -15,7 +15,7 @@ import { parseAmountInput } from '../util/money';
       <span class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-content-muted" aria-hidden="true">R$</span>
       <input
         appFieldControl
-        class="pl-11"
+        class="pl-12 font-display text-lg font-semibold"
         type="text"
         inputmode="decimal"
         autocomplete="off"

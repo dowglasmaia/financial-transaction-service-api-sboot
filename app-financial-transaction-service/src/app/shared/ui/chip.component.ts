@@ -7,8 +7,8 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
   template: `
     <button
       type="button"
-      class="inline-flex h-11 items-center gap-1.5 rounded-control border px-4 text-sm font-medium transition duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-45"
-      [class]="selected() ? 'border-accent bg-surface-overlay text-accent' : 'border-line bg-transparent text-content-muted hover:bg-surface-sunken hover:text-content'"
+      class="inline-flex h-11 items-center gap-1.5 rounded-control border-[1.5px] px-4 text-sm font-bold transition duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none"
+      [class]="selected() ? 'border-accent bg-accent/10 text-content shadow-glow-accent' : 'border-line bg-surface-raised/40 text-content hover:bg-surface-overlay'"
       [attr.aria-pressed]="selected()"
       [disabled]="disabled()"
       (click)="toggled.emit()"
