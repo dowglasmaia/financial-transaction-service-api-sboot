@@ -12,7 +12,31 @@ Functional portfolio prototype of a modern online bank (web only, test data).
 
 Each application has its own isolated pipeline (path-filtered) and is built and tested independently.
 
-Run the stack: `docker compose up --build` (API on `localhost:8088`). API details: `api-financial-transaction-service/README.md`. Work is driven by `.spec/spec-execution-flow.md`.
+## Run back and front together
+
+Everything below starts from the repo root. Ports: Postgres `5433`, Kafka `9092`, Kafdrop `19000`, MaiaBank stub `8089`, API `8088`, app `4200`.
+
+```bash
+cp .env.example .env                                                         # once (local, throw-away values)
+docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api              # infrastructure only
+```
+
+**API** - from the IDE (run configuration with `SPRING_PROFILES_ACTIVE=local`, `SEED_OWNER_SUB`, optional `SEED_SECOND_SUB`) **or** in Docker: `docker compose --profile api up -d --build` (it needs `SEED_OWNER_SUB` / `SEED_SECOND_SUB` in `.env`, the Auth0 `user_id` of your test users).
+
+**App** - `cd app-financial-transaction-service && npm ci && npm start`, then open <http://localhost:4200>. The dev server proxies `/api` to `localhost:8088`.
+
+**Real Auth0 sign-in (manual):** in the Auth0 dashboard (application *Transaction-app*) add `http://localhost:4200` to *Allowed Callback URLs*, *Allowed Logout URLs* and *Allowed Web Origins*. Then click **Access my account** and sign in with a test user. The app reads its Auth0 values from `app-financial-transaction-service/public/config.json` (public values only).
+
+**Automated end-to-end (no password, mock identity provider):**
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.e2e.yml --profile api --profile e2e up -d --build
+cd app-financial-transaction-service && npm run e2e:install && npm run e2e   # 3 viewports: 1280 / 768 / 390
+```
+
+Details of the e2e setup (mock IdP users, how the browser reaches it): `app-financial-transaction-service/e2e/README.md`.
+
+Shortcut: `docker compose --profile api up --build` runs everything including the API in Docker. API details: `api-financial-transaction-service/README.md`. Work is driven by `.spec/spec-execution-flow.md`.
 
 ## Authentication (Auth0) - how it works and how to configure it
 
