@@ -36,7 +36,7 @@ describe('BalanceCardComponent', () => {
       fixture.componentRef.setInput('amount', 4250.5);
       fixture.componentRef.setInput('countUp', true);
       fixture.detectChanges();
-      const visible = () => (fixture.nativeElement as HTMLElement).querySelector('[aria-hidden="true"]')?.textContent ?? '';
+      const visible = () => (fixture.nativeElement as HTMLElement).querySelector('p span[aria-hidden="true"]')?.textContent ?? '';
       expect(visible()).not.toContain('4,250.50');
 
       vi.advanceTimersByTime(2000);
