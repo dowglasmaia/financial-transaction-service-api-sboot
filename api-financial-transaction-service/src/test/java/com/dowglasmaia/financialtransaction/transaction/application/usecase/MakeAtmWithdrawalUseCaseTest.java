@@ -10,7 +10,7 @@ import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurre
 import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAgencyUseCase;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
-import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundException;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,7 +55,7 @@ class MakeAtmWithdrawalUseCaseTest {
     @Test
     void nonCardWithdrawalOnAnotherAccountNumberIsNotFoundAndDebitsNothing() { // F-05 fixed by BE-04
         assertThatThrownBy(() -> useCase.execute("0211", "9999", new BigDecimal("80.00")))
-              .isInstanceOf(ObjectNotFoundExeption.class).hasMessage("Account not found.");
+              .isInstanceOf(ObjectNotFoundException.class).hasMessage("Account not found.");
 
         verifyNoInteractions(debitAccount, saveTransaction);
     }

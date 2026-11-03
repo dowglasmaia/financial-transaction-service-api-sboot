@@ -9,7 +9,7 @@ import com.dowglasmaia.financialtransaction.transaction.application.port.PixGate
 import com.dowglasmaia.financialtransaction.transaction.domain.PixTransfer;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
-import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityExeption;
+import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityException;
 import java.math.BigDecimal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -63,7 +63,7 @@ public class MakePixTransferUseCase {
             String errorMessage = "Pix key does not exist or is invalid for the specified type: " + transfer.key().type().label();
             log.error(errorMessage);
 
-            throw new UnprocessableEntityExeption(errorMessage);
+            throw new UnprocessableEntityException(errorMessage);
         }
 
         Account account = getCurrentAccount.execute();
@@ -78,7 +78,7 @@ public class MakePixTransferUseCase {
             log.error("Fail send Pix.", e);
             compensate(ledgerId, account.getId(), amount);
 
-            throw new UnprocessableEntityExeption("Fail send Pix.");
+            throw new UnprocessableEntityException("Fail send Pix.");
         }
 
         confirm(ledgerId);

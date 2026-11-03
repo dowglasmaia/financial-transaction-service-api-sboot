@@ -11,7 +11,7 @@ import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.transaction.application.port.RechargeEventPublisher;
 import com.dowglasmaia.financialtransaction.transaction.domain.MobileRecharge;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
-import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityExeption;
+import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityException;
 import java.math.BigDecimal;
 import org.mockito.InOrder;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,7 @@ class RequestMobileRechargeUseCaseTest {
     @Test
     void anInvalidPhoneIsRejectedBeforeAnyMoneyMoves() {
         assertThatThrownBy(() -> useCase().execute(new MobileRecharge(11, 12345, BigDecimal.TEN, "TIM")))
-              .isInstanceOf(UnprocessableEntityExeption.class).hasMessage("Invalid cell phone numer");
+              .isInstanceOf(UnprocessableEntityException.class).hasMessage("Invalid cell phone numer");
 
         verifyNoInteractions(getCurrentAccount, debitAccount, saveTransaction, publisher);
     }

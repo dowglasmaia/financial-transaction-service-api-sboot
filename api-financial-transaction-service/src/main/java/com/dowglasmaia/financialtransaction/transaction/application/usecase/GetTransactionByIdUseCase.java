@@ -4,7 +4,7 @@ import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurre
 import com.dowglasmaia.financialtransaction.transaction.application.port.TransactionRepository;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.transaction.domain.Transaction;
-import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundException;
 import org.springframework.stereotype.Service;
 
 /** One entry of the caller's account; an id that belongs to another account behaves as an unknown one. */
@@ -23,6 +23,6 @@ public class GetTransactionByIdUseCase {
         Account account = getCurrentAccount.execute();
 
         return ledger.findByIdAndAccountId(id, account.getId())
-              .orElseThrow(() -> new ObjectNotFoundExeption("Transaction not found"));
+              .orElseThrow(() -> new ObjectNotFoundException("Transaction not found"));
     }
 }

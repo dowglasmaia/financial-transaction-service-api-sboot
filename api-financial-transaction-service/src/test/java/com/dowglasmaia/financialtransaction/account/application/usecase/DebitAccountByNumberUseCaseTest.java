@@ -8,7 +8,7 @@ import com.dowglasmaia.financialtransaction.account.application.port.AccountRepo
 import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.account.domain.Agency;
 import com.dowglasmaia.financialtransaction.account.domain.User;
-import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundException;
 import java.math.BigDecimal;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -43,6 +43,6 @@ class DebitAccountByNumberUseCaseTest {
         when(accounts.findByNumber("9999")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> useCase().execute("9999", BigDecimal.TEN))
-              .isInstanceOf(ObjectNotFoundExeption.class).hasMessage("Account not found.");
+              .isInstanceOf(ObjectNotFoundException.class).hasMessage("Account not found.");
     }
 }

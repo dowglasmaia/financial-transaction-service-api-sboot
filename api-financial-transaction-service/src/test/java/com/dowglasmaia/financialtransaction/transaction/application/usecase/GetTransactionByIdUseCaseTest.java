@@ -10,7 +10,7 @@ import com.dowglasmaia.financialtransaction.transaction.application.port.Transac
 import com.dowglasmaia.financialtransaction.transaction.domain.Transaction;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
-import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundException;
 import java.math.BigDecimal;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -35,6 +35,6 @@ class GetTransactionByIdUseCaseTest {
 
         assertThat(useCase.execute("t-1")).isSameAs(row);
         assertThatThrownBy(() -> useCase.execute("t-2"))
-              .isInstanceOf(ObjectNotFoundExeption.class).hasMessage("Transaction not found");
+              .isInstanceOf(ObjectNotFoundException.class).hasMessage("Transaction not found");
     }
 }

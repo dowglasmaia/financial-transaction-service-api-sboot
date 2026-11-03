@@ -1,7 +1,7 @@
 package com.dowglasmaia.financialtransaction.account.application.usecase;
 
 import com.dowglasmaia.financialtransaction.account.application.port.AgencyRepository;
-import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +21,7 @@ public class GetCurrentAgencyUseCase {
     public String execute() {
         log.info("Start getCurrentAgency");
         return agencies.findByNumber(CURRENT_AGENCY_NUMBER)
-              .orElseThrow(() -> new ObjectNotFoundExeption("Agency not found."))
+              .orElseThrow(() -> new ObjectNotFoundException("Agency not found."))
               .getId();
     }
 }

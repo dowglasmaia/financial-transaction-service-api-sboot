@@ -2,7 +2,7 @@ package com.dowglasmaia.financialtransaction.account.application.usecase;
 
 import com.dowglasmaia.financialtransaction.account.application.port.AccountRepository;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
-import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundException;
 import java.math.BigDecimal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class DebitAccountByNumberUseCase {
         log.info("Start debit at account:{}", accountNumber);
 
         Account account = accounts.findByNumber(accountNumber)
-              .orElseThrow(() -> new ObjectNotFoundExeption("Account not found."));
+              .orElseThrow(() -> new ObjectNotFoundException("Account not found."));
 
         debitAccount.execute(account.getId(), amount);
     }

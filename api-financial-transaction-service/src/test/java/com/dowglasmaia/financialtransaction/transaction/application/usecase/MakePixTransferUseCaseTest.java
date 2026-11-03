@@ -20,7 +20,7 @@ import com.dowglasmaia.financialtransaction.transaction.domain.PixKeyType;
 import com.dowglasmaia.financialtransaction.transaction.domain.PixTransfer;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
-import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityExeption;
+import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityException;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.InOrder;
@@ -79,7 +79,7 @@ class MakePixTransferUseCaseTest {
         doThrow(new IllegalStateException("maiabank down")).when(gateway).send();
 
         assertThatThrownBy(() -> useCase.execute(VALID))
-              .isInstanceOf(UnprocessableEntityExeption.class).hasMessage("Fail send Pix.");
+              .isInstanceOf(UnprocessableEntityException.class).hasMessage("Fail send Pix.");
 
         verify(creditAccount).execute("acc-1", new BigDecimal("25.00"));
         verify(updateStatus).execute("ledger-1", TransactionStatus.FAILED);
@@ -91,7 +91,7 @@ class MakePixTransferUseCaseTest {
         PixTransfer bad = new PixTransfer(new PixKey(PixKeyType.CPF, "12345678900"), BigDecimal.TEN);
 
         assertThatThrownBy(() -> useCase.execute(bad))
-              .isInstanceOf(UnprocessableEntityExeption.class)
+              .isInstanceOf(UnprocessableEntityException.class)
               .hasMessage("Pix key does not exist or is invalid for the specified type: cpf");
 
         verifyNoInteractions(getCurrentAccount, debitAccount, recordTransaction, gateway, updateStatus, creditAccount);

@@ -5,7 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.dowglasmaia.financialtransaction.account.application.port.AccountRepository;
-import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityExeption;
+import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityException;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +31,7 @@ class DebitAccountUseCaseTest {
         when(accounts.tryDebit("acc-1", BigDecimal.TEN)).thenReturn(false);
 
         assertThatThrownBy(() -> new DebitAccountUseCase(accounts).execute("acc-1", BigDecimal.TEN))
-              .isInstanceOf(UnprocessableEntityExeption.class)
+              .isInstanceOf(UnprocessableEntityException.class)
               .hasMessage("Operation not performed, there is not enough balance in the account.");
     }
 }

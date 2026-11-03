@@ -6,7 +6,7 @@ import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.transaction.application.port.RechargeEventPublisher;
 import com.dowglasmaia.financialtransaction.transaction.domain.MobileRecharge;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
-import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityExeption;
+import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +35,7 @@ public class RequestMobileRechargeUseCase {
     @Transactional
     public void execute(MobileRecharge recharge) {
         if (!recharge.hasValidPhone()) {
-            throw new UnprocessableEntityExeption("Invalid cell phone numer");
+            throw new UnprocessableEntityException("Invalid cell phone numer");
         }
 
         Account account = getCurrentAccount.execute();

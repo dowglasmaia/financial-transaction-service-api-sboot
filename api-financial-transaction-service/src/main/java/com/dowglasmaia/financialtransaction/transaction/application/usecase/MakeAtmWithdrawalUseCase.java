@@ -4,7 +4,7 @@ import com.dowglasmaia.financialtransaction.account.application.usecase.DebitAcc
 import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAccountUseCase;
 import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAgencyUseCase;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
-import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundException;
 import java.math.BigDecimal;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +52,7 @@ public class MakeAtmWithdrawalUseCase {
             log.info("AtmWithdrawal not based card");
 
             if (!Objects.equals(numberAccount, account.getNumber())) {
-                throw new ObjectNotFoundExeption("Account not found.");
+                throw new ObjectNotFoundException("Account not found.");
             }
             debitAccount.execute(account.getId(), amount);
         }

@@ -10,7 +10,7 @@ import com.dowglasmaia.financialtransaction.account.application.usecase.FindAcco
 import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAgencyUseCase;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
-import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundException;
 import java.math.BigDecimal;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,7 @@ class MakeDepositUseCaseTest {
         when(findAccount.execute("agency-id", "9999")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> useCase().execute("0211", "9999", BigDecimal.TEN))
-              .isInstanceOf(ObjectNotFoundExeption.class).hasMessage("Account not found.");
+              .isInstanceOf(ObjectNotFoundException.class).hasMessage("Account not found.");
 
         verifyNoInteractions(creditAccount, saveTransaction);
     }

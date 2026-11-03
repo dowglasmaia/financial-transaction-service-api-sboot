@@ -1,9 +1,9 @@
 package com.dowglasmaia.financialtransaction.shared.web;
 
 
-import com.dowglasmaia.financialtransaction.shared.error.ForbiddenExeption;
-import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundExeption;
-import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ForbiddenException;
+import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundException;
+import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityException;
 import com.dowglasmaia.provider.model.ResponseErrorDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +16,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(ObjectNotFoundExeption.class)
+    @ExceptionHandler(ObjectNotFoundException.class)
     public final ResponseEntity<ResponseErrorDTO> handlerObjectNotFoundExeption(Exception ex){
         ResponseErrorDTO exceptionResponse = new ResponseErrorDTO();
         exceptionResponse.setCode(HttpStatus.NOT_FOUND.name());
@@ -24,7 +24,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<ResponseErrorDTO>(exceptionResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(ForbiddenExeption.class)
+    @ExceptionHandler(ForbiddenException.class)
     public final ResponseEntity<ResponseErrorDTO> handlerForbiddenExeption(Exception ex){
         ResponseErrorDTO exceptionResponse = new ResponseErrorDTO();
         exceptionResponse.setCode(HttpStatus.FORBIDDEN.name());
@@ -32,7 +32,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<ResponseErrorDTO>(exceptionResponse, HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler(UnprocessableEntityExeption.class)
+    @ExceptionHandler(UnprocessableEntityException.class)
     public final ResponseEntity<ResponseErrorDTO> handlerUnprocessableEntityExeption(Exception ex){
         ResponseErrorDTO exceptionResponse = new ResponseErrorDTO();
         exceptionResponse.setCode(HttpStatus.UNPROCESSABLE_ENTITY.name());

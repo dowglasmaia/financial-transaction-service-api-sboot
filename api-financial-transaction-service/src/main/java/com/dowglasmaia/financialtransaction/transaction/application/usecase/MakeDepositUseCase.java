@@ -5,7 +5,7 @@ import com.dowglasmaia.financialtransaction.account.application.usecase.FindAcco
 import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAgencyUseCase;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
-import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundException;
 import java.math.BigDecimal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,7 +39,7 @@ public class MakeDepositUseCase {
         log.info("Deposit requested at agency: {}", agencyId);
 
         Account found = findAccountByAgencyAndNumber.execute(agencyId, account)
-              .orElseThrow(() -> new ObjectNotFoundExeption("Account not found."));
+              .orElseThrow(() -> new ObjectNotFoundException("Account not found."));
 
         creditAccount.execute(found.getId(), amount);
 

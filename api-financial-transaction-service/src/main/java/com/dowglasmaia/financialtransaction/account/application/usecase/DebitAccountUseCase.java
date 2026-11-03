@@ -1,7 +1,7 @@
 package com.dowglasmaia.financialtransaction.account.application.usecase;
 
 import com.dowglasmaia.financialtransaction.account.application.port.AccountRepository;
-import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityExeption;
+import com.dowglasmaia.financialtransaction.shared.error.UnprocessableEntityException;
 import java.math.BigDecimal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ public class DebitAccountUseCase {
     public void execute(String accountId, BigDecimal amount) {
         if (!accounts.tryDebit(accountId, amount)) {
             log.error("Operation not performed, there is not enough balance in the account.");
-            throw new UnprocessableEntityExeption(INSUFFICIENT_BALANCE);
+            throw new UnprocessableEntityException(INSUFFICIENT_BALANCE);
         }
     }
 }
