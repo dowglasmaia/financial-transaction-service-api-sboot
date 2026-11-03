@@ -4,23 +4,18 @@ import { InjectionToken } from '@angular/core';
 export interface AppConfig {
   readonly apiBaseUrl: string;
   readonly demoBanner: boolean;
+  /** Auth0 SPA application (public values only; a SPA has no secret). */
   readonly auth: {
-    readonly enabled: boolean;
-    readonly issuer: string;
+    readonly domain: string;
     readonly clientId: string;
-    readonly scopes: readonly string[];
+    readonly audience: string;
   };
 }
 
 export const DEFAULT_APP_CONFIG: AppConfig = {
-  apiBaseUrl: '/api',
+  apiBaseUrl: '/api/v1',
   demoBanner: true,
-  auth: {
-    enabled: false, // dev-open mode until the Okta integration (spec FE-03 / BE-04)
-    issuer: '',
-    clientId: '',
-    scopes: ['openid', 'profile', 'email', 'transactions:read', 'transactions:write'],
-  },
+  auth: { domain: '', clientId: '', audience: '' },
 };
 
 export const APP_CONFIG = new InjectionToken<AppConfig>('APP_CONFIG', { factory: () => DEFAULT_APP_CONFIG });
@@ -37,15 +32,13 @@ function text(value: unknown, fallback: string): string {
 export function parseAppConfig(raw: unknown): AppConfig {
   const source = isRecord(raw) ? raw : {};
   const auth = isRecord(source['auth']) ? source['auth'] : {};
-  const scopes = Array.isArray(auth['scopes']) && auth['scopes'].every((s) => typeof s === 'string') ? (auth['scopes'] as string[]) : DEFAULT_APP_CONFIG.auth.scopes;
   return {
     apiBaseUrl: text(source['apiBaseUrl'], DEFAULT_APP_CONFIG.apiBaseUrl).replace(/\/+$/, '') || DEFAULT_APP_CONFIG.apiBaseUrl,
     demoBanner: typeof source['demoBanner'] === 'boolean' ? source['demoBanner'] : DEFAULT_APP_CONFIG.demoBanner,
     auth: {
-      enabled: typeof auth['enabled'] === 'boolean' ? auth['enabled'] : DEFAULT_APP_CONFIG.auth.enabled,
-      issuer: text(auth['issuer'], DEFAULT_APP_CONFIG.auth.issuer),
+      domain: text(auth['domain'], DEFAULT_APP_CONFIG.auth.domain),
       clientId: text(auth['clientId'], DEFAULT_APP_CONFIG.auth.clientId),
-      scopes,
+      audience: text(auth['audience'], DEFAULT_APP_CONFIG.auth.audience),
     },
   };
 }

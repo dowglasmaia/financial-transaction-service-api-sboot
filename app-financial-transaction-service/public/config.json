@@ -1,10 +1,9 @@
 {
-  "apiBaseUrl": "/api",
+  "apiBaseUrl": "/api/v1",
   "demoBanner": true,
   "auth": {
-    "enabled": false,
-    "issuer": "",
-    "clientId": "",
-    "scopes": ["openid", "profile", "email", "transactions:read", "transactions:write"]
+    "domain": "dev-twljocmfwpvlxx1q.eu.auth0.com",
+    "clientId": "Sy50My7UVdXFjIX7VCwm35LLyzNosKUr",
+    "audience": "https://api.financial-transaction.local"
   }
 }
