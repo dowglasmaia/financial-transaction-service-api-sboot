@@ -8,13 +8,14 @@ import { ReviewDialogComponent } from './review-dialog.component';
 @Component({
   imports: [AmountPresetsComponent, ReviewDialogComponent, ResultPanelComponent],
   template: `
-    <app-amount-presets [(value)]="text" [balance]="balance" [presets]="[10, 20]" />
+    <app-amount-presets [(value)]="text" [balance]="balance" [presets]="[10, 20]" [serverError]="serverError()" />
     <app-review-dialog [(open)]="open" title="Review thing" [lines]="[{ label: 'Amount', value: 'R$ 10.00' }]" [pending]="pending()" (confirmed)="confirmed = confirmed + 1" />
     <app-result-panel [kind]="kind()" title="T" message="M" againLabel="New thing" (again)="events.push('again')" (edit)="events.push('edit')" (retry)="events.push('retry')" />
   `,
 })
 class Host {
   text = signal('');
+  serverError = signal('');
   balance = 100;
   open = signal(true);
   pending = signal(false);
@@ -42,6 +43,17 @@ describe('shared money-flow pieces', () => {
     chips[2].click();
     await fixture.whenStable();
     expect(host.text()).toBe('100.00');
+  });
+
+  it('amount presets: a server error is shown on the field (the page clears it)', async () => {
+    const { fixture, host, el } = setup();
+    host.serverError.set('Account not found.');
+    await fixture.whenStable();
+    expect(el.querySelector('app-amount-presets [role="alert"]')?.textContent).toContain('Account not found.');
+
+    host.serverError.set('');
+    await fixture.whenStable();
+    expect(el.querySelector('app-amount-presets [role="alert"]')).toBeNull();
   });
 
   it('review dialog: shows the lines, emits confirmed, and while pending cannot be dismissed or confirmed again', async () => {
