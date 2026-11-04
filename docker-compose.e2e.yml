@@ -13,6 +13,12 @@ services:
       - kafka
       - mock-idp
 
+  # Optional: run the e2e against the containerised web app instead of `ng serve` (add `--profile web`). The app reads the
+  # mock IdP values from the file mounted below; the browser still needs `mock-idp` mapped to 127.0.0.1 (Playwright does it).
+  financial-transaction-web:
+    volumes:
+      - ./app-financial-transaction-service/e2e/web-config.json:/usr/share/nginx/html/config.json:ro
+
   mock-idp:
     profiles: ["e2e"]
     image: node:22-alpine

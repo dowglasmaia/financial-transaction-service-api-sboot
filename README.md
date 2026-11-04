@@ -36,6 +36,8 @@ cd app-financial-transaction-service && npm run e2e:install && npm run e2e   # 3
 
 Details of the e2e setup (mock IdP users, how the browser reaches it): `app-financial-transaction-service/e2e/README.md`.
 
+**Web app in Docker** - `docker compose --profile api --profile web up -d --build` serves the Angular build with nginx on http://localhost:4200 (same origin as `ng serve`, so the Auth0 callback URLs already registered keep working; stop `npm start` first or set `WEB_PORT`). nginx forwards `/api/` to the API container; the public Auth0 values are the build's `config.json`, replaceable by mounting a file over `/usr/share/nginx/html/config.json`.
+
 Shortcut: `docker compose --profile api up --build` runs everything including the API in Docker. API details: `api-financial-transaction-service/README.md`. Work is driven by `.spec/spec-execution-flow.md`.
 
 ## Authentication (Auth0) - how it works and how to configure it

@@ -493,6 +493,279 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "SL-02 statement and summary",
+			"item": [
+				{
+					"name": "Statement, one day (from = to) -> 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('200 and paging metadata', () => { pm.response.to.have.status(200); const b = pm.response.json(); pm.expect(b).to.have.property('totalElements'); pm.expect(b).to.have.property('page'); pm.expect(b).to.have.property('size'); });"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions?from=2026-03-11&to=2026-03-11",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "2026-03-11"
+								},
+								{
+									"key": "to",
+									"value": "2026-03-11"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Statement, type + sort + page -> 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('200', () => pm.response.to.have.status(200));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions?from=2026-01-01&to=2026-12-31&type=PIX&sort=amount&order=desc&page=0&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "2026-01-01"
+								},
+								{
+									"key": "to",
+									"value": "2026-12-31"
+								},
+								{
+									"key": "type",
+									"value": "PIX"
+								},
+								{
+									"key": "sort",
+									"value": "amount"
+								},
+								{
+									"key": "order",
+									"value": "desc"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Statement without dates -> 422",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('422 with the known message', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().message).to.eql('Dates are required: send from and to.'); });"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions?",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions"
+							],
+							"query": []
+						}
+					}
+				},
+				{
+					"name": "Statement, reversed dates -> 422",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('422', () => pm.response.to.have.status(422));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions?from=2026-03-12&to=2026-03-10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "2026-03-12"
+								},
+								{
+									"key": "to",
+									"value": "2026-03-10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Summary of a period -> 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('200 with one bucket per day', () => { pm.response.to.have.status(200); const b = pm.response.json(); pm.expect(b.series).to.have.length(31); });"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions/summary?from=2026-03-01&to=2026-03-31",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"summary"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "2026-03-01"
+								},
+								{
+									"key": "to",
+									"value": "2026-03-31"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Malformed transaction id -> 400",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('400', () => pm.response.to.have.status(400));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions/not-a-uuid?",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"not-a-uuid"
+							],
+							"query": []
+						}
+					}
+				}
+			]
 		}
 	],
 	"variable": [

@@ -50,3 +50,31 @@ jobs:
             api-financial-transaction-service/target/surefire-reports
             api-financial-transaction-service/target/site/jacoco
           if-no-files-found: ignore
+
+  # SL-02: the contract may grow, it may not break its consumers. Compares the OpenAPI file of the pull request with the one
+  # of the base branch. A deliberate breaking change needs the owner's label `breaking-contract-approved` on the PR.
+  openapi-diff:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Contract of the base branch
+        run: |
+          mkdir -p "$RUNNER_TEMP/base"
+          git show "origin/${{ github.base_ref }}:api-financial-transaction-service/src/main/resources/swagger/financial-transaction-openapi.yaml" > "$RUNNER_TEMP/base/openapi.yaml"
+
+      - name: Fail on breaking changes
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'breaking-contract-approved') }}
+        run: |
+          docker run --rm \
+            -v "$RUNNER_TEMP/base:/base:ro" \
+            -v "$GITHUB_WORKSPACE/api-financial-transaction-service/src/main/resources/swagger:/head:ro" \
+            openapitools/openapi-diff:2.1.0-beta.11 \
+            /base/openapi.yaml /head/financial-transaction-openapi.yaml --fail-on-incompatible
