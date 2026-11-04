@@ -11,7 +11,7 @@ History: seeded from the FE-01 review of the v1 prototype (brown/gold). SL-00 (2
 |---|---|---|
 | V1 | Portuguese copy, brand "Banco MaisVida", "Login seguro via Okta" | UI stays **English**, brand **Maia Bank**, sign-in note will read "Secure sign-in with Auth0" (built in SL-01) |
 | V2 | Search field, notification bell with count, support-phone strip, "Learn more" security link | **Not built** — no endpoint (D-35) |
-| V3 | Recharge carriers Claro / Vivo / TIM / **Oi** | Backend enum is VIVO / CLARO / TIM / **ALGAR** → Algar (D-36, SL-05) |
+| V3 | Recharge carriers Claro / Vivo / TIM / **Oi** | Backend enum is VIVO / CLARO / TIM / **ALGAR** → Algar (D-36, SL-04) |
 | V4 | Dark only | Dark default + **derived light theme** from the v2 hues, contrast-tested (D-34) |
 | V5 | No AI Assistant screen | Dropped from scope; reinstate only if the owner asks |
 | V6 | Prototype control bar (data / outcome simulators, screen jump) | Never shipped; the states are reproduced in unit tests and `/design` |

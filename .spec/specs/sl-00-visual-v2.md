@@ -55,7 +55,7 @@ Replace the v1 look (warm brown + gold) that FE-02 implemented with the approved
 |---|---|---|
 | 1 | Portuguese copy, brand "Banco MaisVida", "Login seguro via Okta" | Translate to English, brand **Maia Bank**, "Secure sign-in with Auth0" (D-33) |
 | 2 | Search field, bell "3", support phone strip, security "Learn more" link | Not built — no endpoint (D-35) |
-| 3 | Recharge carriers Claro/Vivo/TIM/**Oi** | Backend enum is VIVO/CLARO/TIM/**ALGAR** → show Algar (SL-05) |
+| 3 | Recharge carriers Claro/Vivo/TIM/**Oi** | Backend enum is VIVO/CLARO/TIM/**ALGAR** → show Algar (SL-04) |
 | 4 | Deposit = boleto with client-side "Simulate payment" | Tier-2 proposal A stays (decided in SL-04) |
 | 5 | Ids like `TX-000001-9F2` | Real ids are UUIDs → show shortened + copy action (SL-02) |
 | 6 | Dark only | Derived light palette (D-34) |

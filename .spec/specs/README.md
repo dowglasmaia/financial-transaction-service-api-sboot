@@ -7,13 +7,15 @@
 SDD: nothing is implemented without an approved spec. A spec starts when its dependencies are **Done**. Protocol: `../shared/como-executar.md`. Base context: `../memory/`.
 
 ## Two kinds of work
-1. **Foundation specs (done or backend-only)** — `MONO-01`, `BE-01…BE-04`, `FE-01`, `FE-02`, and the closing backend specs `BE-07`, `BE-08`, `FE-05`, `FINAL-01`.
+1. **Foundation specs (done or backend-only)** — `MONO-01`, `BE-01…BE-04`, `FE-01`, `FE-02`, and the closing specs `BE-07`, `BE-08`, `FINAL-01` (which absorbs the former `FE-05`).
 2. **Vertical slices (D-31)** — from now on every user-visible capability is delivered as **one slice = one branch = one PR carrying backend + frontend + e2e together**, so the parts that connect always move together and can be tried in the browser at the end of each slice.
 
 `BE-05`, `BE-06`, `FE-03` and `FE-04` are **superseded**: their scope was split across the slices (mapping below). Their files stay as the scope catalogue.
 
 ## Order
-`MONO-01 · BE-01…BE-04 · FE-01 · FE-02` (done) → **`SL-00`** → **`SL-01`** → **`ARCH-01 → ARCH-02`** → **`SL-02 → SL-03 → SL-04 → SL-05 → SL-06`** → `BE-07` → `BE-08 ∥ FE-05` → `FINAL-01`
+> **Revised 2026-11-04:** ARCH-01 and ARCH-02 are merged. Deposit and recharge became one slice (SL-04, branch `slice/04-deposit-and-recharge`); the body-shape validation of all four POSTs moved to SL-03; FE-05 was folded into FINAL-01. SL-05 and FE-05 have no prompt any more.
+
+`MONO-01 · BE-01…BE-04 · FE-01 · FE-02` (done) → **`SL-00`** → **`SL-01`** → **`ARCH-01 → ARCH-02`** → **`SL-02 → SL-03 → SL-04 (deposit + recharge) → SL-06`** → `BE-07` → `BE-08` → `FINAL-01` (includes the former FE-05)
 
 Slices are strictly sequential (they share backend services and the app shell). **`ARCH-01` and `ARCH-02` (backend architecture migration, D-39) run right after `SL-01`** (owner decision 2026-11-03, D-44: finish the login flow first) and **before `SL-02`**, so every later endpoint is created in its final place with the skill `java-spring-create-module`. `SL-01` is the one slice built on the current layered backend.
 
@@ -32,12 +34,12 @@ Slices are strictly sequential (they share backend services and the app shell). 
 | [SL-01](sl-01-login-and-account.md) | **Sign in (Auth0) + `/accounts/me` + shell + Home header** | SL-00, BE-04 | `slice/01-login-and-account` |
 | [SL-02](sl-02-statement-and-detail.md) | **Statement, detail, Home summary** (+ contract, dates, errors) | ARCH-02 | `slice/02-statement-and-detail` |
 | [SL-03](sl-03-withdrawal.md) | **Withdrawal** + result panel + `Idempotency-Key` | SL-02 | `slice/03-withdrawal` |
-| [SL-04](sl-04-deposit.md) | **Deposit** (boleto simulation over the real deposit) | SL-03 | `slice/04-deposit` |
-| [SL-05](sl-05-recharge.md) | **Mobile recharge** | SL-04 | `slice/05-recharge` |
-| [SL-06](sl-06-pix.md) | **Pix** (3 steps, MaiaBank) | SL-05 | `slice/06-pix` |
+| [SL-04](sl-04-deposit-and-recharge.md) | **Deposit + Mobile recharge** (boleto simulation over the real deposit; "requested" recharge) — one slice, two pages | SL-03 | `slice/04-deposit-and-recharge` |
+| ~~[SL-05](sl-05-recharge.md)~~ | Merged into SL-04 2026-11-04 | — | — |
+| [SL-06](sl-06-pix.md) | **Pix** (3 steps, MaiaBank) | SL-04 | `slice/06-pix` |
 | [BE-07](be-07-platform-upgrade.md) | Platform upgrade: Boot 3.5.x, Java 21, Java 25 (backend-only) | SL-06 | `spec/be-07-platform-upgrade` |
 | [BE-08](be-08-cleanup-hardening.md) | Cleanup and portfolio-grade hardening (backend-only) | BE-07 | `spec/be-08-cleanup-hardening` |
-| [FE-05](fe-05-final-validation.md) | End-to-end, accessibility and final review | SL-06, BE-07 | `spec/fe-05-final-validation` |
+| ~~[FE-05](fe-05-final-validation.md)~~ | Folded into FINAL-01 2026-11-04 | — | — |
 | [FINAL-01](final-01-test-round.md) | Final test round (after all specs) | all others | `spec/final-01-test-round` |
 | ~~[BE-05](be-05-behaviour-fixes.md)~~ | Superseded | — | — |
 | ~~[BE-06](be-06-api-contract-and-evolution.md)~~ | Superseded | — | — |
@@ -48,7 +50,8 @@ Slices are strictly sequential (they share backend services and the app shell). 
 | Old item | Delivered in |
 |---|---|
 | BE-05 dates (half-open range, null/invalid), `HandlerException` (parse errors, 500 JSON) | SL-02 |
-| BE-05 validators / null bodies per operation | SL-03 (withdraw), SL-04 (deposit), SL-05 (recharge, phone), SL-06 (Pix: CPF, e-mail, phone) |
+| BE-05 null/blank body checks of the four POSTs | SL-03 (all four, once) |
+| BE-05 operation rules | SL-04 (deposit, recharge phone/carrier), SL-06 (Pix: CPF, e-mail, phone) |
 | BE-06 `GET /accounts/me` | SL-01 |
 | BE-06 generator migration, contract corrections, row `id`, pagination/sort/type, totals, ISO dates, openapi-diff | SL-02 |
 | BE-06 `Idempotency-Key` (`V4`) | SL-03 |
@@ -56,7 +59,8 @@ Slices are strictly sequential (they share backend services and the app shell). 
 | FE-03 Home summary, Statement, Detail | SL-02 |
 | FE-03 AI Assistant concept card | Dropped (v2 has none; D-35) |
 | FE-04 Withdrawal + shared result panel | SL-03 |
-| FE-04 Deposit / Recharge / Pix | SL-04 / SL-05 / SL-06 |
+| FE-04 Deposit + Recharge / Pix | SL-04 / SL-06 |
+| FE-05 e2e matrix, responsive audit, demo README | FINAL-01 (items E, F, J) |
 | BE-04's pending manual Auth0 sign-in | SL-01 (human task) |
 
 ## Why this order
@@ -65,7 +69,8 @@ Slices are strictly sequential (they share backend services and the app shell). 
 3. **ARCH-01/02 before the first backend slice:** SL-01…SL-06 add and change backend code; doing it on the old layered packages and migrating later would mean writing it twice. The migration is behaviour-frozen and guarded by the 100+ existing tests; `account` goes first as the pilot because it is the smallest feature.
 4. **SL-01 first slice:** the smallest end-to-end chain (browser → Auth0 → API → DB) that the owner can try; everything later relies on it.
 5. **SL-02 before the operations:** you can only judge an operation by what it does to the balance and the statement.
-6. **SL-03 before SL-04…06:** it creates the shared result panel and the idempotency protection the other three flows reuse; withdrawal is the simplest body.
+6. **SL-03 before SL-04 and SL-06:** it creates the shared result panel, amount presets, review dialog and the idempotency protection the other flows reuse, and hardens the body validation of all four POSTs once; withdrawal is the simplest body.
+6b. **Deposit and recharge together (2026-11-04):** after SL-03 both are almost only frontend and share every component, so they are one slice with two pages (Deposit first).
 7. **Pix last:** it has the external call, the most validators and the uncertain-outcome path.
 8. **BE-07 after the slices:** functional work first, platform upgrades last, so regressions are attributable.
 
@@ -88,9 +93,10 @@ Approve the class mapping table and the security split (ARCH-01) and the transac
 | SL-00 … SL-06 | Draft (specs written 2026-11-03; not authorized) |
 | SL-00 | Done (PR #13 merged); owner signed off the look 2026-11-03 (record: commit `7a8a37e` on `slice/00-visual-v2`, not merged) |
 | SL-01 | **Implemented on `slice/01-login-and-account` (2026-11-03), verified with the mock IdP** (116 backend tests, 174 unit tests, 21 e2e). **Open:** owner's real Auth0 sign-in + portal URLs, `api-ci`/`app-ci` on the PR. Tokens stay in memory (owner decision 2026-11-03). Prompt used: see `prompts.md` *Execution log* |
-| SL-02 … SL-06 | Draft (specs written 2026-11-03; not authorized) |
+| SL-02, SL-03, SL-04 (deposit + recharge), SL-06 | Draft (revised 2026-11-04 after ARCH-01/02; not authorized) |
+| SL-05 | Merged into SL-04 (2026-11-04) |
 | BE-07 | Draft (Java 21 build already pre-applied locally, uncommitted; see the spec note) |
 | BE-08 | Draft |
-| FE-05 | Draft |
+| FE-05 | Folded into FINAL-01 (2026-11-04) |
 | FINAL-01 | Draft |
 | BE-05, BE-06, FE-03, FE-04 | Superseded by the slices |
