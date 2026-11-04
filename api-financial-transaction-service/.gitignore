@@ -33,6 +33,6 @@ build/
 .vscode/
 
 ### Local configuration (never commit) ###
-application-local.yaml
+# application-local.yaml is versioned on purpose: it only holds throw-away credentials of the local compose database
 application-local.yml
 .env
