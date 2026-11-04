@@ -28,6 +28,12 @@ export const routes: Routes = [
     loadChildren: () => import('./features/statement/statement.routes').then((module) => module.STATEMENT_ROUTES),
   },
   {
+    path: 'withdraw',
+    canActivate: [authGuard],
+    data: { nav: { label: 'Withdraw', icon: 'ph ph-money', order: 3 } },
+    loadChildren: () => import('./features/withdraw/withdraw.routes').then((module) => module.WITHDRAW_ROUTES),
+  },
+  {
     path: 'no-access',
     canActivate: [authGuard],
     title: 'No access · Maia Bank',

@@ -56,14 +56,14 @@ describe('WithdrawPage', () => {
     expect(input().value).toBe('5000.00');
   });
 
-  it('gives feedback (only feedback) above the balance and for zero, and keeps Review disabled', async () => {
+  it('gives feedback above the balance (the server still decides, so Review stays available) and for zero (nothing to review)', async () => {
     const { fixture, el, button, type } = setup();
     await fixture.whenStable();
     expect(button('Review withdrawal')!.disabled).toBe(true);
 
     await type('5000.01');
     expect(el.textContent).toContain("The amount can't exceed your available balance.");
-    expect(button('Review withdrawal')!.disabled).toBe(true);
+    expect(button('Review withdrawal')!.disabled).toBe(false); // feedback only: the server answers 422 and the panel says so
 
     await type('0');
     expect(el.textContent).toContain('Enter an amount greater than zero.');
