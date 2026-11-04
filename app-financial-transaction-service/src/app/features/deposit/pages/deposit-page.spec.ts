@@ -14,7 +14,9 @@ const ACCOUNT: AccountMe = { agency: '0211', number: '2022', balance: 5000 };
 function setup(deposit: (...args: unknown[]) => unknown = () => of(undefined)) {
   const account = { me: vi.fn(() => of(ACCOUNT)) };
   const api = { deposit: vi.fn(deposit) };
-  const session = { user: signal({ name: 'Maria Silva', email: 'maria@example.test', picture: '' }) };
+  const session = {
+    user: signal({ name: 'Maria Silva', email: 'maria@example.test', picture: '' }),
+  };
   TestBed.configureTestingModule({
     providers: [
       provideRouter([]),
@@ -26,7 +28,10 @@ function setup(deposit: (...args: unknown[]) => unknown = () => of(undefined)) {
   const fixture = TestBed.createComponent(DepositPage);
   const el = fixture.nativeElement as HTMLElement;
   const input = () => el.querySelector<HTMLInputElement>('input')!;
-  const button = (text: string) => [...el.querySelectorAll<HTMLButtonElement>('button')].find((b) => b.textContent?.includes(text));
+  const button = (text: string) =>
+    [...el.querySelectorAll<HTMLButtonElement>('button')].find((b) =>
+      b.textContent?.includes(text),
+    );
   const type = async (value: string) => {
     input().value = value;
     input().dispatchEvent(new Event('input'));
@@ -44,7 +49,8 @@ describe('DepositPage', () => {
   it('offers the proposed amounts and never a balance limit', async () => {
     const { fixture, el } = setup();
     await fixture.whenStable();
-    for (const label of ['R$ 100', 'R$ 250', 'R$ 500', 'R$ 1000']) expect(el.textContent).toContain(label);
+    for (const label of ['R$ 100', 'R$ 250', 'R$ 500', 'R$ 1000'])
+      expect(el.textContent).toContain(label);
     expect(el.textContent).not.toContain('Use full balance');
     expect(el.textContent).not.toContain('exceed');
   });
@@ -102,7 +108,7 @@ describe('DepositPage', () => {
     expect(button('Generate boleto')).toBeDefined();
   });
 
-  it("\"Simulate payment\" sends ONE request with the caller's agency, account and the amount; a double click is one request", async () => {
+  it('"Simulate payment" sends ONE request with the caller\'s agency, account and the amount; a double click is one request', async () => {
     const pending = new Subject<void>();
     const { fixture, api, button, generate } = setup(() => pending);
     await fixture.whenStable();
@@ -114,7 +120,11 @@ describe('DepositPage', () => {
     await fixture.whenStable();
 
     expect(api.deposit).toHaveBeenCalledTimes(1);
-    expect(api.deposit).toHaveBeenCalledWith({ agency: '0211', account: '2022' }, '150.00', expect.any(String));
+    expect(api.deposit).toHaveBeenCalledWith(
+      { agency: '0211', account: '2022' },
+      '150.00',
+      expect.any(String),
+    );
   });
 
   it('success: "Deposit registered" and the balance is read again from the API', async () => {
@@ -143,7 +153,11 @@ describe('DepositPage', () => {
   });
 
   it('422 shows the backend message in the business-failure panel', async () => {
-    const failure: ApiError = { status: 422, code: 'UNPROCESSABLE_ENTITY', message: 'Amount must be positive and non-null' };
+    const failure: ApiError = {
+      status: 422,
+      code: 'UNPROCESSABLE_ENTITY',
+      message: 'Amount must be positive and non-null',
+    };
     const { fixture, el, button, generate } = setup(() => throwError(() => failure));
     await fixture.whenStable();
     await generate('150');
@@ -156,7 +170,11 @@ describe('DepositPage', () => {
 
   it('uncertain: "Try again" repeats the SAME key and the same request; no automatic retry', async () => {
     let calls = 0;
-    const { fixture, el, api, button, generate } = setup(() => (++calls === 1 ? throwError(() => ({ status: 0, code: 'NETWORK', message: 'offline' })) : of(undefined)));
+    const { fixture, el, api, button, generate } = setup(() =>
+      ++calls === 1
+        ? throwError(() => ({ status: 0, code: 'NETWORK', message: 'offline' }))
+        : of(undefined),
+    );
     await fixture.whenStable();
     await generate('150');
     button('Simulate payment')!.click();

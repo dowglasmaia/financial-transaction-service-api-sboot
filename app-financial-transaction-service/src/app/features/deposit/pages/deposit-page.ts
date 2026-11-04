@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  untracked,
+} from '@angular/core';
 import { SessionService } from '../../../core/auth/session.service';
 import { OperationController } from '../../../shared/operation/operation';
 import { AccountStore } from '../../account/data-access/account.store';
@@ -12,7 +20,8 @@ import { formatBrl, parseAmountInput } from '../../../shared/util/money';
 import { DepositApi } from '../data-access/deposit.api';
 import { Boleto, buildBoleto } from '../domain/boleto';
 
-const UNCERTAIN_MESSAGE = "We couldn't confirm the operation. Check your transactions before trying again, so you don't pay twice.";
+const UNCERTAIN_MESSAGE =
+  "We couldn't confirm the operation. Check your transactions before trying again, so you don't pay twice.";
 const PRESETS = [100, 250, 500, 1000] as const;
 
 /**
@@ -68,7 +77,9 @@ export class DepositPage {
         }
         this.showResult.set(true);
         if (phase === 'success') {
-          this.doneAt.set(new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+          this.doneAt.set(
+            new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+          );
           this.account.load(); // the balance on screen is always the API's, never a local calculation
         }
       });
@@ -93,7 +104,9 @@ export class DepositPage {
     const boleto = this.boleto();
     const account = this.account.account();
     if (!boleto || !account) return;
-    this.operation.run((key) => this.api.deposit({ agency: account.agency, account: account.number }, boleto.amount, key));
+    this.operation.run((key) =>
+      this.api.deposit({ agency: account.agency, account: account.number }, boleto.amount, key),
+    );
   }
 
   protected tryAgain(): void {

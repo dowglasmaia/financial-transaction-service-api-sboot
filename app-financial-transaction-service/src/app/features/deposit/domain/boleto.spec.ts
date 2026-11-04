@@ -4,7 +4,9 @@ const TODAY = new Date(2026, 10, 4); // 4 Nov 2026
 
 describe('buildBoleto (a demo: nothing here is a real boleto)', () => {
   it('is deterministic: the same amount always gives the same document, line and bars', () => {
-    expect(buildBoleto('150.00', 'Maria Silva', TODAY)).toEqual(buildBoleto('150.00', 'Maria Silva', TODAY));
+    expect(buildBoleto('150.00', 'Maria Silva', TODAY)).toEqual(
+      buildBoleto('150.00', 'Maria Silva', TODAY),
+    );
   });
 
   it('a different amount gives a different document line and bars', () => {

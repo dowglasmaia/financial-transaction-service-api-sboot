@@ -20,7 +20,13 @@ export class DepositApi {
 
   /** `amount` is the normalized two-decimal string; `idempotencyKey` identifies this user attempt. */
   deposit(target: DepositTarget, amount: string, idempotencyKey: string): Observable<void> {
-    const body: DepositBody = { agency: target.agency, account: target.account, amount: Number(amount) };
-    return this.http.post<void>(`${this.baseUrl}/transactions/deposit`, body, { headers: { 'Idempotency-Key': idempotencyKey } });
+    const body: DepositBody = {
+      agency: target.agency,
+      account: target.account,
+      amount: Number(amount),
+    };
+    return this.http.post<void>(`${this.baseUrl}/transactions/deposit`, body, {
+      headers: { 'Idempotency-Key': idempotencyKey },
+    });
   }
 }

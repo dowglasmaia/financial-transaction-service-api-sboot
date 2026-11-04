@@ -7,7 +7,11 @@ import { DepositApi } from './deposit.api';
 describe('DepositApi', () => {
   function setup() {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), { provide: API_BASE_URL, useValue: '/api/v1' }],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: API_BASE_URL, useValue: '/api/v1' },
+      ],
     });
     return { api: TestBed.inject(DepositApi), http: TestBed.inject(HttpTestingController) };
   }

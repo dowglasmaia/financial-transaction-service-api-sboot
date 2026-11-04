@@ -22,7 +22,13 @@
       />
     }
     @default {
-      <app-result-panel kind="uncertain" title="Outcome not confirmed" [message]="uncertainMessage" [busy]="operation.pending()" (retry)="tryAgain()" />
+      <app-result-panel
+        kind="uncertain"
+        title="Outcome not confirmed"
+        [message]="uncertainMessage"
+        [busy]="operation.pending()"
+        (retry)="tryAgain()"
+      />
     }
   }
 } @else {
@@ -38,62 +44,135 @@
     @if (account.error(); as problem) {
       <p role="alert" class="rounded-control border border-expense bg-expense/10 p-3 text-sm">
         We couldn't load your account. {{ problem.message }}
-        <button appButton variant="secondary" type="button" class="ml-2 h-9 px-3 text-sm" (click)="account.load()">Try again</button>
+        <button
+          appButton
+          variant="secondary"
+          type="button"
+          class="ml-2 h-9 px-3 text-sm"
+          (click)="account.load()"
+        >
+          Try again
+        </button>
       </p>
     }
 
     <div class="grid items-start gap-6 lg:grid-cols-2">
       @if (!boleto()) {
-        <form class="grid gap-5 rounded-panel border border-line bg-glass p-6 shadow-card" (submit)="$event.preventDefault(); generate()">
-          <p class="flex items-center gap-2.5 rounded-control border border-primary/40 bg-primary/10 p-3 text-[15px]">
+        <form
+          class="grid gap-5 rounded-panel border border-line bg-glass p-6 shadow-card"
+          (submit)="$event.preventDefault(); generate()"
+        >
+          <p
+            class="flex items-center gap-2.5 rounded-control border border-primary/40 bg-primary/10 p-3 text-[15px]"
+          >
             <i class="ph-fill ph-info text-xl text-accent" aria-hidden="true"></i>
-            This is a demo: no real boleto is issued. Simulating the payment registers a real deposit in your account.
+            This is a demo: no real boleto is issued. Simulating the payment registers a real
+            deposit in your account.
           </p>
-          <app-amount-presets label="Deposit amount" [(value)]="text" [balance]="null" [fullBalance]="false" [presets]="presets" [serverError]="fieldError()" />
+          <app-amount-presets
+            label="Deposit amount"
+            [(value)]="text"
+            [balance]="null"
+            [fullBalance]="false"
+            [presets]="presets"
+            [serverError]="fieldError()"
+          />
           <button appButton type="submit" [disabled]="!amount()">Generate boleto</button>
         </form>
 
-        <section class="grid gap-3 rounded-panel border border-dashed border-line-input bg-glass p-6 text-center" aria-label="Boleto preview">
+        <section
+          class="grid gap-3 rounded-panel border border-dashed border-line-input bg-glass p-6 text-center"
+          aria-label="Boleto preview"
+        >
           <h2 class="font-display text-base font-bold">Your boleto</h2>
           <div class="flex h-[70px] items-stretch justify-center gap-[3px]" aria-hidden="true">
-            @for (bar of [3, 1, 2, 4, 1, 3, 2, 1, 4, 2, 1, 3, 2, 4, 1, 2, 3, 1, 4, 2]; track $index) {
+            @for (
+              bar of [3, 1, 2, 4, 1, 3, 2, 1, 4, 2, 1, 3, 2, 4, 1, 2, 3, 1, 4, 2];
+              track $index
+            ) {
               <span class="bg-line-input" [style.width.px]="bar * 2"></span>
             }
           </div>
-          <p class="text-sm text-content-muted">Preview. The barcode and the data appear after you generate the boleto.</p>
+          <p class="text-sm text-content-muted">
+            Preview. The barcode and the data appear after you generate the boleto.
+          </p>
         </section>
       } @else {
-        <section class="grid gap-4 rounded-panel bg-[#f4f7ff] p-6 text-[#0f1b4d] shadow-card" aria-label="Demo boleto">
-          <div class="flex items-center justify-between gap-3">
-            <h2 class="font-display text-base font-bold">Your boleto</h2>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#fef3c7] px-2.5 py-1 text-[11px] font-bold text-[#92400e]">
-              <span class="size-[7px] rounded-full bg-[#d97706]" aria-hidden="true"></span>Awaiting payment (demo)
-            </span>
-          </div>
-          <div class="flex h-[70px] items-stretch overflow-hidden" aria-hidden="true">
-            @for (bar of boleto()!.bars; track $index) {
-              <span [style.width.px]="bar * 1.5" [class]="$index % 2 === 0 ? 'bg-[#0f1b4d]' : 'bg-transparent'"></span>
-            }
-          </div>
-          <dl class="grid gap-2 border-t-2 border-dashed border-[#cbd5f0] pt-3 text-[13px]">
-            <div class="flex justify-between gap-3"><dt class="text-[#46548a]">Beneficiary</dt><dd class="font-bold">{{ boleto()!.beneficiary }}</dd></div>
-            <div class="flex justify-between gap-3"><dt class="text-[#46548a]">Payer</dt><dd class="font-bold">{{ boleto()!.payer }}</dd></div>
-            <div class="flex justify-between gap-3"><dt class="text-[#46548a]">Document</dt><dd class="font-bold">{{ boleto()!.document }}</dd></div>
-            <div class="flex justify-between gap-3"><dt class="text-[#46548a]">Due date</dt><dd class="font-bold">{{ boleto()!.dueDate }}</dd></div>
-            <div class="flex justify-between gap-3"><dt class="text-[#46548a]">Amount</dt><dd class="font-bold tabular-nums">{{ boletoAmount() }}</dd></div>
-          </dl>
-          <p class="font-mono text-xs leading-relaxed break-all text-[#334155]">{{ boleto()!.digitableLine }}</p>
+        <div class="grid gap-4">
+          <section
+            class="grid gap-4 rounded-panel bg-[#f4f7ff] p-6 text-[#0f1b4d] shadow-card"
+            aria-label="Demo boleto"
+          >
+            <div class="flex items-center justify-between gap-3">
+              <h2 class="font-display text-base font-bold">Your boleto</h2>
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-[#fef3c7] px-2.5 py-1 text-[11px] font-bold text-[#92400e]"
+              >
+                <span class="size-[7px] rounded-full bg-[#d97706]" aria-hidden="true"></span
+                >Awaiting payment (demo)
+              </span>
+            </div>
+            <div class="flex h-[70px] items-stretch overflow-hidden" aria-hidden="true">
+              @for (bar of boleto()!.bars; track $index) {
+                <span
+                  [style.width.px]="bar * 1.5"
+                  [class]="$index % 2 === 0 ? 'bg-[#0f1b4d]' : 'bg-transparent'"
+                ></span>
+              }
+            </div>
+            <dl class="grid gap-2 border-t-2 border-dashed border-[#cbd5f0] pt-3 text-[13px]">
+              <div class="flex justify-between gap-3">
+                <dt class="text-[#46548a]">Beneficiary</dt>
+                <dd class="font-bold">{{ boleto()!.beneficiary }}</dd>
+              </div>
+              <div class="flex justify-between gap-3">
+                <dt class="text-[#46548a]">Payer</dt>
+                <dd class="font-bold">{{ boleto()!.payer }}</dd>
+              </div>
+              <div class="flex justify-between gap-3">
+                <dt class="text-[#46548a]">Document</dt>
+                <dd class="font-bold">{{ boleto()!.document }}</dd>
+              </div>
+              <div class="flex justify-between gap-3">
+                <dt class="text-[#46548a]">Due date</dt>
+                <dd class="font-bold">{{ boleto()!.dueDate }}</dd>
+              </div>
+              <div class="flex justify-between gap-3">
+                <dt class="text-[#46548a]">Amount</dt>
+                <dd class="font-bold tabular-nums">{{ boletoAmount() }}</dd>
+              </div>
+            </dl>
+            <p class="font-mono text-xs leading-relaxed break-all text-[#334155]">
+              {{ boleto()!.digitableLine }}
+            </p>
+            <p class="text-center text-xs text-[#46548a]">Demo. This is not a real boleto.</p>
+          </section>
           <div class="grid gap-2.5">
             <div class="grid gap-2.5 sm:grid-cols-3">
-              <button appButton variant="secondary" type="button" (click)="demoAction()"><i class="ph ph-download-simple" aria-hidden="true"></i>Download boleto</button>
-              <button appButton variant="secondary" type="button" (click)="demoAction()"><i class="ph ph-share-network" aria-hidden="true"></i>Share</button>
-              <button appButton variant="secondary" type="button" (click)="demoAction()"><i class="ph ph-copy" aria-hidden="true"></i>Copy line</button>
+              <button appButton variant="secondary" type="button" (click)="demoAction()">
+                <i class="ph ph-download-simple" aria-hidden="true"></i>Download boleto
+              </button>
+              <button appButton variant="secondary" type="button" (click)="demoAction()">
+                <i class="ph ph-share-network" aria-hidden="true"></i>Share
+              </button>
+              <button appButton variant="secondary" type="button" (click)="demoAction()">
+                <i class="ph ph-copy" aria-hidden="true"></i>Copy line
+              </button>
             </div>
-            <button appButton type="button" [loading]="operation.pending()" (click)="pay()">Simulate payment</button>
-            <button appButton variant="ghost" type="button" [disabled]="operation.pending()" (click)="newAmount()">New amount</button>
+            <button appButton type="button" [loading]="operation.pending()" (click)="pay()">
+              Simulate payment
+            </button>
+            <button
+              appButton
+              variant="ghost"
+              type="button"
+              [disabled]="operation.pending()"
+              (click)="newAmount()"
+            >
+              New amount
+            </button>
           </div>
-          <p class="text-center text-xs text-[#46548a]">Demo. This is not a real boleto.</p>
-        </section>
+        </div>
       }
     </div>
   </section>
