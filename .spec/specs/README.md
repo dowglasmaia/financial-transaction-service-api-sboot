@@ -86,13 +86,11 @@ Approve the class mapping table and the security split (ARCH-01) and the transac
 | BE-03 | Done (PR #7 merged 2026-11-02) |
 | BE-04 | Merged (PR #9); automated two-user scenario added; **manual Auth0 browser sign-in moves to SL-01** |
 | FE-01 | Superseded by SL-00 (v2 sign-off happens there) |
-| FE-02 | Done (PR #5 merged 2026-11-02; app-ci green on 48230d5). Look replaced by SL-00. Carried over: axe run → SL-01/FE-05, OpenAPI type generation → SL-01 |
-| SL-00 | Implemented on `slice/00-visual-v2` (2026-11-03); owner signed off the look (2026-11-03); **open: `app-ci` on the PR** |
-| ARCH-01 | **Implemented 2026-11-03** on `spec/arch-01-hexagonal-pilot` (pushed, no PR yet); Done after `api-ci` is green on the PR and the owner merges |
-| ARCH-02 | **Implemented 2026-11-03** on `spec/arch-02-hexagonal-transaction` (pushed, no PR yet); Done after `api-ci` is green on the PR and the owner merges |
-| SL-00 … SL-06 | Draft (specs written 2026-11-03; not authorized) |
+| FE-02 | Done (PR #5 merged 2026-11-02; app-ci green on 48230d5). Look replaced by SL-00. Carried over: axe run → SL-01/FINAL-01, OpenAPI type generation → SL-01 |
+| ARCH-01 | Done (PR #17 merged; 156 tests, checker 0 violations, layout v2 / D-50) |
+| ARCH-02 | Done (PR #18 merged; 184 tests, strict checker 0 violations, no legacy package) |
 | SL-00 | Done (PR #13 merged); owner signed off the look 2026-11-03 (record: commit `7a8a37e` on `slice/00-visual-v2`, not merged) |
-| SL-01 | **Implemented on `slice/01-login-and-account` (2026-11-03), verified with the mock IdP** (116 backend tests, 174 unit tests, 21 e2e). **Open:** owner's real Auth0 sign-in + portal URLs, `api-ci`/`app-ci` on the PR. Tokens stay in memory (owner decision 2026-11-03). Prompt used: see `prompts.md` *Execution log* |
+| SL-01 | Merged (PR #16), verified with the mock IdP (116 backend tests, 174 unit tests, 21 e2e). **Open (owner):** real Auth0 sign-in for both users + the portal URLs, then the SL-01 continuation prompt closes it. Tokens stay in memory (owner decision 2026-11-03) |
 | SL-02, SL-03, SL-04 (deposit + recharge), SL-06 | Draft (revised 2026-11-04 after ARCH-01/02; not authorized) |
 | SL-05 | Merged into SL-04 (2026-11-04) |
 | BE-07 | Draft (Java 21 build already pre-applied locally, uncommitted; see the spec note) |
