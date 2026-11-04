@@ -111,4 +111,31 @@ describe('HomePage', () => {
     expect(el.textContent).toContain('Request id: req-9');
     expect(el.querySelector('app-balance-card')).not.toBeNull();
   });
+  it('quick actions: a Deposit tile links to the Deposit page', async () => {
+    const { fixture, el } = setup(() => of(ACCOUNT));
+    await fixture.whenStable();
+    const tile = el.querySelector<HTMLAnchorElement>('a[href="/deposit"]');
+    expect(tile?.textContent).toContain('Deposit');
+  });
+
+  it('quick recharge: the same form; Review recharge needs everything, then opens the review on the Recharge page', async () => {
+    const { fixture, el, navigateByUrl } = setup(() => of(ACCOUNT));
+    await fixture.whenStable();
+    const card = el.querySelector('[aria-label="Quick recharge"]')!;
+    const button = (text: string) => [...card.querySelectorAll<HTMLButtonElement>('button')].find((b) => b.textContent?.includes(text))!;
+    const typeInto = async (input: HTMLInputElement, value: string) => {
+      input.value = value;
+      input.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+    };
+    expect(button('Review recharge').disabled).toBe(true);
+
+    button('Vivo').click();
+    await typeInto(card.querySelector<HTMLInputElement>('input[type="tel"]')!, '11912345678');
+    await typeInto(card.querySelector<HTMLInputElement>('input[inputmode="decimal"]')!, '30');
+    expect(button('Review recharge').disabled).toBe(false);
+
+    button('Review recharge').click();
+    expect(navigateByUrl).toHaveBeenCalledWith('/recharge', { state: { recharge: { carrier: 'VIVO', phone: '(11) 9 1234-5678', amount: '30.00' } } });
+  });
 });

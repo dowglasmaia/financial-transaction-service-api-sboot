@@ -28,6 +28,25 @@
     </div>
   }
 
+  @if (store.account(); as account) {
+    <section class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]" aria-labelledby="quick-title">
+      <div class="grid gap-3">
+        <h2 id="quick-title" class="font-display text-xl font-semibold">Quick actions</h2>
+        <a
+          routerLink="/deposit"
+          class="flex items-center gap-3 rounded-card border border-line bg-glass p-4 shadow-card transition hover:bg-surface-overlay focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none"
+        >
+          <app-icon-tile icon="ph-bold ph-barcode" tone="income" />
+          <span class="grid">
+            <span class="font-bold">Deposit</span>
+            <span class="text-sm text-content-muted">Demo boleto, real deposit</span>
+          </span>
+        </a>
+      </div>
+      <app-quick-recharge-card [balance]="account.balance" />
+    </section>
+  }
+
   @if (store.account()) {
     <section class="grid gap-4" aria-labelledby="activity-title">
       <div class="flex flex-wrap items-center justify-between gap-3">

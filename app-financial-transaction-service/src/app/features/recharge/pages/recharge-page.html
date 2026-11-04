@@ -1,0 +1,92 @@
+@if (showResult()) {
+  @switch (operation.phase()) {
+    @case ('success') {
+      <app-result-panel
+        kind="success"
+        title="Recharge requested"
+        [message]="successMessage"
+        [lines]="lines()"
+        [note]="'Requested on this device at ' + doneAt()"
+        againLabel="New recharge"
+        (again)="another()"
+      />
+    }
+    @case ('business') {
+      <app-result-panel
+        kind="business"
+        title="Couldn't request the recharge"
+        [message]="operation.error()?.message ?? 'The recharge was not requested.'"
+        [lines]="lines()"
+        note="Nothing was charged. Your balance is unchanged."
+        (edit)="edit()"
+      />
+    }
+    @default {
+      <app-result-panel
+        kind="uncertain"
+        title="Outcome not confirmed"
+        [message]="uncertainMessage"
+        [busy]="operation.pending()"
+        (retry)="tryAgain()"
+      />
+    }
+  }
+} @else {
+  <section class="grid gap-6" aria-labelledby="recharge-title">
+    <header class="flex flex-wrap items-center gap-3.5">
+      <app-icon-tile icon="ph-bold ph-device-mobile" tone="violet" size="lg" />
+      <div>
+        <h1 id="recharge-title" class="font-display text-3xl font-bold">Recharge</h1>
+        <p class="text-sm text-content-muted">Top up a mobile phone</p>
+      </div>
+      <div class="ml-auto rounded-control border border-line bg-glass px-4 py-2 text-right">
+        <p class="text-[10px] font-bold tracking-wider text-content-muted uppercase">
+          Available balance
+        </p>
+        <p class="font-display text-lg font-bold tabular-nums">{{ formattedBalance() }}</p>
+      </div>
+    </header>
+
+    @if (account.error(); as problem) {
+      <p role="alert" class="rounded-control border border-expense bg-expense/10 p-3 text-sm">
+        We couldn't load your balance. {{ problem.message }}
+        <button
+          appButton
+          variant="secondary"
+          type="button"
+          class="ml-2 h-9 px-3 text-sm"
+          (click)="account.load()"
+        >
+          Try again
+        </button>
+      </p>
+    }
+
+    <form
+      class="grid max-w-xl gap-5 rounded-panel border border-line bg-glass p-6 shadow-card"
+      (submit)="$event.preventDefault(); openReview()"
+    >
+      <p
+        class="flex items-center gap-2.5 rounded-control border border-primary/40 bg-primary/10 p-3 text-[15px]"
+      >
+        <i class="ph-fill ph-info text-xl text-accent" aria-hidden="true"></i>
+        The amount leaves your account now. Your carrier applies the credit afterwards.
+      </p>
+      <app-recharge-form
+        [(carrier)]="carrier"
+        [(phone)]="phone"
+        [(amountText)]="amountText"
+        [balance]="balance()"
+      />
+      <button appButton type="submit" [disabled]="!target() || !amount()">Review recharge</button>
+    </form>
+  </section>
+}
+
+<app-review-dialog
+  [(open)]="reviewOpen"
+  title="Review recharge"
+  [lines]="lines()"
+  [pending]="operation.pending()"
+  (confirmed)="confirm()"
+/>
