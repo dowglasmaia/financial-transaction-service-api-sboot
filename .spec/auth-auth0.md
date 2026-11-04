@@ -54,6 +54,8 @@ The API never calls Auth0 per request: it validates JWTs locally against the cac
    Custom claims in access tokens must be **namespaced** (a URL), which is why the claim name is a URL.
 4. **Users:** two test users in the Database connection (`Username-Password-Authentication`); **Disable Sign Ups** on that connection. Record each `user_id` (the token `sub`) for the seed/linking step; do not record passwords here.
 
+**Most common mistake (found 2026-11-04):** the Single Page Application is created and the API too, but the application is **not authorized on the API**. Auth0 then refuses every sign-in with `error=invalid_request … Client "…" is not authorized to access resource server "https://api.financial-transaction.local"`. Fix: *Applications > APIs > Financial Transaction API > Application Access* (also called *Machine to Machine Applications*) > **Transaction-app** > *User Access* **Authorized** > Save. Also confirm `http://localhost:4200` in **Allowed Callback URLs**, **Allowed Logout URLs** and **Allowed Web Origins**. The full step-by-step list and the troubleshooting table are in the root `README.md` (*Run back and front together*).
+
 ## Backend specification (Spring Boot / Spring Security)
 **Dependencies:** `spring-boot-starter-security`, `spring-boot-starter-oauth2-resource-server`; tests `spring-security-test`. No Auth0 SDK.
 **Configuration (externalized, no secrets):**
