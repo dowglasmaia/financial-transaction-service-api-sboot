@@ -28,9 +28,15 @@ export const routes: Routes = [
     loadChildren: () => import('./features/statement/statement.routes').then((module) => module.STATEMENT_ROUTES),
   },
   {
+    path: 'deposit',
+    canActivate: [authGuard],
+    data: { nav: { label: 'Deposit', icon: 'ph ph-barcode', order: 3 } },
+    loadChildren: () => import('./features/deposit/deposit.routes').then((module) => module.DEPOSIT_ROUTES),
+  },
+  {
     path: 'withdraw',
     canActivate: [authGuard],
-    data: { nav: { label: 'Withdraw', icon: 'ph ph-money', order: 3 } },
+    data: { nav: { label: 'Withdraw', icon: 'ph ph-money', order: 4 } },
     loadChildren: () => import('./features/withdraw/withdraw.routes').then((module) => module.WITHDRAW_ROUTES),
   },
   {

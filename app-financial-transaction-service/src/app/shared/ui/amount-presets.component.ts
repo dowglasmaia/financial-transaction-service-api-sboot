@@ -26,7 +26,7 @@ import { MoneyInputComponent } from './money-input.component';
         }
       </div>
 
-      <app-form-field [label]="label()" [error]="feedback().message ?? ''">
+      <app-form-field [label]="label()" [error]="feedback().message ?? serverError()">
         <app-money-input [(value)]="value" [disabled]="disabled()" />
       </app-form-field>
 
@@ -45,6 +45,8 @@ export class AmountPresetsComponent {
   readonly balance = input<number | null>(null);
   readonly fullBalance = input(true);
   readonly disabled = input(false);
+  /** An error the SERVER reported for this field (for example "Account not found."); the page clears it when the customer edits. */
+  readonly serverError = input('');
 
   protected readonly feedback = computed(() => amountFeedback(this.value(), this.balance()));
   protected readonly formattedBalance = computed(() => formatBrl(this.balance() ?? 0));
