@@ -55,10 +55,20 @@ describe('Auth0SessionService', () => {
     expect(session.user()?.name).toBe('Customer');
   });
 
-  it('login goes through the library with the return target', async () => {
+  it('login goes through the library with the return target and always asks the provider for its login form', async () => {
     const { auth0, session } = setup();
     await session.login('/home');
-    expect(auth0.loginWithRedirect).toHaveBeenCalledWith({ appState: { target: '/home' } });
+    // prompt=login: an old single-sign-on session at the provider must not skip the form
+    expect(auth0.loginWithRedirect).toHaveBeenCalledWith({ appState: { target: '/home' }, authorizationParams: { prompt: 'login' } });
+  });
+
+  it('login passes the typed e-mail as login_hint (it only pre-fills the provider form)', async () => {
+    const { auth0, session } = setup();
+    await session.login('/home', { loginHint: 'maria@example.test' });
+    expect(auth0.loginWithRedirect).toHaveBeenCalledWith({
+      appState: { target: '/home' },
+      authorizationParams: { prompt: 'login', login_hint: 'maria@example.test' },
+    });
   });
 
   it('logout returns to the origin and clears an expired-session flag', async () => {

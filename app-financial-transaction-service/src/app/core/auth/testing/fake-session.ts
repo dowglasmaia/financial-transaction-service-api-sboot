@@ -11,6 +11,7 @@ export class FakeSession extends SessionService {
   renewedToken: string | null = 'tok-2';
   readonly tokenCalls: Array<{ renew: boolean }> = [];
   readonly loginCalls: string[] = [];
+  readonly loginHints: Array<string | undefined> = [];
   logoutCalls = 0;
 
   override readonly status = computed(() => this.state());
@@ -21,8 +22,9 @@ export class FakeSession extends SessionService {
     return Promise.resolve(this.state());
   }
 
-  override login(returnTo = '/home'): Promise<void> {
+  override login(returnTo = '/home', options?: { loginHint?: string }): Promise<void> {
     this.loginCalls.push(returnTo);
+    this.loginHints.push(options?.loginHint);
     return Promise.resolve();
   }
 

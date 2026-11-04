@@ -2,7 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { combineLatest, filter, firstValueFrom, map, take } from 'rxjs';
-import { SessionService, SessionStatus, SessionUser } from './session.service';
+import { SessionService, SessionStatus, SessionUser, LoginOptions } from './session.service';
 
 /** {@link SessionService} on top of `@auth0/auth0-angular` (Authorization Code + PKCE, tokens in memory). */
 @Injectable({ providedIn: 'root' })
@@ -33,8 +33,10 @@ export class Auth0SessionService extends SessionService {
     );
   }
 
-  override login(returnTo = '/home'): Promise<void> {
-    return firstValueFrom(this.auth0.loginWithRedirect({ appState: { target: returnTo } }));
+  /** `prompt=login` makes the provider show its login form every time, even when an old single-sign-on session exists. */
+  override login(returnTo = '/home', options?: LoginOptions): Promise<void> {
+    const authorizationParams = { prompt: 'login' as const, ...(options?.loginHint ? { login_hint: options.loginHint } : {}) };
+    return firstValueFrom(this.auth0.loginWithRedirect({ appState: { target: returnTo }, authorizationParams }));
   }
 
   override logout(): Promise<void> {

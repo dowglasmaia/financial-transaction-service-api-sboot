@@ -94,6 +94,9 @@ The whole sign-in chain works end to end: **browser → identity provider → Sp
 
 **Not executed / open:** see *Open items*. **Accepted limitations:** the backend was built in the current layered structure (ARCH-01/02 will move `AccountController`); a reload signs the user out with in-memory tokens; Postman requests are written but not run; the optional `e2e` CI job was not added.
 
+## Follow-up 2026-11-04 (owner request)
+The sign-in page got an optional **e-mail field** (shape-checked, passed to Auth0 as `login_hint`) and the login now always sends `prompt=login`, so Auth0 shows its form even when an old single-sign-on session exists (before, the click went straight to Home). The password is still typed only on Auth0's page. Evidence: `session.service.spec` (prompt + hint), `signin-page.spec` (field, hint, malformed e-mail), one new e2e (the `/authorize` request carries `prompt=login`, the hint and PKCE); 178 unit tests, 24 e2e green on 3 viewports. The versioned `application-local.yaml` now lets environment variables win (a regression of PR #20 had broken the Docker API).
+
 ## Open items (how to resume)
 1. **Auth0 portal** (you): add `http://localhost:4200` to Callback/Logout/Web-Origin URLs of *Transaction-app*.
 2. **Manual sign-in** (you): real Auth0 as user 1 and user 2; report the account shown; run the Postman checks folder.
