@@ -53,6 +53,9 @@ public class TransactionControllerTest {
     MockMvc mvc;
 
     @MockBean
+    private com.dowglasmaia.financialtransaction.shared.idempotency.IdempotencyStore idempotencyStore; // the filter is part of the web slice
+
+    @MockBean
     private MakePixTransferUseCase makePixTransfer;
     @MockBean
     private MakeDepositUseCase makeDeposit;
