@@ -1,0 +1,52 @@
+name: codeql
+
+# BE-08: static security analysis with GitHub's own CodeQL (owner decision: native GitHub features for the scans).
+# Dependency alerts come from Dependabot (.github/dependabot.yml); secret scanning with push protection is a repository
+# setting (Settings > Code security) and needs no workflow.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 4 * * 1'
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: java-kotlin
+            build-mode: manual
+          - language: javascript-typescript
+            build-mode: none
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        if: matrix.language == 'java-kotlin'
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          cache-dependency-path: api-financial-transaction-service/pom.xml
+
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+
+      - name: Build the API (tests are run by api-ci)
+        if: matrix.language == 'java-kotlin'
+        working-directory: api-financial-transaction-service
+        run: ./mvnw -B -ntp -DskipTests package
+
+      - uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.language }}

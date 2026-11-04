@@ -22,7 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -52,22 +52,22 @@ public class TransactionControllerTest {
     @Autowired
     MockMvc mvc;
 
-    @MockBean
+    @MockitoBean
     private com.dowglasmaia.financialtransaction.shared.idempotency.IdempotencyStore idempotencyStore; // the filter is part of the web slice
 
-    @MockBean
+    @MockitoBean
     private MakePixTransferUseCase makePixTransfer;
-    @MockBean
+    @MockitoBean
     private MakeDepositUseCase makeDeposit;
-    @MockBean
+    @MockitoBean
     private GetTransactionsSummaryUseCase getTransactionsSummary;
-    @MockBean
+    @MockitoBean
     private RequestMobileRechargeUseCase requestMobileRecharge;
-    @MockBean
+    @MockitoBean
     private MakeAtmWithdrawalUseCase makeAtmWithdrawal;
-    @MockBean
+    @MockitoBean
     private GetStatementUseCase getStatement;
-    @MockBean
+    @MockitoBean
     private GetTransactionByIdUseCase getTransactionById;
 
 

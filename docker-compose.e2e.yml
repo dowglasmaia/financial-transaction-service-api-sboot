@@ -9,9 +9,12 @@ services:
       SEED_OWNER_SUB: auth0|mock-user-1
       SEED_SECOND_SUB: auth0|mock-user-2
     depends_on:
-      - pg-db
-      - kafka
-      - mock-idp
+      pg-db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      mock-idp:
+        condition: service_started
 
   # Optional: run the e2e against the containerised web app instead of `ng serve` (add `--profile web`). The app reads the
   # mock IdP values from the file mounted below; the browser still needs `mock-idp` mapped to 127.0.0.1 (Playwright does it).
