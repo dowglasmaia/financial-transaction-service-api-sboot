@@ -4,6 +4,7 @@ package com.dowglasmaia.financialtransaction.transaction.api;
 import com.dowglasmaia.financialtransaction.transaction.application.usecase.GetStatementUseCase;
 import com.dowglasmaia.financialtransaction.transaction.application.usecase.GetTransactionByIdUseCase;
 import com.dowglasmaia.financialtransaction.transaction.application.usecase.MakeAtmWithdrawalUseCase;
+import com.dowglasmaia.financialtransaction.transaction.application.usecase.GetTransactionsSummaryUseCase;
 import com.dowglasmaia.financialtransaction.transaction.application.usecase.MakeDepositUseCase;
 import com.dowglasmaia.financialtransaction.transaction.application.usecase.MakePixTransferUseCase;
 import com.dowglasmaia.financialtransaction.transaction.application.usecase.RequestMobileRechargeUseCase;
@@ -55,6 +56,8 @@ public class TransactionControllerTest {
     private MakePixTransferUseCase makePixTransfer;
     @MockBean
     private MakeDepositUseCase makeDeposit;
+    @MockBean
+    private GetTransactionsSummaryUseCase getTransactionsSummary;
     @MockBean
     private RequestMobileRechargeUseCase requestMobileRecharge;
     @MockBean

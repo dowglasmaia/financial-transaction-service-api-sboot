@@ -287,6 +287,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TransactionResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
         401:
           $ref: '#/components/responses/Unauthorized'
         403:
@@ -319,6 +321,12 @@ paths:
 
 components:
   responses:
+    BadRequest:
+      description: The id in the path is not a UUID
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResponseError'
     Unauthorized:
       description: Unauthorized (no token, or a token that is not valid for this API)
       content:

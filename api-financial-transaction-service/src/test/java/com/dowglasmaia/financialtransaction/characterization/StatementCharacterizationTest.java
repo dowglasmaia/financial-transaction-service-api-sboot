@@ -13,7 +13,6 @@ import java.time.ZoneOffset;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -44,22 +43,22 @@ class StatementCharacterizationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void initialDayIsExcludedBecauseBothBoundsAreEndOfDayUtc() throws Exception { // characterizes F-07 / BR-50; BE-05 fixes
+    void theInitialDayIsNowIncludedWithTheDeprecatedParameters() throws Exception { // F-07 fixed by SL-02 (was: the initial day was lost)
         String id = seedAccount().getId();
         ledger(TransactionType.DEPOSIT, new BigDecimal("1.00"), id, at(10, 12));
         ledger(TransactionType.DEPOSIT, new BigDecimal("2.00"), id, at(11, 12));
 
         JsonNode body = bodyOf(get("?initial-date=10/03/2026&final-date=11/03/2026").andExpect(status().isOk()));
 
-        assertThat(body.get("transaction")).hasSize(1); // only the 11th; the 10th is lost
-        assertThat(body.get("sumIncoming").decimalValue()).isEqualByComparingTo("2");
+        assertThat(body.get("transaction")).hasSize(2);
+        assertThat(body.get("sumIncoming").decimalValue()).isEqualByComparingTo("3");
     }
 
     @Test
-    void aSingleDayRangeReturnsNothing() throws Exception { // characterizes F-07
+    void aSingleDayRangeNowReturnsThatDay() throws Exception { // F-07 fixed by SL-02 (was: nothing)
         ledger(TransactionType.DEPOSIT, new BigDecimal("1.00"), seedAccount().getId(), at(11, 12));
         JsonNode body = bodyOf(get("?initial-date=11/03/2026&final-date=11/03/2026").andExpect(status().isOk()));
-        assertThat(body.get("transaction")).isEmpty();
+        assertThat(body.get("transaction")).hasSize(1);
     }
 
     @Test
@@ -74,8 +73,8 @@ class StatementCharacterizationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void missingDatesAreNotHandled() { // characterizes F-07: NPE surfaces as a servlet exception (HTTP 500 in a running server)
-        assertThatThrownBy(() -> get("")).hasRootCauseInstanceOf(NullPointerException.class);
+    void missingDatesAre422NowNotAnNpe() throws Exception { // F-07 fixed by SL-02
+        get("").andExpect(status().isUnprocessableEntity());
     }
 
     @Test
