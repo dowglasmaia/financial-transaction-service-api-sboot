@@ -75,6 +75,7 @@ This API manages user financial transactions, allowing for the insertion, visual
 * **Profiles:** none is forced. `local` and `test` seed a demo user/account (idempotent, safe to restart); do not use them in production. Until spec BE-04 (Okta) the acting account is the seeded one, so a non-`local` run cannot resolve an account yet.
 * **Docker:** copy `.env.example` to `.env` (git-ignored) at the monorepo root, then `docker compose up --build`.
 * **IDE run:** copy `src/main/resources/application-local.yaml.example` to `application-local.yaml` (git-ignored) and run with `SPRING_PROFILES_ACTIVE=local`.
+  If the API stops with `Driver org.postgresql.Driver claims to not accept jdbcUrl, ${DB_URL}`, the datasource variables are missing: that file does not exist yet (it is git-ignored, so a fresh clone or worktree does not have it) and `DB_URL`/`DB_USER`/`DB_PASSWORD` are not set. Create the file with the `POSTGRES_*` values of your `.env` (the database container listens on `localhost:5433`). The Kafka broker must also be up: if `docker compose ps` shows `kafka` as *Exited* (ZooKeeper `NodeExists` after an unclean restart), run `docker compose start kafka`; otherwise the API waits ~40 s on the topic creation before it starts.
 
 ## Configuration for Circuit Breaker And Observability
 

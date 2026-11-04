@@ -1,8 +1,11 @@
 # Copy to application-local.yaml (git-ignored) and run with SPRING_PROFILES_ACTIVE=local.
-# Values below are examples for a throw-away local database - never commit real credentials.
+# Values below match .env.example (docker compose publishes Postgres on host port 5433) - put the same
+# POSTGRES_* values you use in your .env. Never commit real credentials.
+# Without this file (or the DB_URL / DB_USER / DB_PASSWORD environment variables) the API stops at startup with:
+#   Driver org.postgresql.Driver claims to not accept jdbcUrl, ${DB_URL}
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/transactions
+    url: jdbc:postgresql://localhost:5433/transactions
     username: transactions
     password: change-me
   jpa:
