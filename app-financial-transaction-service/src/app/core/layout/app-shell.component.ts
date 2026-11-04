@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AccountStore } from '../../features/account/data-access/account.store';
+import { StatementStore, SummaryStore, TransactionDetailStore } from '../../features/statement/data-access/ledger.stores';
 import { SessionService } from '../auth/session.service';
 import { APP_CONFIG } from '../config/app-config';
 import { ButtonDirective } from '../../shared/ui/button.directive';
@@ -158,6 +159,7 @@ export class AppShellComponent {
   protected readonly session = inject(SessionService);
   protected readonly account = inject(AccountStore);
   private readonly router = inject(Router);
+  private readonly ledgerStores = [inject(StatementStore), inject(SummaryStore), inject(TransactionDetailStore)];
   protected readonly showApp = computed(() => this.session.status() === 'authenticated');
   protected readonly brandClass = computed(() => (this.showApp() ? 'md:hidden' : ''));
   protected readonly signOutOpen = signal(false);
@@ -168,14 +170,20 @@ export class AppShellComponent {
   protected readonly bottomItems = this.items.length > BOTTOM_VISIBLE ? this.items.slice(0, BOTTOM_VISIBLE) : this.items;
   protected readonly moreItems = this.items.length > BOTTOM_VISIBLE ? this.items.slice(BOTTOM_VISIBLE) : [];
 
+  /** Nothing of the previous customer (account, rows, totals) may be on screen for the next one. */
+  private forgetCustomerData(): void {
+    this.account.clear();
+    this.ledgerStores.forEach((store) => store.clear());
+  }
+
   protected signOut(): void {
     this.signOutOpen.set(false);
-    this.account.clear();
+    this.forgetCustomerData();
     void this.session.logout();
   }
 
   protected signInAgain(): void {
-    this.account.clear();
+    this.forgetCustomerData();
     void this.session.login(this.router.url);
   }
 

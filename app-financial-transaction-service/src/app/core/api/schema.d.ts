@@ -15,7 +15,7 @@ export interface paths {
         put?: never;
         /**
          * Send Pix
-         * @description Method to send a Pix transaction.
+         * @description Sends a Pix from the caller's account (reserve, call the bank, confirm or give the money back).
          */
         post: operations["sendPix"];
         delete?: never;
@@ -35,7 +35,7 @@ export interface paths {
         put?: never;
         /**
          * Recharge Mobile
-         * @description Method to recharge a mobile phone.
+         * @description Requests a mobile recharge; the debit is immediate and the carrier credit is asynchronous.
          */
         post: operations["rechargeMobile"];
         delete?: never;
@@ -55,7 +55,7 @@ export interface paths {
         put?: never;
         /**
          * Withdraw
-         * @description Method to perform a withdrawal.
+         * @description Withdraws from the caller's own account.
          */
         post: operations["withdraw"];
         delete?: never;
@@ -75,7 +75,7 @@ export interface paths {
         put?: never;
         /**
          * Deposit
-         * @description Method to deposit money into an account.
+         * @description Deposits money into an existing account (third-party deposits are allowed).
          */
         post: operations["deposit"];
         delete?: never;
@@ -93,9 +93,29 @@ export interface paths {
         };
         /**
          * Get Transactions
-         * @description Method to get a user's transactions.
+         * @description Statement of the caller's account for a period: completed operations only, with the totals of the WHOLE period (independent of the page and of the type filter) and the current balance. The period is half-open, [from 00:00, to + 1 day 00:00), in the time zone America/Sao_Paulo. Send `from` and `to` (ISO dates); `initial-date` and `final-date` (dd/MM/yyyy) are deprecated and mean the same period.
          */
         get: operations["getTransactions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/transactions/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the summary of a period
+         * @description Totals of the caller's completed operations for the same half-open period as the statement, plus one bucket per day (time zone America/Sao_Paulo), so a screen never has to add rows up.
+         */
+        get: operations["getTransactionsSummary"];
         put?: never;
         post?: never;
         delete?: never;
@@ -113,7 +133,7 @@ export interface paths {
         };
         /**
          * Get Transaction
-         * @description Method to get a Transaction.
+         * @description One operation of the caller's account. An id that belongs to another customer behaves as an unknown one.
          */
         get: operations["getTransaction"];
         put?: never;
@@ -200,31 +220,12 @@ export interface components {
             /** @example 1234567 */
             numberAccount?: string;
         };
-        User: {
-            /** @example John Doe */
-            name?: string;
-            /** @example 12345678900 */
-            CPF?: string;
-            /**
-             * Format: email
-             * @example john.doe@example.com
-             */
-            email?: string;
-            /** @example 99988887777 */
-            phone?: number;
-        };
-        Account: {
-            /** @example 0001 */
-            agency?: string;
-            /** @example 1234567 */
-            number?: string;
-            /**
-             * Format: decimal
-             * @example 1000
-             */
-            balance?: number;
-        };
         TransactionResponse: {
+            /**
+             * Format: uuid
+             * @example 6c6fa8c9-743a-4c79-9cf6-e1d5e25ad4a5
+             */
+            id?: string;
             /**
              * Format: decimal
              * @example 1000
@@ -235,11 +236,61 @@ export interface components {
              * @example 2024-05-22T10:00:00Z
              */
             dateHour?: string;
-            /** @example Pix */
-            transactionType?: string;
+            /**
+             * @example PIX
+             * @enum {string}
+             */
+            transactionType?: "DEPOSIT" | "PIX" | "PHONE_RECHARGE" | "WITHDRAW";
         };
         TransactionsResponse: {
             transaction?: components["schemas"]["TransactionResponse"][];
+            /**
+             * Format: decimal
+             * @description Sum of the DEPOSIT rows of the whole period
+             * @example 2000
+             */
+            sumIncoming?: number;
+            /**
+             * Format: decimal
+             * @description Sum of the PIX, PHONE_RECHARGE and WITHDRAW rows of the whole period
+             * @example 1500
+             */
+            sumOutgoing?: number;
+            /**
+             * Format: decimal
+             * @description Current balance of the caller's account
+             * @example 10500
+             */
+            balance?: number;
+            /** @example 0 */
+            page?: number;
+            /** @example 20 */
+            size?: number;
+            /**
+             * Format: int64
+             * @description Number of rows of the period after the type filter (all pages)
+             * @example 42
+             */
+            totalElements?: number;
+        };
+        DailyTotal: {
+            /**
+             * Format: date
+             * @example 2026-03-10
+             */
+            date?: string;
+            /**
+             * Format: decimal
+             * @example 100
+             */
+            incoming?: number;
+            /**
+             * Format: decimal
+             * @example 35
+             */
+            outgoing?: number;
+        };
+        TransactionsSummaryResponse: {
             /**
              * Format: decimal
              * @example 2000
@@ -255,11 +306,12 @@ export interface components {
              * @example 10500
              */
             balance?: number;
+            series?: components["schemas"]["DailyTotal"][];
         };
         ResponseError: {
-            /** @example ERR001 */
+            /** @example UNPROCESSABLE_ENTITY */
             code?: string;
-            /** @example Error */
+            /** @example Dates are required: send from and to. */
             message?: string;
         };
         AccountResponse: {
@@ -274,7 +326,62 @@ export interface components {
             balance: number;
         };
     };
-    responses: never;
+    responses: {
+        /** @description The id in the path is not a UUID */
+        BadRequest: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ResponseError"];
+            };
+        };
+        /** @description Unauthorized (no token, or a token that is not valid for this API) */
+        Unauthorized: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ResponseError"];
+            };
+        };
+        /** @description Forbidden (valid token, but the identity is not a customer linked to an account) */
+        Forbidden: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ResponseError"];
+            };
+        };
+        /** @description Not found (unknown account or transaction, or one that is not the caller's) */
+        NotFound: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ResponseError"];
+            };
+        };
+        /** @description The request is well formed but a field or a business rule is rejected (the message says which) */
+        UnprocessableEntity: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ResponseError"];
+            };
+        };
+        /** @description Unexpected failure (no internal detail is returned) */
+        InternalError: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ResponseError"];
+            };
+        };
+    };
     parameters: never;
     requestBodies: never;
     headers: never;
@@ -296,40 +403,17 @@ export interface operations {
             };
         };
         responses: {
-            /** @description OK */
-            200: {
+            /** @description Pix sent */
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResponseError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResponseError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResponseError"];
-                };
-            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
         };
     };
     rechargeMobile: {
@@ -346,40 +430,17 @@ export interface operations {
             };
         };
         responses: {
-            /** @description OK */
-            200: {
+            /** @description Recharge requested */
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResponseError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResponseError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResponseError"];
-                };
-            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
         };
     };
     withdraw: {
@@ -396,40 +457,18 @@ export interface operations {
             };
         };
         responses: {
-            /** @description OK */
-            200: {
+            /** @description Withdrawal registered */
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResponseError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResponseError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResponseError"];
-                };
-            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
         };
     };
     deposit: {
@@ -446,49 +485,47 @@ export interface operations {
             };
         };
         responses: {
-            /** @description OK */
-            200: {
+            /** @description Deposit registered */
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResponseError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResponseError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResponseError"];
-                };
-            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
         };
     };
     getTransactions: {
         parameters: {
             query?: {
-                /** @description Initial date for filtering transactions (format: dd/MM/yyyy) */
+                /** @description First day of the period (ISO date, yyyy-MM-dd) */
+                from?: string;
+                /** @description Last day of the period, included (ISO date, yyyy-MM-dd) */
+                to?: string;
+                /**
+                 * @deprecated
+                 * @description Deprecated, use `from`. First day of the period (format: dd/MM/yyyy)
+                 */
                 "initial-date"?: string;
-                /** @description Final date for filtering transactions (format: dd/MM/yyyy) */
+                /**
+                 * @deprecated
+                 * @description Deprecated, use `to`. Last day of the period, included (format: dd/MM/yyyy)
+                 */
                 "final-date"?: string;
+                /** @description Lists only this type of operation (the totals still cover the whole period) */
+                type?: "DEPOSIT" | "PIX" | "PHONE_RECHARGE" | "WITHDRAW";
+                /** @description Sort field */
+                sort?: "date" | "amount";
+                /** @description Sort direction */
+                order?: "asc" | "desc";
+                /** @description Page number, starting at 0 */
+                page?: number;
+                /** @description Rows per page (1 to 100) */
+                size?: number;
             };
             header?: never;
             path?: never;
@@ -505,24 +542,39 @@ export interface operations {
                     "application/json": components["schemas"]["TransactionsResponse"];
                 };
             };
-            /** @description Unauthorized */
-            401: {
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    getTransactionsSummary: {
+        parameters: {
+            query: {
+                /** @description First day of the period (ISO date, yyyy-MM-dd) */
+                from: string;
+                /** @description Last day of the period, included (ISO date, yyyy-MM-dd) */
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ResponseError"];
+                    "application/json": components["schemas"]["TransactionsSummaryResponse"];
                 };
             };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResponseError"];
-                };
-            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
         };
     };
     getTransaction: {
@@ -546,24 +598,11 @@ export interface operations {
                     "application/json": components["schemas"]["TransactionResponse"];
                 };
             };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResponseError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResponseError"];
-                };
-            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
         };
     };
     getMyAccount: {
@@ -584,24 +623,9 @@ export interface operations {
                     "application/json": components["schemas"]["AccountResponse"];
                 };
             };
-            /** @description Unauthorized (no token, or a token that is not valid for this API) */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResponseError"];
-                };
-            };
-            /** @description Forbidden (valid token, but the identity is not linked to a customer) */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResponseError"];
-                };
-            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
         };
     };
 }

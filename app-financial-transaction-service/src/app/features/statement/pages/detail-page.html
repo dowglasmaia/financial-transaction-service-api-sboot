@@ -1,0 +1,60 @@
+<section class="grid max-w-2xl gap-6" aria-labelledby="detail-title">
+  <a routerLink="/transactions" class="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+    <i class="ph-bold ph-arrow-left" aria-hidden="true"></i> All transactions
+  </a>
+
+  @switch (store.state()) {
+    @case ('ready') {
+      @if (store.row(); as row) {
+        @if (info(); as info) {
+          <article class="grid gap-5 rounded-card border border-line bg-glass p-6 shadow-card">
+            <header class="flex items-center gap-3.5">
+              <app-icon-tile [icon]="info.icon" [tone]="info.tile" size="lg" />
+              <div>
+                <h1 id="detail-title" class="font-display text-2xl font-bold">{{ info.label }}</h1>
+                <p class="text-sm text-content-muted">{{ row.dateHour | date: 'MMM d, y, h:mm a' }}</p>
+              </div>
+            </header>
+
+            <p class="font-display text-4xl font-bold" [class]="info.direction === 'in' ? 'text-income' : 'text-expense'">
+              <span class="sr-only">{{ info.direction === 'in' ? 'Money in' : 'Money out' }} </span>{{ signed() }}
+            </p>
+
+            <dl class="grid gap-3 text-sm">
+              <div class="flex justify-between gap-4 border-t border-line pt-3">
+                <dt class="text-content-muted">Status</dt>
+                <dd class="font-semibold">Registered</dd>
+              </div>
+              <div class="flex items-center justify-between gap-4 border-t border-line pt-3">
+                <dt class="text-content-muted">Transaction id</dt>
+                <dd class="flex items-center gap-2 font-mono">
+                  <span [attr.title]="row.id">{{ shortId() }}</span>
+                  <button appButton variant="secondary" type="button" (click)="copyId()" aria-label="Copy transaction id">
+                    <i class="ph-bold ph-copy" aria-hidden="true"></i> Copy
+                  </button>
+                </dd>
+              </div>
+            </dl>
+          </article>
+        }
+      }
+    }
+    @case ('not-found') {
+      <app-empty-state title="Transaction not found" message="This transaction does not exist or is not on your account." icon="ph-bold ph-magnifying-glass">
+        <a appButton variant="secondary" routerLink="/transactions">Back to transactions</a>
+      </app-empty-state>
+    }
+    @case ('error') {
+      <app-alert kind="error" title="We couldn't load this transaction">
+        {{ store.error()?.message }}
+        @if (store.error()?.requestId; as requestId) {
+          <span class="mt-1 block text-xs text-content-muted">Request id: {{ requestId }}</span>
+        }
+        <button appButton variant="secondary" type="button" class="mt-3" (click)="retry()">Try again</button>
+      </app-alert>
+    }
+    @default {
+      <div aria-busy="true" aria-label="Loading the transaction"><app-skeleton [height]="220" /></div>
+    }
+  }
+</section>

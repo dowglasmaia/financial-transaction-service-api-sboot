@@ -22,6 +22,12 @@ export const routes: Routes = [
     loadChildren: () => import('./features/home/home.routes').then((module) => module.HOME_ROUTES),
   },
   {
+    path: 'transactions',
+    canActivate: [authGuard],
+    data: { nav: { label: 'Transactions', icon: 'ph ph-receipt', order: 2 } },
+    loadChildren: () => import('./features/statement/statement.routes').then((module) => module.STATEMENT_ROUTES),
+  },
+  {
     path: 'no-access',
     canActivate: [authGuard],
     title: 'No access · Maia Bank',

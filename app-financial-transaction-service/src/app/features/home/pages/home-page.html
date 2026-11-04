@@ -27,4 +27,61 @@
       <app-skeleton [height]="190" />
     </div>
   }
+
+  @if (store.account()) {
+    <section class="grid gap-4" aria-labelledby="activity-title">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h2 id="activity-title" class="font-display text-xl font-semibold">Your activity</h2>
+        <div class="flex gap-2" role="group" aria-label="Period">
+          @for (period of periods; track period) {
+            <app-chip [selected]="days() === period" (toggled)="days.set(period)">{{ period }} days</app-chip>
+          }
+        </div>
+      </div>
+
+      @switch (summary.state()) {
+        @case ('error') {
+          <app-alert kind="error" title="We couldn't load your activity">
+            {{ summary.error()?.message }}
+            @if (summary.error()?.requestId; as requestId) {
+              <span class="mt-1 block text-xs text-content-muted">Request id: {{ requestId }}</span>
+            }
+            <button appButton variant="secondary" type="button" class="mt-3" (click)="retrySummary()">Try again</button>
+          </app-alert>
+        }
+        @case ('ready') {
+          @if (summary.summary(); as totals) {
+            <div class="grid gap-3 sm:grid-cols-3" aria-label="Totals of the period">
+              <app-kpi-tile label="Incoming" icon="ph-bold ph-arrow-down-left" tone="income" [value]="format(totals.sumIncoming ?? 0)" />
+              <app-kpi-tile label="Outgoing" icon="ph-bold ph-arrow-up-right" tone="expense" [value]="format(totals.sumOutgoing ?? 0)" />
+              <app-kpi-tile label="Current balance" icon="ph-bold ph-wallet" [value]="format(totals.balance ?? 0)" />
+            </div>
+          }
+          @if (summary.hasActivity()) {
+            <app-line-chart [days]="summary.series()" />
+            <div class="grid gap-3">
+              <div class="flex items-center justify-between">
+                <h3 class="font-display text-lg font-semibold">Recent activity</h3>
+                <a routerLink="/transactions" class="text-sm font-semibold text-accent underline-offset-4 hover:underline">See all →</a>
+              </div>
+              <ul class="grid gap-3" aria-label="Recent transactions">
+                @for (row of summary.recent(); track row.id) {
+                  <li>
+                    <a [routerLink]="['/transactions', row.id]" class="block rounded-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                      <app-ledger-row [type]="row.transactionType!" [amount]="row.amount!" [date]="row.dateHour!" />
+                    </a>
+                  </li>
+                }
+              </ul>
+            </div>
+          } @else {
+            <app-empty-state title="No activity yet" message="No activity yet. Make a deposit to get started." icon="ph-bold ph-tray" />
+          }
+        }
+        @default {
+          <div aria-busy="true" aria-label="Loading your activity"><app-skeleton [height]="160" /></div>
+        }
+      }
+    </section>
+  }
 </section>
