@@ -266,30 +266,41 @@
             </plugin>
 
             <plugin>
-                <groupId>io.swagger.codegen.v3</groupId>
-                <artifactId>swagger-codegen-maven-plugin</artifactId>
-                <version>3.0.36</version>
+                <!-- SL-02: migrated from swagger-codegen 3.0.36 (javax) to openapi-generator (jakarta). Same packages and DTO suffix. -->
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>7.5.0</version>
                 <executions>
                     <execution>
-                        <id>api-exactabank</id>
-                        <phase>generate-resources</phase>
+                        <id>api-financial-transaction</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/swagger/financial-transaction-openapi.yaml</inputSpec>
-                            <language>spring</language>
-                            <configOptions>
-                                <delegatePattern>true</delegatePattern>
-                                <interfaceOnly>true</interfaceOnly>
-                                <dateLibrary>java8</dateLibrary>
-                                <modelPackage>${project.groupId}.provider.model</modelPackage>
-                                <apiPackage>${project.groupId}.provider.api</apiPackage>
-                                <useBeanValidation>true</useBeanValidation>
-                            </configOptions>
+                            <generatorName>spring</generatorName>
+                            <output>${project.build.directory}/generated-sources/openapi</output>
+                            <apiPackage>${project.groupId}.provider.api</apiPackage>
+                            <modelPackage>${project.groupId}.provider.model</modelPackage>
                             <modelNameSuffix>DTO</modelNameSuffix>
                             <generateSupportingFiles>false</generateSupportingFiles>
                             <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <generateApiDocumentation>false</generateApiDocumentation>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <useTags>true</useTags>
+                                <dateLibrary>java8</dateLibrary>
+                                <openApiNullable>false</openApiNullable>
+                                <documentationProvider>none</documentationProvider>
+                                <annotationLibrary>none</annotationLibrary>
+                                <!-- Bean validation is NOT enforced on purpose: the messages of ValidateBodyRequest are part of the contract (SL-02 decision) -->
+                                <useBeanValidation>false</useBeanValidation>
+                                <performBeanValidation>false</performBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                 </executions>
