@@ -79,11 +79,21 @@ Dashboard: <https://manage.auth0.com/>. Tenant used by this project: `dev-twljoc
    ```js
    exports.onExecutePostLogin = async (event, api) => {
      const namespace = 'https://financial-transaction/roles';
-     api.accessToken.setCustomClaim(namespace, ['customer']);
+     // the roles assigned in Auth0 (step 5); a user with no role at all falls back to customer
+     const roles = event.authorization?.roles?.length ? event.authorization.roles : ['customer'];
+     api.accessToken.setCustomClaim(namespace, roles);   // accessToken, NOT idToken: the API reads the access token
    };
    ```
-   Then *Actions > Triggers > post-login*: drag the Action **into the flow** (between Start and Complete) and click **Apply**. A deployed but unattached Action issues no claim.
+   Then *Actions > Triggers > post-login*: drag the Action **into the flow** (between Start and Complete) and click **Apply**. A deployed but unattached Action issues no claim, and the API answers 403 to every call.
 4. **Users** (*User Management > Users > Create User*, connection `Username-Password-Authentication`): create at least two test users (the second one proves a customer cannot touch the first one's data). Copy each **user_id** (`auth0|...`). Then *Authentication > Database > Username-Password-Authentication > Settings*: turn **Disable Sign Ups** on.
+5. **Roles** (*User Management > Roles > Create Role*): create `customer` and `admin` (exact names, lower case; the API upper-cases them to `ROLE_CUSTOMER` / `ROLE_ADMIN`). Do **not** add permissions: the system does not use scopes. Then *User Management > Users > (user) > Roles > Assign Roles* and give each test user the roles it needs:
+
+   | Role | What it opens |
+   |---|---|
+   | `customer` | The whole business API (`/api/**`), and only if the user's `sub` is linked to an account |
+   | `admin` | The actuator endpoints other than health and Prometheus (port 8090, never published) |
+
+   **Always assign `customer` together with `admin`.** The Action sends the roles assigned in Auth0, and only falls back to `customer` when the user has none: a user with `admin` alone loses `customer` and gets 403 on every business call. Roles reach the token only at sign-in, so **sign out and sign in again** after changing them.
 
 ### 2. Run the API linked to a test user
 The local seed creates one demo customer (account `2022`). Link it to the first test user's `user_id`:
@@ -101,8 +111,18 @@ Other settings have defaults for this tenant and can be overridden: `AUTH_ISSUER
 | Clicking **Sign in** returns to the sign-in page with *"Auth0 said: Client … is not authorized to access resource server …"* | *Transaction-app* is not authorized on the API | Section 1, item 2 above (Application Access > Authorized) |
 | *"Callback URL mismatch"* or a CORS/origin error on the Auth0 page | `http://localhost:4200` missing from the application URLs | Section 1, items 1 and 2.5 above |
 | After signing in, Home shows **"no access"** and the browser console shows `GET /api/v1/accounts/me 403` | The token is valid but refused. **The API console says which reason** (INFO line): `Access denied (403): the token has no ROLE_CUSTOMER (roles in the token: [...])` = the user has another Auth0 role assigned (the Action then sends that role instead of `customer`): remove it under *User Management > Users > (user) > Roles*, or fix the Action; `Access denied (403): the token subject is not linked to a customer` = the user's `sub` is not `SEED_OWNER_SUB`/`SEED_SECOND_SUB` | Fix as described, then restart the API (the seed relinks on start) and sign in again |
+| Same 403, and the decoded token has **no** `https://financial-transaction/roles` claim (found 2026-11-04) | Roles are assigned to the user but the **Action** is not in the Login flow, is not deployed, writes to the ID token, or names the claim without `https://`. Assigning roles alone never adds the claim | Section 1, item 3 (Deploy, drag into *post-login*, **Apply**), then sign out and in. Check with "Inspect your token" below |
 | The sign-in goes straight to Home without a form | An old Auth0 single-sign-on session exists | Not a bug; since 2026-11-04 the app asks for the form every time (`prompt=login`). **Sign out** also ends the Auth0 session |
 | After a page reload you must click Sign in again | Tokens are kept in memory only (owner decision) | Expected; one click, no password (the Auth0 cookie signs you in again) |
+
+### Inspect your token (roles check)
+Copy the access token from the browser (*Network* tab > any `/api/v1/...` request > `Authorization` header, without the word `Bearer`) into an environment variable and print its claims (the signature is not needed, and the token is not sent anywhere):
+
+```bash
+TOKEN='<paste the access token>' node -e "const p=JSON.parse(Buffer.from(process.env.TOKEN.split('.')[1],'base64url'));console.log({sub:p.sub,aud:p.aud,exp:new Date(p.exp*1000).toISOString(),roles:p['https://financial-transaction/roles']})"
+```
+
+Expected: `aud` contains `https://api.financial-transaction.local` and `roles` is `[ 'customer', 'admin' ]` (or `[ 'customer' ]`). `roles: undefined` means the Action did not run for this sign-in. Treat a token as a password until it expires (about 24 h): do not paste it into chats, issues or commits.
 
 ### 3. Get a user token (Postman)
 *Authorization* tab > type **OAuth 2.0** > Grant Type **Authorization Code (With PKCE)**:
