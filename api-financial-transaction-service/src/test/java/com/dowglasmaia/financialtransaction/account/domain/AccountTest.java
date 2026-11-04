@@ -36,4 +36,11 @@ class AccountTest {
         assertThatThrownBy(() -> Account.create(agency, null, "1", BigDecimal.ONE)).isInstanceOf(NullPointerException.class);
         assertThatThrownBy(() -> Account.create(agency, user, " ", BigDecimal.ONE)).isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    void createRefusesANegativeOrMissingBalance() { // BE-08 invariant
+        assertThatThrownBy(() -> Account.create(agency, user, "3033", new BigDecimal("-0.01"))).isInstanceOf(IllegalArgumentException.class).hasMessage("Balance cannot be negative");
+        assertThatThrownBy(() -> Account.create(agency, user, "3033", null)).isInstanceOf(IllegalArgumentException.class).hasMessage("Balance is required");
+        assertThat(Account.create(agency, user, "3033", BigDecimal.ZERO).getBalance()).isEqualByComparingTo("0");
+    }
 }

@@ -1,20 +1,21 @@
-FROM maven:3.8.4-openjdk-17-slim AS build
+FROM maven:3.9-eclipse-temurin-25 AS build
 
 COPY pom.xml /exact/
 WORKDIR /exact
 
-RUN mvn dependency:resolve
+RUN mvn -B dependency:resolve
 
 COPY src /exact/src
 # Tests need Docker (Testcontainers) and run in CI / the IDE, not while building the image.
 RUN mvn -B clean package -DskipTests
 
 
-FROM amazoncorretto:17-alpine3.16
+FROM eclipse-temurin:25-jre-alpine
 
 LABEL MANTAINER="Dowglas Maia"
 ENV SPRING_LOGGING_LEVEL=INFO
-ENV ACTUATOR_PORT=8088
+# BE-08: the actuator listens on its own port (health, metrics); the API port serves only the business endpoints.
+ENV ACTUATOR_PORT=8090
 ENV PORT=8088
 
 RUN rm -f /etc/localtime && ln -s /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
@@ -23,8 +24,8 @@ COPY --from=build /exact/target/*.jar /usr/src/app/exactbank.jar
 
 WORKDIR /usr/src/app
 
+# `-noverify` was removed (deprecated since JDK 13); the container-aware defaults of the JVM size the heap.
 ENTRYPOINT java \
-           -noverify \
            -Dfile.encoding=UTF-8 \
            -Dlogging.level.root=${SPRING_LOGGING_LEVEL} \
            -Dmanagement.server.port=${ACTUATOR_PORT} \
