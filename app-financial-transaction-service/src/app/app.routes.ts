@@ -28,21 +28,27 @@ export const routes: Routes = [
     loadChildren: () => import('./features/statement/statement.routes').then((module) => module.STATEMENT_ROUTES),
   },
   {
+    path: 'pix',
+    canActivate: [authGuard],
+    data: { nav: { label: 'Pix', icon: 'ph ph-diamonds-four', order: 3 } },
+    loadChildren: () => import('./features/pix/pix.routes').then((module) => module.PIX_ROUTES),
+  },
+  {
     path: 'deposit',
     canActivate: [authGuard],
-    data: { nav: { label: 'Deposit', icon: 'ph ph-barcode', order: 3 } },
+    data: { nav: { label: 'Deposit', icon: 'ph ph-barcode', order: 4 } },
     loadChildren: () => import('./features/deposit/deposit.routes').then((module) => module.DEPOSIT_ROUTES),
   },
   {
     path: 'recharge',
     canActivate: [authGuard],
-    data: { nav: { label: 'Recharge', icon: 'ph ph-device-mobile', order: 5 } },
+    data: { nav: { label: 'Recharge', icon: 'ph ph-device-mobile', order: 6 } },
     loadChildren: () => import('./features/recharge/recharge.routes').then((module) => module.RECHARGE_ROUTES),
   },
   {
     path: 'withdraw',
     canActivate: [authGuard],
-    data: { nav: { label: 'Withdraw', icon: 'ph ph-money', order: 4 } },
+    data: { nav: { label: 'Withdraw', icon: 'ph ph-money', order: 5 } },
     loadChildren: () => import('./features/withdraw/withdraw.routes').then((module) => module.WITHDRAW_ROUTES),
   },
   {

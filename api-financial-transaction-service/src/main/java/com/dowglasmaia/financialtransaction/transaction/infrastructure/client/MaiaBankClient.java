@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 public interface MaiaBankClient {
 
     @PostMapping
-    ResponseEntity<Void> receiversPix();
+    /** The request is unchanged (an empty POST). The real MaiaBank answers 200 with a text body, so the answer is read as text and ignored. */
+    ResponseEntity<String> receiversPix();
 
 }

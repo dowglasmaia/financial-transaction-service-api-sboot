@@ -61,6 +61,17 @@ Text pairs ≥ 4.5:1 and control borders ≥ 3:1 for `content`, `content-muted`,
 | 38 | Home gets a **Quick actions** block (Deposit tile) and the **quick-recharge card** (same form). "Review recharge" opens the review on the Recharge page through router state; Home sends nothing and no phone number goes in the URL | Same review dialog, no personal data in the URL | `features/home` |
 | 39 | Nav order: Home, Transactions, Deposit, Withdraw, Recharge | Entries come from the route table | `app.routes.ts` |
 
+## SL-06 — Pix
+| # | Deviation | Why | Where |
+|---|---|---|---|
+| 40 | Pix is three steps with the stepper (Key, Amount, Review) and the review is a step on the page, not a dialog; "Confirm and send" is its button | Spec; the key stays visible-masked next to Back | `features/pix` |
+| 41 | Step 2 **blocks Continue above the balance** (unlike Withdraw/Recharge, where Review stays available) | Spec: "amount above balance blocked on step 2"; the server still decides | `pix-page` |
+| 42 | The key is shown **masked** in the review and the receipt (`•••.982.•••-25`, `(11) 9 ••••-5678`, `m•••@example.com`); it is never logged, never in a URL, and is cleared on "New Pix". The server logs it masked too | Privacy rule of the spec | `shared/util/pix-key.ts`, `PixKey.masked()` |
+| 43 | The business-failure panel says "We couldn't send this Pix. Your balance was not changed." and shows the backend's reason below it (for example "Fail send Pix.") | Spec copy; the reason stays the server's | `pix-page.html` |
+| 44 | The stepper shows only the **current** step label below 640 px (the others stay for screen readers) | "Amount" was cut to "Am…" at 390 px | `stepper.component.ts` |
+| 45 | Nav order: Home, Transactions, Pix, Deposit, Withdraw, Recharge; Home has a Pix tile in Quick actions | Pix is the main operation; the phone bar shows the first three | `app.routes.ts`, `home-page.html` |
+| 46 | No "Pix received" row: the ledger only stores `PIX` as outgoing and no local recipient is credited | Decision D-15 | — |
+
 ## Still open — Tier 2 (need the owner)
 | # | Proposal | Detail |
 |---|---|---|

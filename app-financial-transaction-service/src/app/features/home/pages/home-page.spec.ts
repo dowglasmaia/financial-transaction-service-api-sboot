@@ -118,6 +118,12 @@ describe('HomePage', () => {
     expect(tile?.textContent).toContain('Deposit');
   });
 
+  it('quick actions: a Pix tile links to the Pix page', async () => {
+    const { fixture, el } = setup(() => of(ACCOUNT));
+    await fixture.whenStable();
+    expect(el.querySelector<HTMLAnchorElement>('a[href="/pix"]')?.textContent).toContain('Pix');
+  });
+
   it('quick recharge: the same form; Review recharge needs everything, then opens the review on the Recharge page', async () => {
     const { fixture, el, navigateByUrl } = setup(() => of(ACCOUNT));
     await fixture.whenStable();

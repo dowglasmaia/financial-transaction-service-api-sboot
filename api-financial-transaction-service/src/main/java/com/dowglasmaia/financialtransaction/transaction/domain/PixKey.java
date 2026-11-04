@@ -15,4 +15,22 @@ public record PixKey(PixKeyType type, String value) {
                 return false;
         }
     }
+
+    /**
+     * The key as it may appear in a log: never the whole value. CPF keeps its two check digits, an e-mail its first letter
+     * and domain, a phone its last four digits. A value that is not a usable key is hidden completely.
+     */
+    public String masked() {
+        if (!isValid()) {
+            return "***";
+        }
+        switch (type) {
+            case CPF:
+                return "***.***.***-" + value.substring(value.length() - 2);
+            case EMAIL:
+                return value.charAt(0) + "***" + value.substring(value.indexOf('@'));
+            default:
+                return "*******" + value.substring(value.length() - 4);
+        }
+    }
 }

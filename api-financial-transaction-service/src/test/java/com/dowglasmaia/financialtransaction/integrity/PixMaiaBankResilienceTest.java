@@ -62,6 +62,8 @@ class PixMaiaBankResilienceTest {
     private static final AtomicInteger IN_FLIGHT = new AtomicInteger();
     private static volatile int responseStatus = 200;
     private static volatile long delayMillis = 0;
+    /** The real maiabank-api answers 200 with the text "API-ON" (SL-06 found that against the container). */
+    private static volatile boolean plainTextBody = false;
     private static final HttpServer MAIABANK = startStub();
 
     private static HttpServer startStub() {
@@ -76,7 +78,14 @@ class PixMaiaBankResilienceTest {
                     Thread.currentThread().interrupt();
                 }
                 try {
-                    exchange.sendResponseHeaders(responseStatus, -1);
+                    if (plainTextBody) {
+                        byte[] body = "API-ON".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                        exchange.getResponseHeaders().add("Content-Type", "text/plain;charset=UTF-8");
+                        exchange.sendResponseHeaders(responseStatus, body.length);
+                        exchange.getResponseBody().write(body);
+                    } else {
+                        exchange.sendResponseHeaders(responseStatus, -1);
+                    }
                 } catch (IOException ignored) {
                     // the client already gave up (timeout)
                 } finally {
@@ -121,6 +130,7 @@ class PixMaiaBankResilienceTest {
         HITS.set(0);
         responseStatus = 200;
         delayMillis = 0;
+        plainTextBody = false;
         breaker().reset();
     }
 
@@ -147,6 +157,17 @@ class PixMaiaBankResilienceTest {
         assertThat(rows).hasSize(1);
         assertThat(rows.get(0).getStatus()).isEqualTo(TransactionStatus.COMPLETED);
         assertThat(HITS.get()).isEqualTo(1);
+    }
+
+    @Test
+    void aPlainTextAnswerLikeTheRealMaiaBankIsASuccess() throws Exception { // SL-06: ResponseEntity<Void> failed to decode text/plain
+        plainTextBody = true;
+
+        pix().andExpect(status().isNoContent());
+
+        assertThat(balance()).isEqualByComparingTo("4900.00");
+        assertThat(ledger.findAll()).singleElement().extracting(TransactionEntity::getStatus).isEqualTo(TransactionStatus.COMPLETED);
+        assertThat(breaker().getState()).isEqualTo(CircuitBreaker.State.CLOSED);
     }
 
     @Test
