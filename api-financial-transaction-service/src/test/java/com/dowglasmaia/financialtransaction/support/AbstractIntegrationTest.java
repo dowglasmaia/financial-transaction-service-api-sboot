@@ -2,15 +2,15 @@ package com.dowglasmaia.financialtransaction.support;
 
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountEntity;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AgencyEntity;
-import com.dowglasmaia.financialtransaction.entity.Transaction;
-import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionEntity;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.UserEntity;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountJpaRepository;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AgencyJpaRepository;
-import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
-import com.dowglasmaia.financialtransaction.repository.TransactionRepository;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.OutboxEventJpaRepository;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionJpaRepository;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.UserJpaRepository;
-import com.dowglasmaia.financialtransaction.services.client.maiaBank.MaiaBankClient;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.client.MaiaBankClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -62,8 +62,8 @@ public abstract class AbstractIntegrationTest {
     @Autowired protected AccountJpaRepository accountRepository;
     @Autowired protected AgencyJpaRepository agencyRepository;
     @Autowired protected UserJpaRepository userRepository;
-    @Autowired protected TransactionRepository transactionRepository;
-    @Autowired protected OutboxEventRepository outboxEventRepository;
+    @Autowired protected TransactionJpaRepository transactionRepository;
+    @Autowired protected OutboxEventJpaRepository outboxEventRepository;
 
     @MockBean protected MaiaBankClient maiaBankClient;
 
@@ -118,8 +118,8 @@ public abstract class AbstractIntegrationTest {
         return accountRepository.findByNumber(accountNumber).orElseThrow().getBalance();
     }
 
-    protected Transaction ledger(TransactionTypeEnum type, BigDecimal amount, String accountId, OffsetDateTime when) {
-        return transactionRepository.save(Transaction.builder()
+    protected TransactionEntity ledger(TransactionType type, BigDecimal amount, String accountId, OffsetDateTime when) {
+        return transactionRepository.save(TransactionEntity.builder()
               .transactionType(type).amount(amount).accountId(accountId).agencyId(null).dateHour(when).build());
     }
 

@@ -10,7 +10,7 @@ import com.dowglasmaia.financialtransaction.account.application.port.UserReposit
 import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.account.domain.Agency;
 import com.dowglasmaia.financialtransaction.account.domain.User;
-import com.dowglasmaia.financialtransaction.exeptions.ForbiddenExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ForbiddenException;
 import java.math.BigDecimal;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,7 @@ class GetCurrentAccountUseCaseTest {
     void withoutATokenTheCallerIsForbidden() {
         when(caller.subject()).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> useCase().execute()).isInstanceOf(ForbiddenExeption.class).hasMessage("Access denied.");
+        assertThatThrownBy(() -> useCase().execute()).isInstanceOf(ForbiddenException.class).hasMessage("Access denied.");
     }
 
     @Test
@@ -55,7 +55,7 @@ class GetCurrentAccountUseCaseTest {
         when(caller.subject()).thenReturn(Optional.of("auth0|stranger"));
         when(users.findByExternalSubject("auth0|stranger")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> useCase().execute()).isInstanceOf(ForbiddenExeption.class).hasMessage(NOT_LINKED);
+        assertThatThrownBy(() -> useCase().execute()).isInstanceOf(ForbiddenException.class).hasMessage(NOT_LINKED);
     }
 
     @Test
@@ -64,6 +64,6 @@ class GetCurrentAccountUseCaseTest {
         when(users.findByExternalSubject("auth0|abc")).thenReturn(Optional.of(holder));
         when(accounts.findFirstByUserId("user-1")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> useCase().execute()).isInstanceOf(ForbiddenExeption.class).hasMessage(NOT_LINKED);
+        assertThatThrownBy(() -> useCase().execute()).isInstanceOf(ForbiddenException.class).hasMessage(NOT_LINKED);
     }
 }

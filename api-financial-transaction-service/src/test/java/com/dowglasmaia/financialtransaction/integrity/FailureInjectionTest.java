@@ -1,11 +1,11 @@
 package com.dowglasmaia.financialtransaction.integrity;
 
-import com.dowglasmaia.financialtransaction.entity.OutboxEvent;
-import com.dowglasmaia.financialtransaction.entity.Transaction;
-import com.dowglasmaia.financialtransaction.entity.TransactionStatusEnum;
-import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
-import com.dowglasmaia.financialtransaction.repository.OutboxEventRepository;
-import com.dowglasmaia.financialtransaction.repository.TransactionRepository;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.OutboxEventEntity;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionEntity;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.OutboxEventJpaRepository;
+import com.dowglasmaia.financialtransaction.transaction.infrastructure.persistence.TransactionJpaRepository;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -26,11 +26,11 @@ import static org.mockito.Mockito.verify;
  */
 class FailureInjectionTest extends AbstractIntegrationTest {
 
-    @SpyBean TransactionRepository ledger;
-    @SpyBean OutboxEventRepository outbox;
+    @SpyBean TransactionJpaRepository ledger;
+    @SpyBean OutboxEventJpaRepository outbox;
 
     private void ledgerFails() {
-        doThrow(new IllegalStateException("ledger unavailable")).when(ledger).save(any(Transaction.class));
+        doThrow(new IllegalStateException("ledger unavailable")).when(ledger).save(any(TransactionEntity.class));
     }
 
     @Test
@@ -60,7 +60,7 @@ class FailureInjectionTest extends AbstractIntegrationTest {
 
     @Test
     void anOutboxFailureRollsBackTheWholeRecharge() {
-        doThrow(new IllegalStateException("outbox unavailable")).when(outbox).save(any(OutboxEvent.class));
+        doThrow(new IllegalStateException("outbox unavailable")).when(outbox).save(any(OutboxEventEntity.class));
         assertThatThrownBy(() -> post("/recharge-mobile", "{\"phoneNumber\":998877665,\"areaCode\":11,\"carrier\":\"VIVO\",\"amount\":50.00}"))
               .hasRootCauseInstanceOf(IllegalStateException.class);
         assertThat(sameValue(SEED_BALANCE, balanceOf(SEED_ACCOUNT))).as("debit rolled back").isTrue();
@@ -84,15 +84,15 @@ class FailureInjectionTest extends AbstractIntegrationTest {
               .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isUnprocessableEntity());
 
         assertThat(sameValue(SEED_BALANCE, balanceOf(SEED_ACCOUNT))).as("debit reversed").isTrue();
-        List<Transaction> rows = transactionRepository.findAll();
+        List<TransactionEntity> rows = transactionRepository.findAll();
         assertThat(rows).hasSize(1);
-        assertThat(rows.get(0).getTransactionType()).isEqualTo(TransactionTypeEnum.PIX);
-        assertThat(rows.get(0).getStatus()).isEqualTo(TransactionStatusEnum.FAILED);
+        assertThat(rows.get(0).getTransactionType()).isEqualTo(TransactionType.PIX);
+        assertThat(rows.get(0).getStatus()).isEqualTo(TransactionStatus.FAILED);
         assertThat(sum(rows)).isEqualByComparingTo("500.00"); // the audit row keeps the amount, the statement ignores it
         assertThat(bodyOf(get("?initial-date=01/01/2000&final-date=31/12/2100")).get("transaction")).isEmpty();
     }
 
-    private static BigDecimal sum(List<Transaction> rows) {
-        return rows.stream().map(Transaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+    private static BigDecimal sum(List<TransactionEntity> rows) {
+        return rows.stream().map(TransactionEntity::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

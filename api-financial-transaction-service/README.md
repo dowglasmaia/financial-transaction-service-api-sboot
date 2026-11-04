@@ -234,10 +234,10 @@ docker compose up --build   # run from the monorepo root (where docker-compose.y
 
 ### Architecture checks (Hexagonal Pragmática)
 
-The package layout (`<feature>.{domain,application,infra}` + `shared`) is enforced by `ArchitectureTest` (ArchUnit), which runs in `mvn verify` and in `api-ci`. A quick offline check (needs only Node) lives in the `java-spring-create-module` skill. While the `transaction` side is still in the old layered packages (until ARCH-02), pass them as legacy:
+The package layout (`<feature>.{api, application(port, usecase), domain, infrastructure}` + `shared`) is enforced by `ArchitectureTest` (ArchUnit), which runs in `mvn verify` and in `api-ci`. A quick offline check (needs only Node) lives in the `java-spring-create-module` skill. All code is migrated, so the check is strict:
 
 ```bash
-node ~/.claude/skills/java-spring-create-module/scripts/check-architecture.mjs --src api-financial-transaction-service/src/main/java --base-package com.dowglasmaia.financialtransaction --legacy controllers,services,entity,repository,config,exeptions,utils
+node ~/.claude/skills/java-spring-create-module/scripts/check-architecture.mjs --src api-financial-transaction-service/src/main/java --base-package com.dowglasmaia.financialtransaction --strict
 ```
 
-Expected: `0 violation(s)`; the number of files still in legacy packages must only go down.
+Expected: `0 violation(s)`.

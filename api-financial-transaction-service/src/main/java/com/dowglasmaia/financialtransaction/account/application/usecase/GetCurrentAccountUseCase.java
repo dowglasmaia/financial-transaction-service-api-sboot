@@ -5,7 +5,7 @@ import com.dowglasmaia.financialtransaction.account.application.port.CallerIdent
 import com.dowglasmaia.financialtransaction.account.application.port.UserRepository;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.account.domain.User;
-import com.dowglasmaia.financialtransaction.exeptions.ForbiddenExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ForbiddenException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -28,8 +28,8 @@ public class GetCurrentAccountUseCase {
     }
 
     public Account execute() {
-        String subject = caller.subject().orElseThrow(() -> new ForbiddenExeption("Access denied."));
-        User user = users.findByExternalSubject(subject).orElseThrow(() -> new ForbiddenExeption(NOT_LINKED));
-        return accounts.findFirstByUserId(user.getId()).orElseThrow(() -> new ForbiddenExeption(NOT_LINKED));
+        String subject = caller.subject().orElseThrow(() -> new ForbiddenException("Access denied."));
+        User user = users.findByExternalSubject(subject).orElseThrow(() -> new ForbiddenException(NOT_LINKED));
+        return accounts.findFirstByUserId(user.getId()).orElseThrow(() -> new ForbiddenException(NOT_LINKED));
     }
 }

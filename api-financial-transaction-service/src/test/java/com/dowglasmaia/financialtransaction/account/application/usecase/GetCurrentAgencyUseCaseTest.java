@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.dowglasmaia.financialtransaction.account.application.port.AgencyRepository;
 import com.dowglasmaia.financialtransaction.account.domain.Agency;
-import com.dowglasmaia.financialtransaction.exeptions.ObjectNotFoundExeption;
+import com.dowglasmaia.financialtransaction.shared.error.ObjectNotFoundException;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +30,6 @@ class GetCurrentAgencyUseCaseTest {
         when(agencies.findByNumber("0211")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> new GetCurrentAgencyUseCase(agencies).execute())
-              .isInstanceOf(ObjectNotFoundExeption.class).hasMessage("Agency not found.");
+              .isInstanceOf(ObjectNotFoundException.class).hasMessage("Agency not found.");
     }
 }

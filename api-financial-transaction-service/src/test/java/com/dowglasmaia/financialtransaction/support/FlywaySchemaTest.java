@@ -1,7 +1,7 @@
 package com.dowglasmaia.financialtransaction.support;
 
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountEntity;
-import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -52,7 +52,7 @@ class FlywaySchemaTest extends AbstractIntegrationTest {
         assertThatThrownBy(() -> jdbc.update(
               "insert into transaction (id, date_hour, amount, account_id, agency_id, transaction_type) values (?,?,?,?,?,?)",
               "fk-test", OffsetDateTime.now(), new BigDecimal("1.00"), seedAccount().getId(), "no-such-agency",
-              TransactionTypeEnum.DEPOSIT.name())).isInstanceOf(DataIntegrityViolationException.class);
+              TransactionType.DEPOSIT.name())).isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test

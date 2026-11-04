@@ -1,7 +1,7 @@
 package com.dowglasmaia.financialtransaction.security;
 
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.AccountEntity;
-import com.dowglasmaia.financialtransaction.entity.TransactionTypeEnum;
+import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
 import com.dowglasmaia.financialtransaction.account.infrastructure.persistence.UserEntity;
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
 import com.dowglasmaia.financialtransaction.support.MockIssuer;
@@ -65,7 +65,7 @@ class TwoRealUsersScenarioTest extends AbstractIntegrationTest {
 
     @Test
     void neitherUserCanReadOrDebitTheOther() throws Exception {
-        var ofUser1 = ledger(TransactionTypeEnum.DEPOSIT, new BigDecimal("9.00"), seedAccount().getId(), OffsetDateTime.now().minusHours(1));
+        var ofUser1 = ledger(TransactionType.DEPOSIT, new BigDecimal("9.00"), seedAccount().getId(), OffsetDateTime.now().minusHours(1));
 
         getAs(token2, "/" + ofUser1.getId()).andExpect(status().isNotFound());
         postAs(token2, "/atm-withdrawal", "{\"amount\":10.00,\"agency\":\"0211\",\"numberAccount\":\"2022\"}")
