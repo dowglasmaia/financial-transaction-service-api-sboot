@@ -6,6 +6,7 @@ import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurre
 import com.dowglasmaia.financialtransaction.account.application.usecase.GetCurrentAgencyUseCase;
 import com.dowglasmaia.financialtransaction.account.domain.Account;
 import com.dowglasmaia.financialtransaction.transaction.application.port.PixGateway;
+import com.dowglasmaia.financialtransaction.transaction.domain.PixKey;
 import com.dowglasmaia.financialtransaction.transaction.domain.PixTransfer;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionStatus;
 import com.dowglasmaia.financialtransaction.transaction.domain.TransactionType;
@@ -115,11 +116,12 @@ public class MakePixTransferUseCase {
     }
 
     private boolean isValidKeyAndExists(PixTransfer transfer) {
-        return transfer.key().isValid() && existKey(transfer.key().value());
+        return transfer.key().isValid() && existKey(transfer.key());
     }
 
-    private boolean existKey(String key) {
-        log.info("validate if the pixKey exists. {}", key);
+    /** Existence is not verified (stub, kept on purpose). The key is only ever logged masked. */
+    private boolean existKey(PixKey key) {
+        log.info("validate if the pixKey exists. {}", key.masked());
         return true;
     }
 }
