@@ -26,6 +26,8 @@ export abstract class SessionService {
   abstract readonly user: Signal<SessionUser | null>;
   /** True after the API or the identity provider said the session is no longer valid (shows the "session expired" dialog). */
   abstract readonly expired: Signal<boolean>;
+  /** Why the identity provider refused the sign-in (the callback came back with an error), or null. Never a token. */
+  abstract readonly loginError: Signal<string | null>;
 
   /** Resolves when the library finished handling a redirect callback / the first session check. */
   abstract whenSettled(): Promise<SessionStatus>;

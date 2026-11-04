@@ -89,6 +89,16 @@ describe('SignInPage', () => {
     expect(el.querySelector('button')?.textContent).toContain('Try again');
   });
 
+  it('shows what the provider said when it refused the sign-in', async () => {
+    const { fixture, session, el } = setup({ failed: '1' });
+    session.loginErrorState.set('Client "abc" is not authorized to access resource server "https://api.example".');
+    await fixture.whenStable();
+
+    const alert = el.querySelector('[role="alert"]')?.textContent ?? '';
+    expect(alert).toContain("We couldn't sign you in");
+    expect(alert).toContain('Client "abc" is not authorized to access resource server');
+  });
+
   it('shows no error on a normal visit', async () => {
     const { fixture, el } = setup();
     await fixture.whenStable();

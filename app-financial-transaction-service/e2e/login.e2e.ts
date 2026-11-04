@@ -27,6 +27,12 @@ test.describe('unauthenticated', () => {
 });
 
 test.describe('sign in with the mock IdP', () => {
+  test('a callback that comes back with an error ends on the sign-in page with the provider message', async ({ page }) => {
+    await page.goto('/?error=invalid_request&error_description=Client%20%22x%22%20is%20not%20authorized%20to%20access%20resource%20server&state=unknown');
+    await expect(page).toHaveURL(/\/signin/);
+    await expect(page.getByRole('alert')).toContainText("We couldn't sign you in");
+  });
+
   test('the sign-in page has an e-mail field; the authorize request asks the provider to show its login form and carries the hint', async ({ page }) => {
     await page.goto('/signin');
     await page.getByLabel(/E-mail/).fill('maria@example.test');

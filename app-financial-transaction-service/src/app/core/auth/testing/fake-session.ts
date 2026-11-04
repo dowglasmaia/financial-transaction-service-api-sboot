@@ -6,6 +6,7 @@ export class FakeSession extends SessionService {
   readonly state = signal<SessionStatus>('anonymous');
   readonly profile = signal<SessionUser | null>(null);
   readonly expiredFlag = signal(false);
+  readonly loginErrorState = signal<string | null>(null);
 
   token: string | null = 'tok-1';
   renewedToken: string | null = 'tok-2';
@@ -17,6 +18,7 @@ export class FakeSession extends SessionService {
   override readonly status = computed(() => this.state());
   override readonly user = computed(() => this.profile());
   override readonly expired = computed(() => this.expiredFlag());
+  override readonly loginError = computed(() => this.loginErrorState());
 
   override whenSettled(): Promise<SessionStatus> {
     return Promise.resolve(this.state());

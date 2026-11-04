@@ -27,7 +27,12 @@ const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       </div>
 
       @if (failed) {
-        <app-alert kind="error" title="We couldn't sign you in">Something went wrong on the way back. Try again.</app-alert>
+        <app-alert kind="error" title="We couldn't sign you in">
+          Something went wrong on the way back. Try again.
+          @if (refusal(); as reason) {
+            <span class="mt-1 block text-xs text-content-muted">Auth0 said: {{ reason }}</span>
+          }
+        </app-alert>
       }
 
       @if (redirecting()) {
@@ -58,6 +63,7 @@ export class SignInPage {
 
   protected readonly failed = inject(ActivatedRoute).snapshot.queryParamMap.has('failed');
   protected readonly redirecting = signal(false);
+  protected readonly refusal = this.session.loginError;
   protected readonly email = signal('');
   protected readonly emailError = signal('');
 

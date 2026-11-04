@@ -68,6 +68,13 @@ describe('LandingPage', () => {
     expect(navigateByUrl).not.toHaveBeenCalled();
   });
 
+  it('a refused sign-in (the SDK consumed the ?error=… of the callback) still ends on the sign-in page with the error state', async () => {
+    const { fixture, session, navigate } = setup();
+    session.loginErrorState.set('Client "abc" is not authorized to access resource server "https://api.example".');
+    await fixture.whenStable();
+    expect(navigate).toHaveBeenCalledWith(['/signin'], { queryParams: { failed: 1 }, replaceUrl: true });
+  });
+
   it('a failed callback (?error=…) goes to the sign-in page with the error state', async () => {
     const { fixture, navigate } = setup({ error: 'access_denied', error_description: 'x' });
     await fixture.whenStable();
