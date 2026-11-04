@@ -25,13 +25,16 @@ class ValidatorsCharacterizationTest {
     }
 
     @Test
-    void cpfWithOneCharacterThrows() { // characterizes F-11: no length check
-        assertThatThrownBy(() -> CPFValidator.isCpf("1")).isInstanceOf(StringIndexOutOfBoundsException.class);
+    void cpfWithOneCharacterIsRejectedNotAnException() { // flipped by SL-06 (was F-11: StringIndexOutOfBoundsException)
+        assertThat(CPFValidator.isCpf("1")).isFalse();
+        assertThat(CPFValidator.isCpf("")).isFalse();
+        assertThat(CPFValidator.isCpf(null)).isFalse();
     }
 
     @Test
-    void cpfWithRepeatedDigitsIsAccepted() { // characterizes F-11: "000.000.000-00" passes the digit algorithm
-        assertThat(CPFValidator.isCpf("00000000000")).isTrue();
+    void cpfWithRepeatedDigitsIsRejected() { // flipped by SL-06 (was F-11: "000.000.000-00" passed the digit algorithm)
+        assertThat(CPFValidator.isCpf("00000000000")).isFalse();
+        assertThat(CPFValidator.isCpf("111.111.111-11")).isFalse();
     }
 
     @Test
@@ -47,6 +50,7 @@ class ValidatorsCharacterizationTest {
     void emailRegex() {
         assertThat(EmailValidator.isValidEmail("a.b-c@example.com")).isTrue();
         assertThat(EmailValidator.isValidEmail("nope")).isFalse();
+        assertThat(EmailValidator.isValidEmail("a..b@example.com")).isFalse(); // SL-06: the old regex accepted it
         assertThat(EmailValidator.isValidEmail("")).isFalse();
         assertThat(EmailValidator.isValidEmail(null)).isFalse();
     }

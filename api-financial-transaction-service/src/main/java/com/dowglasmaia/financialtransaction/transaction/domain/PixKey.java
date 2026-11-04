@@ -15,4 +15,9 @@ public record PixKey(PixKeyType type, String value) {
                 return false;
         }
     }
+
+    /** Placeholder until the masking is implemented (SL-06 red run). */
+    public String masked() {
+        return "";
+    }
 }
