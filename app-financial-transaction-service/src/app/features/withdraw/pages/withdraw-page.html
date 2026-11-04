@@ -22,7 +22,7 @@
       />
     }
     @default {
-      <app-result-panel kind="uncertain" title="We couldn't confirm the operation" [message]="uncertainMessage" [busy]="operation.pending()" (retry)="tryAgain()" />
+      <app-result-panel kind="uncertain" title="Outcome not confirmed" [message]="uncertainMessage" [busy]="operation.pending()" (retry)="tryAgain()" />
     }
   }
 } @else {

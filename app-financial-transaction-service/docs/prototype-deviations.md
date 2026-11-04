@@ -87,3 +87,14 @@ Text pairs ≥ 4.5:1 and control borders ≥ 3:1 for `content`, `content-muted`,
 | 13 | Chart is a hand-made SVG with **solid vs dashed** lines (not colour alone) and a **"View as table"** fallback carrying the same numbers | Accessibility; no chart library | `shared/ui/line-chart.component.ts` |
 | 14 | Dropped: search box, CSV export, per-row status chips (every row is "Registered"), statement balance-after-row column | Out of scope for SL-02; the ledger has no running balance or status per row to show | — |
 | 15 | Desktop shows a **table**, mobile a list of rows (same data) | Readability at both widths | `statement-page` |
+
+## SL-03 — Withdrawal, shared result panel, Idempotency-Key
+| # | Deviation | Why | Where |
+|---|---|---|---|
+| 16 | "Review withdrawal" stays available above the balance: "The amount can't exceed your available balance." is **feedback only** and the server answers 422 (business-failure panel). The prototype disables the button | The spec says the server decides; the e2e proves the 422 panel with an unchanged balance | `withdraw-page`, `amount-presets.component.ts` |
+| 17 | The review dialog cannot be dismissed (Escape, backdrop) while the request is pending, and Confirm shows the spinner | One click = one request; no half-closed state | `dialog.component.ts` (`dismissible`), `review-dialog.component.ts` |
+| 18 | The uncertain panel has an explicit **Try again** (same `Idempotency-Key`) next to "View transactions"; the prototype only has "Open transactions" / "Back". The title is "Outcome not confirmed" and the body is the required sentence, so the text is not repeated | A retry must be a user choice, and the server recognises the key and never debits twice | `result-panel.component.ts`, `shared/operation/operation.ts` |
+| 19 | Business failure keeps the **backend's message** ("Operation not performed, there is not enough balance in the account.") and offers "Edit and try again"; the prototype hard-codes its own sentence | The backend message is the source of truth | `withdraw-page.html` |
+| 20 | The success panel never says cash was dispensed ("Your withdrawal was registered.") and shows "Registered on this device at HH:MM" | The API only registers the operation | `withdraw-page.html` |
+| 21 | No "hand-coins" art panel next to the form and no rail balance pill (the balance is in the page header) | Decorative; a second balance display would be a second source of truth | `withdraw-page.html` |
+| 22 | The client waits 30 s for an answer: no answer in time is an *uncertain* outcome (the request is not repeated) | A hung request must not leave the button pending forever | `shared/operation/operation.ts` |

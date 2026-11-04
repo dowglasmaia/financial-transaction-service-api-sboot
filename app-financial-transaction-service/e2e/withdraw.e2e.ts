@@ -128,7 +128,7 @@ test.describe('withdrawal', () => {
     await review(page, '100');
     await confirm(page).click();
 
-    await expect(page.getByRole('heading', { level: 1, name: "We couldn't confirm the operation" })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Outcome not confirmed' })).toBeVisible();
     await expect(page.locator('app-result-panel')).toContainText("Check your transactions before trying again, so you don't pay twice.");
     await page.waitForTimeout(700);
     await expectNoSeriousA11yViolations(page);
@@ -154,7 +154,7 @@ test.describe('withdrawal', () => {
     await review(page, '50');
     await confirm(page).click();
 
-    await expect(page.getByRole('heading', { level: 1, name: "We couldn't confirm the operation" })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Outcome not confirmed' })).toBeVisible();
     await page.waitForTimeout(1500); // no automatic retry, whatever the wait
     expect(sent).toBe(1);
     expect(balance()).toBe(5000);
