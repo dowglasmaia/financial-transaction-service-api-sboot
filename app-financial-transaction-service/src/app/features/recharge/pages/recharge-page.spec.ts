@@ -13,14 +13,24 @@ function setup(recharge: (...args: unknown[]) => unknown = () => of(undefined)) 
   const account = { me: vi.fn(() => of(ACCOUNT)) };
   const api = { recharge: vi.fn(recharge) };
   TestBed.configureTestingModule({
-    providers: [provideRouter([]), { provide: AccountApi, useValue: account }, { provide: RechargeApi, useValue: api }],
+    providers: [
+      provideRouter([]),
+      { provide: AccountApi, useValue: account },
+      { provide: RechargeApi, useValue: api },
+    ],
   });
   const fixture = TestBed.createComponent(RechargePage);
   const el = fixture.nativeElement as HTMLElement;
   const phone = () => el.querySelector<HTMLInputElement>('input[type="tel"]')!;
   const amount = () => el.querySelector<HTMLInputElement>('input[inputmode="decimal"]')!;
-  const button = (text: string) => [...el.querySelectorAll<HTMLButtonElement>('button')].find((b) => b.textContent?.includes(text));
-  const dialogButton = (text: string) => [...el.querySelectorAll<HTMLButtonElement>('[role="dialog"] button')].find((b) => b.textContent?.includes(text));
+  const button = (text: string) =>
+    [...el.querySelectorAll<HTMLButtonElement>('button')].find((b) =>
+      b.textContent?.includes(text),
+    );
+  const dialogButton = (text: string) =>
+    [...el.querySelectorAll<HTMLButtonElement>('[role="dialog"] button')].find((b) =>
+      b.textContent?.includes(text),
+    );
   const typeInto = async (input: HTMLInputElement, value: string) => {
     input.value = value;
     input.dispatchEvent(new Event('input'));
@@ -46,7 +56,8 @@ describe('RechargePage', () => {
 
     for (const name of ['Claro', 'Vivo', 'TIM', 'Algar']) expect(button(name)).toBeDefined();
     expect(el.textContent).not.toContain('Oi');
-    for (const label of ['R$ 15', 'R$ 30', 'R$ 50', 'R$ 100']) expect(el.textContent).toContain(label);
+    for (const label of ['R$ 15', 'R$ 30', 'R$ 50', 'R$ 100'])
+      expect(el.textContent).toContain(label);
   });
 
   it('selecting a carrier marks only that one as pressed', async () => {
@@ -115,7 +126,11 @@ describe('RechargePage', () => {
     await fixture.whenStable();
 
     expect(api.recharge).toHaveBeenCalledTimes(1);
-    expect(api.recharge).toHaveBeenCalledWith({ areaCode: 11, phoneNumber: 912345678, carrier: 'VIVO' }, '30.00', expect.any(String));
+    expect(api.recharge).toHaveBeenCalledWith(
+      { areaCode: 11, phoneNumber: 912345678, carrier: 'VIVO' },
+      '30.00',
+      expect.any(String),
+    );
   });
 
   it('success says the recharge was "requested" and never "completed"; the balance is read again', async () => {
@@ -133,8 +148,14 @@ describe('RechargePage', () => {
   });
 
   it('business failure shows the backend message, never says completed, and retries nothing', async () => {
-    const failure: ApiError = { status: 422, code: 'UNPROCESSABLE_ENTITY', message: 'Invalid cell phone numer' };
-    const { fixture, el, api, account, review, dialogButton } = setup(() => throwError(() => failure));
+    const failure: ApiError = {
+      status: 422,
+      code: 'UNPROCESSABLE_ENTITY',
+      message: 'Invalid cell phone numer',
+    };
+    const { fixture, el, api, account, review, dialogButton } = setup(() =>
+      throwError(() => failure),
+    );
     await fixture.whenStable();
     await review();
     dialogButton('Confirm')!.click();
@@ -149,7 +170,11 @@ describe('RechargePage', () => {
 
   it('uncertain: "Try again" repeats the SAME key and request', async () => {
     let calls = 0;
-    const { fixture, el, api, button, review, dialogButton } = setup(() => (++calls === 1 ? throwError(() => ({ status: 0, code: 'NETWORK', message: 'offline' })) : of(undefined)));
+    const { fixture, el, api, button, review, dialogButton } = setup(() =>
+      ++calls === 1
+        ? throwError(() => ({ status: 0, code: 'NETWORK', message: 'offline' }))
+        : of(undefined),
+    );
     await fixture.whenStable();
     await review();
     dialogButton('Confirm')!.click();
@@ -166,7 +191,10 @@ describe('RechargePage', () => {
   });
 
   it('arrives pre-filled from the Home quick-recharge card and opens the same review', async () => {
-    history.replaceState({ recharge: { carrier: 'TIM', phone: '(21) 9 8765-4321', amount: '50.00' } }, '');
+    history.replaceState(
+      { recharge: { carrier: 'TIM', phone: '(21) 9 8765-4321', amount: '50.00' } },
+      '',
+    );
     const { fixture, el, api } = setup();
     await fixture.whenStable();
     history.replaceState(null, '');

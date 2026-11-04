@@ -34,6 +34,12 @@ export const routes: Routes = [
     loadChildren: () => import('./features/deposit/deposit.routes').then((module) => module.DEPOSIT_ROUTES),
   },
   {
+    path: 'recharge',
+    canActivate: [authGuard],
+    data: { nav: { label: 'Recharge', icon: 'ph ph-device-mobile', order: 5 } },
+    loadChildren: () => import('./features/recharge/recharge.routes').then((module) => module.RECHARGE_ROUTES),
+  },
+  {
     path: 'withdraw',
     canActivate: [authGuard],
     data: { nav: { label: 'Withdraw', icon: 'ph ph-money', order: 4 } },

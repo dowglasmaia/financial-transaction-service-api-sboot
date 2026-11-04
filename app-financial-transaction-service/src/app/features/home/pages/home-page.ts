@@ -6,12 +6,14 @@ import { BalanceCardComponent } from '../../../shared/ui/balance-card.component'
 import { ButtonDirective } from '../../../shared/ui/button.directive';
 import { ChipComponent } from '../../../shared/ui/chip.component';
 import { EmptyStateComponent } from '../../../shared/ui/empty-state.component';
+import { IconTileComponent } from '../../../shared/ui/icon-tile.component';
 import { KpiTileComponent } from '../../../shared/ui/kpi-tile.component';
 import { LedgerRowComponent } from '../../../shared/ui/ledger-row.component';
 import { LineChartComponent } from '../../../shared/ui/line-chart.component';
 import { SkeletonComponent } from '../../../shared/ui/skeleton.component';
 import { formatBrl } from '../../../shared/util/money';
 import { AccountStore } from '../../account/data-access/account.store';
+import { QuickRechargeCardComponent } from '../ui/quick-recharge-card.component';
 import { SummaryStore } from '../../statement/data-access/ledger.stores';
 import { periodRange } from '../../statement/data-access/statement-query';
 
@@ -21,7 +23,7 @@ import { periodRange } from '../../statement/data-access/statement-query';
  */
 @Component({
   selector: 'app-home-page',
-  imports: [AlertComponent, BalanceCardComponent, ButtonDirective, ChipComponent, EmptyStateComponent, KpiTileComponent, LedgerRowComponent, LineChartComponent, RouterLink, SkeletonComponent],
+  imports: [AlertComponent, BalanceCardComponent, ButtonDirective, ChipComponent, EmptyStateComponent, IconTileComponent, KpiTileComponent, LedgerRowComponent, LineChartComponent, QuickRechargeCardComponent, RouterLink, SkeletonComponent],
   templateUrl: './home-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
