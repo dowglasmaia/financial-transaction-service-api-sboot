@@ -24,7 +24,7 @@ public class DebitAccountByNumberUseCase {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void execute(String accountNumber, BigDecimal amount) {
-        log.info("Start debit at account:{}", accountNumber);
+        log.info("Start debit by account number");
 
         Account account = accounts.findByNumber(accountNumber)
               .orElseThrow(() -> new ObjectNotFoundException("Account not found."));

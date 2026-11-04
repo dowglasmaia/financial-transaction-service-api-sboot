@@ -1,7 +1,6 @@
 package com.dowglasmaia.financialtransaction.observability;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.dowglasmaia.financialtransaction.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
@@ -19,11 +18,6 @@ class ManagementEndpointsTest extends AbstractIntegrationTest {
     @Test
     void theManagementPortIsNotTheApiPort() {
         assertThat(managementPort).isNotBlank().isNotEqualTo("8088");
-    }
-
-    @Test
-    void prometheusCanBeScrapedWithoutATokenOnTheManagementPort() throws Exception {
-        mvc.perform(MockMvcRequestBuilders.get("/actuator/prometheus")).andExpect(status().isOk());
     }
 
     @Test

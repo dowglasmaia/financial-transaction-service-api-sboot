@@ -61,6 +61,8 @@ app:
     second-subject: ${SEED_SECOND_SUB:}   # optional second demo customer (account 3033) for a second login
 
 management:
+  server:
+    port: ${ACTUATOR_PORT:8090}   # BE-08: the actuator is never on the API port (8088); the port is not published by compose
   tracing:
     sampling:
       probability: 1
@@ -108,3 +110,7 @@ resilience4j:
         permittedNumberOfCallsInHalfOpenState: 3
         enableAutomaticTransitionFromOpenToClosedState: true
         transitionFromOpenToClosedStateOnSuccessfulCall: true
+
+logging:
+  pattern:
+    level: "%5p [%X{requestId:-}]"   # BE-08: correlation id in every line
