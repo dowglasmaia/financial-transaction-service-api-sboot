@@ -5,7 +5,7 @@ import com.dowglasmaia.provider.model.MobileRechargeRequestDTO;
 import com.dowglasmaia.provider.model.PixRequestDTO;
 import com.dowglasmaia.provider.model.WithdrawRequestDTO;
 
-import java.math.BigDecimal;
+import com.dowglasmaia.financialtransaction.shared.money.Money;
 
 /**
  * Shape checks of the four money POST bodies, done once here (SL-03): a null body or a missing, blank or non-positive
@@ -21,9 +21,7 @@ public class ValidateBodyRequest {
         if (isBlank(body.getPixKey())) {
             throw new IllegalArgumentException("Pix key is required");
         }
-        if (notPositive(body.getTransactionAmount())) {
-            throw new IllegalArgumentException("Transaction amount must be positive and non-null");
-        }
+        Money.requirePositive(body.getTransactionAmount(), "Transaction amount must be positive and non-null");
         if (body.getKeyType() == null) {
             throw new IllegalArgumentException("Key type is required");
         }
@@ -34,9 +32,7 @@ public class ValidateBodyRequest {
         if (isBlank(body.getAccount())) {
             throw new IllegalArgumentException("Account is required");
         }
-        if (notPositive(body.getAmount())) {
-            throw new IllegalArgumentException(AMOUNT);
-        }
+        Money.requirePositive(body.getAmount(), AMOUNT);
         if (isBlank(body.getAgency())) {
             throw new IllegalArgumentException("Agency is required");
         }
@@ -47,9 +43,7 @@ public class ValidateBodyRequest {
         if (body.getPhoneNumber() == null) {
             throw new IllegalArgumentException("Phone number is required");
         }
-        if (notPositive(body.getAmount())) {
-            throw new IllegalArgumentException(AMOUNT);
-        }
+        Money.requirePositive(body.getAmount(), AMOUNT);
         if (body.getAreaCode() == null) {
             throw new IllegalArgumentException("Area code is required");
         }
@@ -60,9 +54,7 @@ public class ValidateBodyRequest {
 
     public static void validateWithdrawRequest(WithdrawRequestDTO body){
         required(body);
-        if (notPositive(body.getAmount())) {
-            throw new IllegalArgumentException(AMOUNT);
-        }
+        Money.requirePositive(body.getAmount(), AMOUNT);
     }
 
     private static void required(Object body){
@@ -75,8 +67,5 @@ public class ValidateBodyRequest {
         return value == null || value.isBlank();
     }
 
-    private static boolean notPositive(BigDecimal amount){
-        return amount == null || amount.compareTo(BigDecimal.ZERO) <= 0;
-    }
 
 }

@@ -1,5 +1,6 @@
 package com.dowglasmaia.financialtransaction.account.domain;
 
+import com.dowglasmaia.financialtransaction.shared.money.Money;
 import java.math.BigDecimal;
 import java.util.Objects;
 
@@ -29,6 +30,7 @@ public final class Account {
         if (number == null || number.isBlank()) {
             throw new IllegalArgumentException("Account number is required");
         }
+        Money.balance(balance); // invariant: a new account starts with a balance that is zero or more
         return new Account(null, agency, user, number, balance);
     }
 

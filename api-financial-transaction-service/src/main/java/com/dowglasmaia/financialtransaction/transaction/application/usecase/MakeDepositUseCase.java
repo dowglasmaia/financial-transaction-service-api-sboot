@@ -33,10 +33,9 @@ public class MakeDepositUseCase {
     /** Credit + ledger row in ONE transaction: if the ledger cannot be written the credit is rolled back. */
     @Transactional
     public void execute(String agency, String account, BigDecimal amount) {
-        log.info("Start makeDeposit at agency and at acoount: {},{}", agency, account);
+        log.info("Start makeDeposit");
 
         String agencyId = getCurrentAgency.execute();
-        log.info("Deposit requested at agency: {}", agencyId);
 
         Account found = findAccountByAgencyAndNumber.execute(agencyId, account)
               .orElseThrow(() -> new ObjectNotFoundException("Account not found."));

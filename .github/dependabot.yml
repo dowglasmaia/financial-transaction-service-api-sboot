@@ -1,0 +1,32 @@
+# BE-08: dependency updates and vulnerability alerts with GitHub's own tooling (owner decision: native features, no extra tool).
+# Security updates for known vulnerabilities are opened automatically; these entries also keep versions fresh once a week.
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /api-financial-transaction-service
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      spring:
+        patterns: ["org.springframework*"]
+  - package-ecosystem: npm
+    directory: /app-financial-transaction-service
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      angular:
+        patterns: ["@angular/*"]
+  - package-ecosystem: docker
+    directory: /api-financial-transaction-service
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: /app-financial-transaction-service
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

@@ -65,6 +65,7 @@ public class SecurityConfig {
               .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
               .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                    .requestMatchers("/actuator/prometheus").permitAll() // BE-08: scraped on the private management port (never the API port)
                     .requestMatchers("/actuator/**").hasRole("ADMIN") // no admin role is issued today: effectively closed
                     .requestMatchers("/api/**").access(customerLinkedAuthorization)
                     .anyRequest().authenticated())

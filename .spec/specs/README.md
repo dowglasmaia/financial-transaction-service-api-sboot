@@ -40,6 +40,7 @@ Slices are strictly sequential (they share backend services and the app shell). 
 | [BE-07](be-07-platform-upgrade.md) | Platform upgrade: Boot 3.5.x, Java 21, Java 25 (backend-only) | SL-06 | `spec/be-07-platform-upgrade` |
 | [BE-08](be-08-cleanup-hardening.md) | Cleanup and portfolio-grade hardening (backend-only) | BE-07 | `spec/be-08-cleanup-hardening` |
 | ~~[FE-05](fe-05-final-validation.md)~~ | Folded into FINAL-01 2026-11-04 | — | — |
+| [E2E-01](e2e-01-cypress-suite.md) | **Cypress suite** (one spec: flows, API matrix, manual-round checklist) | BE-07, BE-08 | `spec/e2e-01-cypress-suite` |
 | [FINAL-01](final-01-test-round.md) | Final test round (after all specs) | all others | `spec/final-01-test-round` |
 | ~~[BE-05](be-05-behaviour-fixes.md)~~ | Superseded | — | — |
 | ~~[BE-06](be-06-api-contract-and-evolution.md)~~ | Superseded | — | — |
@@ -94,10 +95,11 @@ Approve the class mapping table and the security split (ARCH-01) and the transac
 | SL-02 | Merged (PR #22); contract 1.1.0, statement/detail/summary, openapi-diff job |
 | SL-03 | Merged (PR #23) |
 | SL-04 | Merged (PR #24) |
-| SL-06 | Implemented on `slice/06-pix` (371 backend tests, 379 unit tests, 114 e2e); awaiting the owner's PR, review and green pipelines |
+| SL-06 | Merged (PR #25) |
 | SL-05 | Merged into SL-04 (2026-11-04) |
-| BE-07 | Draft (Java 21 build already pre-applied locally, uncommitted; see the spec note) |
-| BE-08 | Draft |
+| BE-07 | Implemented on `spec/be-07-08-backend-close` (Boot 3.5.16, Java 25, 410 tests with BE-08); awaiting the owner's PR, review and green pipelines |
+| BE-08 | Implemented on `spec/be-07-08-backend-close` together with BE-07; awaiting the owner's PR, review and green pipelines |
+| E2E-01 | Draft (written 2026-11-04): one Cypress suite next to Playwright; needs the owner's approval to implement |
 | FE-05 | Folded into FINAL-01 (2026-11-04) |
 | FINAL-01 | Draft |
 | BE-05, BE-06, FE-03, FE-04 | Superseded by the slices |

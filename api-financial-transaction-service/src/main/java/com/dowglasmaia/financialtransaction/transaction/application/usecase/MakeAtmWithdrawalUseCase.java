@@ -40,7 +40,6 @@ public class MakeAtmWithdrawalUseCase {
         log.info("Start makeAtmWithdrawal");
 
         String agencyId = getCurrentAgency.execute();
-        log.info("AtmWithdrawal at agency: {}", agencyId);
 
         var account = getCurrentAccount.execute();
 

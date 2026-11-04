@@ -23,8 +23,17 @@ services:
     networks:
       - maianet
     depends_on:
-      - pg-db
-      - kafka
+      pg-db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    # BE-08: the actuator is on its own port (8090, not published); health is what "ready" means for the web app and the e2e.
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8090/actuator/health | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
 
   # The web app (nginx serving the Angular build, forwarding /api/ to the API). Optional, like the API: `--profile web`
   # (add `--profile api` for the API it talks to). It listens on 4200 so the Auth0 callback/logout URLs of `ng serve` keep
@@ -41,7 +50,8 @@ services:
     networks:
       - maianet
     depends_on:
-      - financial-transaction-api
+      financial-transaction-api:
+        condition: service_healthy
 
   pg-db:
     container_name: pg-db
@@ -56,6 +66,11 @@ services:
       - "${POSTGRES_PORT:-5433}:5432"   # 5433 on the host so it does not clash with a local Postgres on 5432
     volumes:
       - postgresql_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.1
