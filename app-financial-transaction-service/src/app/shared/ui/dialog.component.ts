@@ -17,7 +17,7 @@ const FOCUSABLE =
   template: `
     @if (open()) {
       <div class="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center">
-        <div data-dialog-backdrop class="absolute inset-0 bg-black/60 backdrop-blur-sm" aria-hidden="true" (click)="close()"></div>
+        <div data-dialog-backdrop class="absolute inset-0 bg-black/60 backdrop-blur-sm" aria-hidden="true" (click)="dismissible() && close()"></div>
         <div
           role="dialog"
           aria-modal="true"
@@ -41,6 +41,8 @@ export class DialogComponent {
   readonly open = model(false);
   readonly title = input.required<string>();
   readonly description = input('');
+  /** False while something must finish first (a request in flight): Escape and the backdrop then do nothing. */
+  readonly dismissible = input(true);
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly document = inject(DOCUMENT);
@@ -76,7 +78,7 @@ export class DialogComponent {
   protected onKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
       event.stopPropagation();
-      this.close();
+      if (this.dismissible()) this.close();
       return;
     }
     if (event.key !== 'Tab') return;

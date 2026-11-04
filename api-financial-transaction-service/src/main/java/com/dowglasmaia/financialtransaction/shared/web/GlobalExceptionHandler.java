@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -84,6 +85,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         body.setMessage(("from".equals(ex.getParameterName()) || "to".equals(ex.getParameterName()))
               ? "Dates are required: send from and to."
               : "Missing parameter '" + ex.getParameterName() + "'.");
+        return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    /**
+     * A body that is missing, the JSON literal null, not JSON, or has a value of the wrong type: 422 like every other
+     * field problem (the four money POSTs never answer 400 or 500 for a bad body).
+     */
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers,
+                                                                  HttpStatusCode status, WebRequest request){
+        String message = ex.getMessage() != null && ex.getMessage().startsWith("Required request body is missing")
+              ? "Request body is required"
+              : "Request body is malformed.";
+        ResponseErrorDTO body = new ResponseErrorDTO();
+        body.setCode(HttpStatus.UNPROCESSABLE_ENTITY.name());
+        body.setMessage(message);
         return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 

@@ -52,10 +52,10 @@ class ValidatorsCharacterizationTest {
     }
 
     @Test
-    void validatorsThrowNullPointerOnANullBody() { // characterizes F-11 (operator precedence); unreachable over HTTP because the body is required
-        assertThatThrownBy(() -> ValidateBodyRequest.validatorPixRequest(null)).isInstanceOf(NullPointerException.class);
-        assertThatThrownBy(() -> ValidateBodyRequest.validatorDepositRequest(null)).isInstanceOf(NullPointerException.class);
-        assertThatThrownBy(() -> ValidateBodyRequest.validateWithdrawRequest(null)).isInstanceOf(NullPointerException.class);
+    void everyValidatorRejectsANullBodyWithAMessage() { // flipped by SL-03 (was F-11: NullPointerException)
+        assertThatThrownBy(() -> ValidateBodyRequest.validatorPixRequest(null)).isInstanceOf(IllegalArgumentException.class).hasMessage("Request body is required");
+        assertThatThrownBy(() -> ValidateBodyRequest.validatorDepositRequest(null)).isInstanceOf(IllegalArgumentException.class).hasMessage("Request body is required");
+        assertThatThrownBy(() -> ValidateBodyRequest.validateWithdrawRequest(null)).isInstanceOf(IllegalArgumentException.class).hasMessage("Request body is required");
     }
 
     @Test

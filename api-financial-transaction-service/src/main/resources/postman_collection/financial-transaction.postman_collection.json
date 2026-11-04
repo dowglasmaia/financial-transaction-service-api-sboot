@@ -766,6 +766,432 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "SL-03 withdrawal and Idempotency-Key",
+			"item": [
+				{
+					"name": "Withdraw 10.00 without a key -> 204 (as before)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('204', () => pm.response.to.have.status(204));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"amount\":10.00}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions/atm-withdrawal",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"atm-withdrawal"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Withdraw 10.00 with a key -> 204 (first time)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('204, not a replay', () => { pm.response.to.have.status(204); pm.expect(pm.response.headers.has('Idempotent-Replayed')).to.eql(false); });",
+									"// run the SAME request again in the runner: the second answer must be a replay and the balance must not move twice"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "postman-sl03-demo-1"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"amount\":10.00}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions/atm-withdrawal",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"atm-withdrawal"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Replay the same key and body -> 204 + Idempotent-Replayed",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('204 replay, nothing debited again', () => { pm.response.to.have.status(204); pm.expect(pm.response.headers.get('Idempotent-Replayed')).to.eql('true'); });"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "postman-sl03-demo-1"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"amount\":10.00}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions/atm-withdrawal",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"atm-withdrawal"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Same key, different body -> 422",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('422 reuse with a different request', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().message).to.eql('Idempotency-Key reuse with a different request.'); });"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "postman-sl03-demo-1"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"amount\":20.00}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions/atm-withdrawal",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"atm-withdrawal"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Key longer than 64 characters -> 422",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('422 invalid key', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().message).to.contain('Invalid Idempotency-Key'); });"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"amount\":10.00}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions/atm-withdrawal",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"atm-withdrawal"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Amount above the balance -> 422, balance unchanged",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('422', () => pm.response.to.have.status(422));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "{{$guid}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"amount\":99999999.00}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions/atm-withdrawal",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"atm-withdrawal"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Null body -> 422 (never 500)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('422 body required', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().message).to.eql('Request body is required'); });"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "{{$guid}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "null",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions/atm-withdrawal",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"atm-withdrawal"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Zero amount -> 422",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('422', () => pm.response.to.have.status(422));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "{{$guid}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"amount\":0}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/transactions/atm-withdrawal",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"atm-withdrawal"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"variable": [

@@ -33,5 +33,5 @@ export async function signInAs(page: Page, user: RegExp): Promise<void> {
 export async function expectNoSeriousA11yViolations(page: Page): Promise<void> {
   const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
   const serious = result.violations.filter((violation) => violation.impact === 'serious' || violation.impact === 'critical');
-  expect(serious.map((v) => `${v.id}: ${v.help} (${v.nodes.length})`)).toEqual([]);
+  expect(serious.map((v) => `${v.id}: ${v.help} (${v.nodes.length}) e.g. ${v.nodes[0]?.target.join(' ')} — ${v.nodes[0]?.any[0]?.message ?? ''}`)).toEqual([]);
 }

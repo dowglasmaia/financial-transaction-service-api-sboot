@@ -1,4 +1,4 @@
-import { formatBrl, parseAmountInput } from './money';
+import { amountFeedback, formatBrl, parseAmountInput } from './money';
 
 describe('formatBrl', () => {
   it('formats with the R$ prefix, thousands separator and two decimals', () => {
@@ -23,5 +23,29 @@ describe('parseAmountInput', () => {
     for (const bad of ['', '0', '0.00', '-5', '1.234', 'abc', '1.2.3', 'R$ 5']) {
       expect(parseAmountInput(bad)).toBeNull();
     }
+  });
+});
+
+describe('amountFeedback', () => {
+  it('says nothing while empty or incomplete', () => {
+    expect(amountFeedback('', 5000)).toEqual({ amount: null, message: null });
+    expect(amountFeedback('12.', 5000)).toEqual({ amount: null, message: null });
+  });
+
+  it('asks for more than zero', () => {
+    expect(amountFeedback('0', 5000).message).toBe('Enter an amount greater than zero.');
+    expect(amountFeedback('0.00', 5000).message).toBe('Enter an amount greater than zero.');
+  });
+
+  it('warns above the balance but still returns the amount (feedback only)', () => {
+    expect(amountFeedback('5000.01', 5000)).toEqual({ amount: '5000.01', message: "The amount can't exceed your available balance." });
+  });
+
+  it('accepts up to the whole balance', () => {
+    expect(amountFeedback('5000', 5000)).toEqual({ amount: '5000.00', message: null });
+  });
+
+  it('does not judge against an unknown balance', () => {
+    expect(amountFeedback('999999', null)).toEqual({ amount: '999999.00', message: null });
   });
 });

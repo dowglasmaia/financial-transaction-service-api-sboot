@@ -34,7 +34,7 @@ import static com.dowglasmaia.financialtransaction.transaction.api.TransactionMa
 import static com.dowglasmaia.financialtransaction.transaction.api.TransactionMapper.toTransactionRequest;
 import static com.dowglasmaia.financialtransaction.transaction.api.TransactionMapper.toTransactionsResponse;
 
-/** Inbound adapter: validates the shape, maps the generated DTOs to domain values and calls one use case. */
+/** Inbound adapter (the Idempotency-Key header is handled before it, by shared.idempotency.IdempotencyFilter): validates the shape, maps the generated DTOs to domain values and calls one use case. */
 @RestController
 @RequestMapping(value = "/api/v1")
 public class TransactionController implements TransactionsApi {
@@ -65,28 +65,28 @@ public class TransactionController implements TransactionsApi {
     }
 
     @Override
-    public ResponseEntity<Void> sendPix(PixRequestDTO body){
+    public ResponseEntity<Void> sendPix(PixRequestDTO body, String idempotencyKey){
         validatorPixRequest(body);
         makePixTransfer.execute(new PixTransfer(new PixKey(PixKeyType.valueOf(body.getKeyType().name()), body.getPixKey()), body.getTransactionAmount()));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @Override
-    public ResponseEntity<Void> deposit(DepositRequestDTO body){
+    public ResponseEntity<Void> deposit(DepositRequestDTO body, String idempotencyKey){
         validatorDepositRequest(body);
         makeDeposit.execute(body.getAgency(), body.getAccount(), body.getAmount());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @Override
-    public ResponseEntity<Void> rechargeMobile(MobileRechargeRequestDTO body){
+    public ResponseEntity<Void> rechargeMobile(MobileRechargeRequestDTO body, String idempotencyKey){
         validateMobileRechargeRequest(body);
         requestMobileRecharge.execute(new MobileRecharge(body.getAreaCode(), body.getPhoneNumber(), body.getAmount(), body.getCarrier().toString()));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @Override
-    public ResponseEntity<Void> withdraw(WithdrawRequestDTO body){
+    public ResponseEntity<Void> withdraw(WithdrawRequestDTO body, String idempotencyKey){
         validateWithdrawRequest(body);
         makeAtmWithdrawal.execute(body.getAgency(), body.getNumberAccount(), body.getAmount());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
