@@ -8,17 +8,30 @@ import { PixPage } from './pix-page';
 
 const ACCOUNT: AccountMe = { agency: '0211', number: '2022', balance: 5000 };
 const CPF = '529.982.247-25';
-const UNCERTAIN = "We couldn't confirm the operation. Check your transactions before trying again, so you don't pay twice.";
+const UNCERTAIN =
+  "We couldn't confirm the operation. Check your transactions before trying again, so you don't pay twice.";
 
 function setup(send: (...args: unknown[]) => unknown = () => of(undefined)) {
   const account = { me: vi.fn(() => of(ACCOUNT)) };
   const api = { send: vi.fn(send) };
-  TestBed.configureTestingModule({ providers: [provideRouter([]), { provide: AccountApi, useValue: account }, { provide: PixApi, useValue: api }] });
+  TestBed.configureTestingModule({
+    providers: [
+      provideRouter([]),
+      { provide: AccountApi, useValue: account },
+      { provide: PixApi, useValue: api },
+    ],
+  });
   const fixture = TestBed.createComponent(PixPage);
   const el = fixture.nativeElement as HTMLElement;
   const keyInput = () => el.querySelector<HTMLInputElement>('input')!;
-  const button = (text: string) => [...el.querySelectorAll<HTMLButtonElement>('button')].find((b) => b.textContent?.trim().includes(text));
-  const radio = (text: string) => [...el.querySelectorAll<HTMLButtonElement>('[role="radio"]')].find((b) => b.textContent?.includes(text))!;
+  const button = (text: string) =>
+    [...el.querySelectorAll<HTMLButtonElement>('button')].find((b) =>
+      b.textContent?.trim().includes(text),
+    );
+  const radio = (text: string) =>
+    [...el.querySelectorAll<HTMLButtonElement>('[role="radio"]')].find((b) =>
+      b.textContent?.includes(text),
+    )!;
   const typeInto = async (input: HTMLInputElement, value: string) => {
     input.value = value;
     input.dispatchEvent(new Event('input'));
@@ -37,7 +50,19 @@ function setup(send: (...args: unknown[]) => unknown = () => of(undefined)) {
     await typeInto(keyInput(), amount);
     await click('Continue');
   };
-  return { fixture, account, api, el, keyInput, button, radio, typeInto, click, toAmount, toReview };
+  return {
+    fixture,
+    account,
+    api,
+    el,
+    keyInput,
+    button,
+    radio,
+    typeInto,
+    click,
+    toAmount,
+    toReview,
+  };
 }
 
 describe('PixPage', () => {
@@ -46,7 +71,8 @@ describe('PixPage', () => {
     await fixture.whenStable();
 
     expect(el.querySelector('app-stepper')?.textContent).toContain('Step 1 of 3');
-    for (const step of ['Key', 'Amount', 'Review']) expect(el.querySelector('app-stepper')?.textContent).toContain(step);
+    for (const step of ['Key', 'Amount', 'Review'])
+      expect(el.querySelector('app-stepper')?.textContent).toContain(step);
     expect(el.textContent).toContain('Check the key with the person you are paying.');
     expect(button('Continue')!.disabled).toBe(true);
   });
@@ -66,7 +92,7 @@ describe('PixPage', () => {
     expect(button('Continue')!.disabled).toBe(false);
   });
 
-  it('changing the key type clears the key and applies that type\'s rule (e-mail, mobile)', async () => {
+  it("changing the key type clears the key and applies that type's rule (e-mail, mobile)", async () => {
     const { fixture, el, keyInput, button, radio, typeInto } = setup();
     await fixture.whenStable();
     await typeInto(keyInput(), CPF);
@@ -92,7 +118,8 @@ describe('PixPage', () => {
     await toAmount();
 
     expect(el.querySelector('app-stepper')?.textContent).toContain('Step 2 of 3');
-    for (const label of ['R$ 50', 'R$ 100', 'R$ 200', 'R$ 500', 'Use full balance']) expect(el.textContent).toContain(label);
+    for (const label of ['R$ 50', 'R$ 100', 'R$ 200', 'R$ 500', 'Use full balance'])
+      expect(el.textContent).toContain(label);
     expect(button('Continue')!.disabled).toBe(true);
 
     await typeInto(keyInput(), '5000.01');
@@ -120,7 +147,8 @@ describe('PixPage', () => {
     await toReview('50');
 
     expect(el.querySelector('app-stepper')?.textContent).toContain('Step 3 of 3');
-    for (const text of ['CPF', '•••.982.•••-25', 'R$ 50.00', 'Your account']) expect(el.textContent).toContain(text);
+    for (const text of ['CPF', '•••.982.•••-25', 'R$ 50.00', 'Your account'])
+      expect(el.textContent).toContain(text);
     expect(el.textContent).not.toContain('52998224725');
     expect(el.textContent).not.toContain(CPF);
   });
@@ -154,8 +182,12 @@ describe('PixPage', () => {
     expect(account.me).toHaveBeenCalledTimes(2);
   });
 
-  it('business failure: the balance was not changed, the reason is the backend\'s, nothing is retried', async () => {
-    const failure: ApiError = { status: 422, code: 'UNPROCESSABLE_ENTITY', message: 'Fail send Pix.' };
+  it("business failure: the balance was not changed, the reason is the backend's, nothing is retried", async () => {
+    const failure: ApiError = {
+      status: 422,
+      code: 'UNPROCESSABLE_ENTITY',
+      message: 'Fail send Pix.',
+    };
     const { fixture, el, api, account, click, toReview } = setup(() => throwError(() => failure));
     await fixture.whenStable();
     await toReview('50');
@@ -169,7 +201,11 @@ describe('PixPage', () => {
 
   it('uncertain: says so, links to Transactions, and "Try again" repeats the SAME key', async () => {
     let calls = 0;
-    const { fixture, el, api, click, toReview } = setup(() => (++calls === 1 ? throwError(() => ({ status: 0, code: 'NETWORK', message: 'offline' })) : of(undefined)));
+    const { fixture, el, api, click, toReview } = setup(() =>
+      ++calls === 1
+        ? throwError(() => ({ status: 0, code: 'NETWORK', message: 'offline' }))
+        : of(undefined),
+    );
     await fixture.whenStable();
     await toReview('50');
     await click('Confirm and send');
@@ -185,8 +221,14 @@ describe('PixPage', () => {
   });
 
   it('after a business failure "Edit and try again" returns to the review; the key never reaches the console', async () => {
-    const spies = (['log', 'info', 'warn', 'error', 'debug'] as const).map((method) => vi.spyOn(console, method).mockImplementation(() => undefined));
-    const failure: ApiError = { status: 422, code: 'UNPROCESSABLE_ENTITY', message: 'Fail send Pix.' };
+    const spies = (['log', 'info', 'warn', 'error', 'debug'] as const).map((method) =>
+      vi.spyOn(console, method).mockImplementation(() => undefined),
+    );
+    const failure: ApiError = {
+      status: 422,
+      code: 'UNPROCESSABLE_ENTITY',
+      message: 'Fail send Pix.',
+    };
     const { fixture, el, click, toReview } = setup(() => throwError(() => failure));
     await fixture.whenStable();
     await toReview('50');

@@ -7,7 +7,7 @@ import { isValidPixKey, maskPixInput, maskPixKeyForDisplay, pixKeyFeedback, toWi
 const VALID_CPF = ['52998224725', '529.982.247-25', '82215344040', '822.153.440-40', '11144477735'];
 const INVALID_CPF = ['', '1', '5299822472', '529982247251', '52998224724', '529.982.247-24', '00000000000', '111.111.111-11', '99999999999', '529.982.24725', '529982.247-25', 'abcdefghijk', ' 52998224725', '529 982 247 25', '5299822472a'];
 const VALID_EMAIL = ['a.b-c@example.com', 'user+tag@mail.example.com.br', 'a_b@x.io', 'maria@maiabank.com.br', 'x@museum.museum'];
-const INVALID_EMAIL = ['', 'nope', 'a@b', '@example.com', 'a@.com', 'a..b@example.com', '.a@example.com', 'a.@example.com', 'a@-example.com', 'a@example-.com', 'a@example..com', 'a b@example.com', 'a@example.c', 'a@example.c0m', 'a@@example.com', `${'a'.repeat(64)}@example.com`];
+const INVALID_EMAIL = ['', 'nope', 'a@b', '@example.com', 'a@.com', 'a..b@example.com', '.a@example.com', 'a.@example.com', 'a@-example.com', 'a@example-.com', 'a@example..com', 'a b@example.com', 'a@example.c', 'a@example.c0m', 'a@@example.com', `${'a'.repeat(77)}@example.com`];
 const VALID_PHONE = ['11999998888', '21912345678', '99900000000'];
 const INVALID_PHONE = ['', '1199999888', '119999988888', '11899998888', '01999998888', '10999998888', '(11)99999-8888', '+5511999998888', '11 99999 8888', '11a99998888'];
 

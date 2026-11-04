@@ -6,7 +6,13 @@ import { PixApi } from './pix.api';
 
 describe('PixApi', () => {
   it('posts {pixKey, keyType, transactionAmount} with the Idempotency-Key header', () => {
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting(), { provide: API_BASE_URL, useValue: '/api/v1' }] });
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: API_BASE_URL, useValue: '/api/v1' },
+      ],
+    });
     const api = TestBed.inject(PixApi);
     const http = TestBed.inject(HttpTestingController);
 
@@ -14,7 +20,11 @@ describe('PixApi', () => {
 
     const request = http.expectOne('/api/v1/transactions/send-pix');
     expect(request.request.method).toBe('POST');
-    expect(request.request.body).toEqual({ pixKey: '52998224725', keyType: 'cpf', transactionAmount: 50 });
+    expect(request.request.body).toEqual({
+      pixKey: '52998224725',
+      keyType: 'cpf',
+      transactionAmount: 50,
+    });
     expect(request.request.headers.get('Idempotency-Key')).toBe('attempt-1');
     request.flush(null, { status: 204, statusText: 'No Content' });
     http.verify();

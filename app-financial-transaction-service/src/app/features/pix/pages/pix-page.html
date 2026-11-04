@@ -1,0 +1,150 @@
+@if (showResult()) {
+  @switch (operation.phase()) {
+    @case ('success') {
+      <app-result-panel
+        kind="success"
+        title="Pix sent"
+        message="Your Pix was sent."
+        [lines]="[lines()[0], lines()[1], lines()[2]]"
+        [note]="'Sent from this device at ' + doneAt()"
+        againLabel="New Pix"
+        (again)="another()"
+      />
+    }
+    @case ('business') {
+      <app-result-panel
+        kind="business"
+        title="Pix not sent"
+        [message]="notSentMessage"
+        [lines]="lines()"
+        [note]="operation.error()?.message ?? ''"
+        (edit)="edit()"
+      />
+    }
+    @default {
+      <app-result-panel
+        kind="uncertain"
+        title="Outcome not confirmed"
+        [message]="uncertainMessage"
+        [busy]="operation.pending()"
+        (retry)="tryAgain()"
+      />
+    }
+  }
+} @else {
+  <section class="grid gap-6" aria-labelledby="pix-title">
+    <header class="flex flex-wrap items-center gap-3.5">
+      <app-icon-tile icon="ph-bold ph-diamonds-four" tone="accent" size="lg" />
+      <div>
+        <h1 id="pix-title" class="font-display text-3xl font-bold">Pix</h1>
+        <p class="text-sm text-content-muted">Send money by key</p>
+      </div>
+      <div class="ml-auto rounded-control border border-line bg-glass px-4 py-2 text-right">
+        <p class="text-[10px] font-bold tracking-wider text-content-muted uppercase">
+          Available balance
+        </p>
+        <p class="font-display text-lg font-bold tabular-nums">{{ formattedBalance() }}</p>
+      </div>
+    </header>
+
+    @if (account.error(); as problem) {
+      <p role="alert" class="rounded-control border border-expense bg-expense/10 p-3 text-sm">
+        We couldn't load your balance. {{ problem.message }}
+        <button
+          appButton
+          variant="secondary"
+          type="button"
+          class="ml-2 h-9 px-3 text-sm"
+          (click)="account.load()"
+        >
+          Try again
+        </button>
+      </p>
+    }
+
+    <div class="grid max-w-xl gap-5 rounded-panel border border-line bg-glass p-6 shadow-card">
+      <app-stepper [steps]="steps" [current]="step()" />
+
+      @switch (step()) {
+        @case (1) {
+          <form class="grid gap-5" (submit)="$event.preventDefault(); next()">
+            <app-segmented
+              label="Key type"
+              [options]="kinds"
+              [value]="kind()"
+              (valueChange)="selectKind($event)"
+            />
+            <app-form-field label="Pix key" [error]="keyFeedback().message ?? ''">
+              <input
+                appFieldControl
+                type="text"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+                [attr.inputmode]="
+                  kind() === 'email' ? 'email' : kind() === 'phone' ? 'tel' : 'numeric'
+                "
+                [placeholder]="
+                  kind() === 'cpf'
+                    ? '000.000.000-00'
+                    : kind() === 'phone'
+                      ? '(11) 9 1234-5678'
+                      : 'name@example.com'
+                "
+                [value]="keyText()"
+                (input)="typeKey($event)"
+              />
+            </app-form-field>
+            <p class="flex items-center gap-2 text-sm text-content-muted">
+              <i class="ph-bold ph-shield-check text-accent" aria-hidden="true"></i>
+              Check the key with the person you are paying.
+            </p>
+            <button appButton type="submit" [disabled]="!keyFeedback().key">Continue</button>
+          </form>
+        }
+        @case (2) {
+          <form class="grid gap-5" (submit)="$event.preventDefault(); next()">
+            <app-amount-presets
+              label="Pix amount"
+              [(value)]="amountText"
+              [balance]="balance()"
+              [presets]="presets"
+            />
+            <div class="grid gap-2.5 sm:grid-cols-2">
+              <button appButton variant="secondary" type="button" (click)="back()">Back</button>
+              <button appButton type="submit" [disabled]="!amountOk()">Continue</button>
+            </div>
+          </form>
+        }
+        @case (3) {
+          <div class="grid gap-5">
+            <dl
+              class="divide-y divide-line rounded-control border border-line bg-surface-sunken px-4"
+            >
+              @for (line of lines(); track line.label) {
+                <div class="flex justify-between gap-3 py-2.5 text-[15px]">
+                  <dt class="text-content-muted">{{ line.label }}</dt>
+                  <dd class="text-right font-bold tabular-nums">{{ line.value }}</dd>
+                </div>
+              }
+            </dl>
+            <div class="grid gap-2.5 sm:grid-cols-2">
+              <button
+                appButton
+                variant="secondary"
+                type="button"
+                [disabled]="operation.pending()"
+                (click)="back()"
+              >
+                Back
+              </button>
+              <button appButton type="button" [loading]="operation.pending()" (click)="confirm()">
+                Confirm and send
+              </button>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  </section>
+}
