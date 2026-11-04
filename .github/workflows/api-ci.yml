@@ -34,7 +34,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'   # raised by spec BE-07 (21, then 25)
+          java-version: '21'
           cache: maven
           cache-dependency-path: api-financial-transaction-service/pom.xml
 
