@@ -382,9 +382,15 @@ export interface components {
             };
         };
     };
-    parameters: never;
+    parameters: {
+        /** @description Optional. Identifies one user attempt (1 to 64 characters). Sending the same key with the same body again returns the original result without moving money a second time; the answer carries Idempotent-Replayed true. The same key with a different body is rejected with 422. Keys belong to the signed-in customer and are kept for 24 hours. A failed attempt (422, 404) does not use the key up. Parallel requests with the same key run once. */
+        IdempotencyKey: string;
+    };
     requestBodies: never;
-    headers: never;
+    headers: {
+        /** @description Present with the value true when the answer is the stored result of an earlier request with the same Idempotency-Key. */
+        IdempotentReplayed: "true";
+    };
     pathItems: never;
 }
 export type $defs = Record<string, never>;
@@ -392,7 +398,10 @@ export interface operations {
     sendPix: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Optional. Identifies one user attempt (1 to 64 characters). Sending the same key with the same body again returns the original result without moving money a second time; the answer carries Idempotent-Replayed true. The same key with a different body is rejected with 422. Keys belong to the signed-in customer and are kept for 24 hours. A failed attempt (422, 404) does not use the key up. Parallel requests with the same key run once. */
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -406,6 +415,7 @@ export interface operations {
             /** @description Pix sent */
             204: {
                 headers: {
+                    "Idempotent-Replayed": components["headers"]["IdempotentReplayed"];
                     [name: string]: unknown;
                 };
                 content?: never;
@@ -419,7 +429,10 @@ export interface operations {
     rechargeMobile: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Optional. Identifies one user attempt (1 to 64 characters). Sending the same key with the same body again returns the original result without moving money a second time; the answer carries Idempotent-Replayed true. The same key with a different body is rejected with 422. Keys belong to the signed-in customer and are kept for 24 hours. A failed attempt (422, 404) does not use the key up. Parallel requests with the same key run once. */
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -433,6 +446,7 @@ export interface operations {
             /** @description Recharge requested */
             204: {
                 headers: {
+                    "Idempotent-Replayed": components["headers"]["IdempotentReplayed"];
                     [name: string]: unknown;
                 };
                 content?: never;
@@ -446,7 +460,10 @@ export interface operations {
     withdraw: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Optional. Identifies one user attempt (1 to 64 characters). Sending the same key with the same body again returns the original result without moving money a second time; the answer carries Idempotent-Replayed true. The same key with a different body is rejected with 422. Keys belong to the signed-in customer and are kept for 24 hours. A failed attempt (422, 404) does not use the key up. Parallel requests with the same key run once. */
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -460,6 +477,7 @@ export interface operations {
             /** @description Withdrawal registered */
             204: {
                 headers: {
+                    "Idempotent-Replayed": components["headers"]["IdempotentReplayed"];
                     [name: string]: unknown;
                 };
                 content?: never;
@@ -474,7 +492,10 @@ export interface operations {
     deposit: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Optional. Identifies one user attempt (1 to 64 characters). Sending the same key with the same body again returns the original result without moving money a second time; the answer carries Idempotent-Replayed true. The same key with a different body is rejected with 422. Keys belong to the signed-in customer and are kept for 24 hours. A failed attempt (422, 404) does not use the key up. Parallel requests with the same key run once. */
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -488,6 +509,7 @@ export interface operations {
             /** @description Deposit registered */
             204: {
                 headers: {
+                    "Idempotent-Replayed": components["headers"]["IdempotentReplayed"];
                     [name: string]: unknown;
                 };
                 content?: never;
