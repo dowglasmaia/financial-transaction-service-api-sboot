@@ -92,8 +92,9 @@ Approve the class mapping table and the security split (ARCH-01) and the transac
 | SL-00 | Done (PR #13 merged); owner signed off the look 2026-11-03 (record: commit `7a8a37e` on `slice/00-visual-v2`, not merged) |
 | SL-01 | Merged (PR #16), verified with the mock IdP (116 backend tests, 174 unit tests, 21 e2e). **Open (owner):** real Auth0 sign-in for both users + the portal URLs, then the SL-01 continuation prompt closes it. Tokens stay in memory (owner decision 2026-11-03) |
 | SL-02 | Merged (PR #22); contract 1.1.0, statement/detail/summary, openapi-diff job |
-| SL-03 | Implemented on `slice/03-withdrawal` (262 backend tests, 260 unit tests, 57 e2e); awaiting the owner's PR, review and green pipelines |
-| SL-04 (deposit + recharge), SL-06 | Draft (revised 2026-11-04 after ARCH-01/02; not authorized) |
+| SL-03 | Merged (PR #23) |
+| SL-04 | Implemented on `slice/04-deposit-and-recharge` (285 backend tests, 307 unit tests, 93 e2e); awaiting the owner's PR, review and green pipelines |
+| SL-06 | Draft (revised 2026-11-04 after ARCH-01/02; not authorized) |
 | SL-05 | Merged into SL-04 (2026-11-04) |
 | BE-07 | Draft (Java 21 build already pre-applied locally, uncommitted; see the spec note) |
 | BE-08 | Draft |

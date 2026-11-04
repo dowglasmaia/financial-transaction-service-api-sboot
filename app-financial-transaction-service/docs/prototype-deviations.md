@@ -11,7 +11,7 @@ History: seeded from the FE-01 review of the v1 prototype (brown/gold). SL-00 (2
 |---|---|---|
 | V1 | Portuguese copy, brand "Banco MaisVida", "Login seguro via Okta" | UI stays **English**, brand **Maia Bank**, sign-in note will read "Secure sign-in with Auth0" (built in SL-01) |
 | V2 | Search field, notification bell with count, support-phone strip, "Learn more" security link | **Not built** — no endpoint (D-35) |
-| V3 | Recharge carriers Claro / Vivo / TIM / **Oi** | Backend enum is VIVO / CLARO / TIM / **ALGAR** → Algar (D-36, SL-04) |
+| V3 | Recharge carriers Claro / Vivo / TIM / **Oi** | Backend enum is VIVO / CLARO / TIM / **ALGAR** → Algar (D-36). **Built in SL-04** (row 35) |
 | V4 | Dark only | Dark default + **derived light theme** from the v2 hues, contrast-tested (D-34) |
 | V5 | No AI Assistant screen | Dropped from scope; reinstate only if the owner asks |
 | V6 | Prototype control bar (data / outcome simulators, screen jump) | Never shipped; the states are reproduced in unit tests and `/design` |
@@ -48,10 +48,23 @@ History: seeded from the FE-01 review of the v1 prototype (brown/gold). SL-00 (2
 ## v2 — measured contrast (dark / light), asserted by `tokens-contrast.spec.ts`
 Text pairs ≥ 4.5:1 and control borders ≥ 3:1 for `content`, `content-muted`, `accent`, `on-accent`, `on-primary` on `primary` and `primary-strong`, `income`, `expense`, `warning`, `violet`, `on-brand` and `on-brand-muted` on `brand`, and `line-input` on all three surfaces. The same test also fails if any v1 hex (`#cea45c`, `#2a1708`, `#fbf1de`, `#5fa899`, `#d4ae6a`, `#110c09`) returns to `styles.scss`.
 
+## SL-04 — Deposit and Recharge
+| # | Deviation | Why | Where |
+|---|---|---|---|
+| 31 | **Deposit proposal A closed (owner, 2026-11-04):** "Generate boleto" builds a **demo boleto on the device** (deterministic from the amount; beneficiary "Maia Bank (demo)"), and "Simulate payment" sends the one real call `POST /transactions/deposit` for the caller's OWN agency/account. Every boleto surface says demo; Download / Share / Copy line only show the toast "Demo action". Third-party deposits stay allowed in the API and are not offered | No boleto exists on the server; no new endpoint | `features/deposit` |
+| 32 | The boleto card is a fixed light "paper" in both themes and its action buttons sit **below** the card, on the theme surface | Secondary buttons on the paper had 1.02:1 contrast (axe caught it) | `deposit-page.html` |
+| 33 | "Simulate payment" has no review dialog: the boleto card is the review (amount, payer, due date) | One extra confirmation for a demo payment adds nothing | `deposit-page` |
+| 34 | A **404 "Account not found."** goes back to the form as an error on the amount field (the new `serverError` input of `app-amount-presets`) | Spec: field-level error | `amount-presets.component.ts` |
+| 35 | Carrier row (V3 closed): **Claro, Vivo, TIM, Algar** as solid brand-coloured text wordmarks (white text, no logos); the chosen one gets an outline and a check icon. No carrier is preselected | Backend enum; contrast and a deliberate choice | `shared/util/carriers.ts`, `recharge-form` |
+| 36 | The mobile number is masked `(11) 9 1234-5678`, split into `areaCode` + `phoneNumber`; the number rule is the backend's and only gives feedback | Spec | `shared/util/phone.ts` |
+| 37 | Success copy is "Recharge requested. Your carrier will apply the credit shortly." (v2: "in a few moments"); the word "completed" appears nowhere | The credit is asynchronous | `recharge-page` |
+| 38 | Home gets a **Quick actions** block (Deposit tile) and the **quick-recharge card** (same form). "Review recharge" opens the review on the Recharge page through router state; Home sends nothing and no phone number goes in the URL | Same review dialog, no personal data in the URL | `features/home` |
+| 39 | Nav order: Home, Transactions, Deposit, Withdraw, Recharge | Entries come from the route table | `app.routes.ts` |
+
 ## Still open — Tier 2 (need the owner)
 | # | Proposal | Detail |
 |---|---|---|
-| A | **Deposit flow** | v2 still models deposit as an online *boleto* (client-side demo with "Simulate payment"). The backend is `POST /transactions/deposit {agency, account, amount}`. Decided in SL-04: keep the boleto as a UI simulation; "Simulate payment" calls the real deposit for the caller's own account (from `/accounts/me`). |
+| A | ~~**Deposit flow**~~ | **Closed in SL-04** (row 31). |
 | B | **Sample data in the prototype** | "Agency 0001 · Account 12345-6", "Dowglas Maia", fixed balance — placeholders; real values come from `/accounts/me` and the ID token (SL-01). |
 | C | **`_ds/nocturne-*` bundle** | A bundled design-system export (blurple, Inter) that the prototype does not use. Treated as non-authoritative and not imported. |
 | D | **Handoff artifacts** | No tokens JSON, copy deck or a11y annotations; tokens/copy are extracted from the HTML. Request them only if the owner wants a formal handoff. |
