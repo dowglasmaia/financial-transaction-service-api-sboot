@@ -11,11 +11,18 @@ const DB = ['exec', 'pg-db', 'psql', '-U', 'transactions', '-d', 'transactions',
 const ENDPOINT = '**/api/v1/transactions/deposit';
 
 function sql(statement: string): string {
-  return execFileSync('docker', [...DB, statement], { encoding: 'utf8' }).trim().split(/\r?\n/)[0];
+  return execFileSync('docker', [...DB, statement], { encoding: 'utf8' })
+    .trim()
+    .split(/\r?\n/)[0];
 }
 
 const balance = () => Number(sql("select balance from account where number = '2022'"));
-const depositRows = () => Number(sql("select count(*) from transaction t join account a on a.id = t.account_id where a.number = '2022' and t.transaction_type = 'DEPOSIT'"));
+const depositRows = () =>
+  Number(
+    sql(
+      "select count(*) from transaction t join account a on a.id = t.account_id where a.number = '2022' and t.transaction_type = 'DEPOSIT'",
+    ),
+  );
 
 test.beforeEach(async ({ page }) => {
   sql("delete from transaction where account_id = (select id from account where number = '2022')");
@@ -46,13 +53,18 @@ async function generate(page: Page, amount: string): Promise<void> {
 }
 
 test.describe('deposit', () => {
-  test('generate a demo boleto and simulate the payment: balance +250 exactly once and a DEPOSIT row', async ({ page }) => {
+  test('generate a demo boleto and simulate the payment: balance +250 exactly once and a DEPOSIT row', async ({
+    page,
+  }) => {
     const posts: { body: string | null; key: string | undefined }[] = [];
     page.on('request', (request) => {
-      if (request.method() === 'POST' && request.url().includes('/transactions/deposit')) posts.push({ body: request.postData(), key: request.headers()['idempotency-key'] });
+      if (request.method() === 'POST' && request.url().includes('/transactions/deposit'))
+        posts.push({ body: request.postData(), key: request.headers()['idempotency-key'] });
     });
     await openDeposit(page);
-    await expect(page.getByText('Preview. The barcode and the data appear after you generate the boleto.')).toBeVisible();
+    await expect(
+      page.getByText('Preview. The barcode and the data appear after you generate the boleto.'),
+    ).toBeVisible();
     await expectNoSeriousA11yViolations(page);
 
     await page.getByRole('button', { name: 'R$ 250', exact: true }).click();
@@ -80,7 +92,7 @@ test.describe('deposit', () => {
     expect(depositRows()).toBe(1);
 
     await page.getByRole('link', { name: 'View transactions' }).click();
-    await expect(page.getByRole('link', { name: 'Deposit' }).first()).toBeVisible();
+    await expect(page.locator('main').getByRole('link', { name: 'Deposit' }).first()).toBeVisible();
     await expect(page.getByLabel('Totals of the period')).toContainText('R$ 5,250.00');
   });
 
@@ -100,7 +112,9 @@ test.describe('deposit', () => {
     expect(depositRows()).toBe(0);
   });
 
-  test('a lost answer is uncertain; "Try again" reuses the key and the account is credited once', async ({ page }) => {
+  test('a lost answer is uncertain; "Try again" reuses the key and the account is credited once', async ({
+    page,
+  }) => {
     const keys: (string | undefined)[] = [];
     let first = true;
     await page.route(ENDPOINT, async (route) => {
@@ -117,7 +131,9 @@ test.describe('deposit', () => {
     await generate(page, '100');
     await page.getByRole('button', { name: 'Simulate payment' }).click();
 
-    await expect(page.getByRole('heading', { level: 1, name: 'Outcome not confirmed' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Outcome not confirmed' }),
+    ).toBeVisible();
     await page.waitForTimeout(700);
     await expectNoSeriousA11yViolations(page);
     expect(balance()).toBe(5100); // the first attempt did go through on the server
@@ -131,7 +147,9 @@ test.describe('deposit', () => {
     expect(depositRows()).toBe(1);
   });
 
-  test('a request that never leaves (network down) is uncertain and is not retried by itself', async ({ page }) => {
+  test('a request that never leaves (network down) is uncertain and is not retried by itself', async ({
+    page,
+  }) => {
     let sent = 0;
     await page.route(ENDPOINT, async (route) => {
       sent++;
@@ -141,7 +159,9 @@ test.describe('deposit', () => {
     await generate(page, '50');
     await page.getByRole('button', { name: 'Simulate payment' }).click();
 
-    await expect(page.getByRole('heading', { level: 1, name: 'Outcome not confirmed' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Outcome not confirmed' }),
+    ).toBeVisible();
     await page.waitForTimeout(1500);
     expect(sent).toBe(1);
     expect(balance()).toBe(5000);
@@ -149,7 +169,11 @@ test.describe('deposit', () => {
 
   test('a 404 from the server is shown as a field error on the amount', async ({ page }) => {
     await page.route(ENDPOINT, (route) =>
-      route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ code: 'NOT_FOUND', message: 'Account not found.' }) }),
+      route.fulfill({
+        status: 404,
+        contentType: 'application/json',
+        body: JSON.stringify({ code: 'NOT_FOUND', message: 'Account not found.' }),
+      }),
     );
     await openDeposit(page);
     await generate(page, '100');

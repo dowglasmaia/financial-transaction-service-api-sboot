@@ -115,7 +115,7 @@ test.describe('statement, detail and Home summary', () => {
     // and user 2's own statement holds only user 2's row
     await goInApp(page, '/transactions');
     await expect(page.getByText('Showing 1–1 of 1')).toBeVisible();
-    await page.getByRole('link', { name: /Deposit/ }).first().click();
+    await page.locator('main').getByRole('link', { name: /Deposit/ }).first().click();
     await expect(page).toHaveURL(new RegExp(`/transactions/${foreignId}$`));
   });
 
