@@ -38,6 +38,7 @@ History: seeded from the FE-01 review of the v1 prototype (brown/gold). SL-00 (2
 |---|---|---|---|
 | 23 | The top bar now has the **account menu** (initials, name, e-mail, `Agency · Account`, Sign out with confirmation) | It was deferred in #18 until the signed-in user and `/accounts/me` exist | `core/layout/account-menu.component.ts` |
 | 24 | Landing "feature strip" shows three static benefits; **no statistics** (v2 showed a fixed balance and 30-day figures) | D-35 / no invented data; real numbers come from the API | `features/landing` |
+| 30 | The sign-in page has an **optional e-mail field** (shape-checked, sent as `login_hint`) and the login always asks Auth0 for its form (`prompt=login`) | Owner request 2026-11-04: with an old Auth0 single-sign-on session the click went straight to Home and no form was ever seen. The password is still typed only on Auth0's page (D-29, Authorization Code + PKCE) | `features/signin`, `core/auth/auth0-session.service.ts` |
 | 25 | Landing and sign-in icons use the `ph-bold` weight (v2 used `ph-fill`) | The fill-weight CSS is not shipped (deviation #9); the tiles rendered empty | `features/landing` |
 | 26 | Balance count-up is skipped under `prefers-reduced-motion`; the screen-reader text is always the final amount | Accessibility | `balance-card.component.ts` |
 | 27 | The footer shows the author's **photo** (192 px avatar) instead of the initials; initials are the fallback if the image fails | Owner request (2026-11-03) | `site-footer.component.ts`, `public/img/dowglas.png` |

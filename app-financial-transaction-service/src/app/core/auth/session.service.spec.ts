@@ -1,12 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
-import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, of, throwError } from 'rxjs';
 import { Auth0SessionService } from './auth0-session.service';
 
 class FakeAuth0 {
   readonly isLoading$ = new BehaviorSubject(true);
   readonly isAuthenticated$ = new BehaviorSubject(false);
   readonly user$ = new BehaviorSubject<Record<string, unknown> | null | undefined>(null);
+  readonly error$ = new Subject<unknown>();
   loginWithRedirect = vi.fn(() => of(undefined));
   logout = vi.fn(() => of(undefined));
   getAccessTokenSilently = vi.fn((): Observable<string> => of('access-token'));
@@ -55,10 +56,37 @@ describe('Auth0SessionService', () => {
     expect(session.user()?.name).toBe('Customer');
   });
 
-  it('login goes through the library with the return target', async () => {
+  it('login goes through the library with the return target and always asks the provider for its login form', async () => {
     const { auth0, session } = setup();
     await session.login('/home');
-    expect(auth0.loginWithRedirect).toHaveBeenCalledWith({ appState: { target: '/home' } });
+    // prompt=login: an old single-sign-on session at the provider must not skip the form
+    expect(auth0.loginWithRedirect).toHaveBeenCalledWith({ appState: { target: '/home' }, authorizationParams: { prompt: 'login' } });
+  });
+
+  it('exposes why the provider refused the sign-in (the callback came back with an error) and nothing before that', () => {
+    const { auth0, session } = setup();
+    expect(session.loginError()).toBeNull();
+
+    auth0.error$.next({ error: 'invalid_request', error_description: 'Client "abc" is not authorized to access resource server "https://api.example".' });
+
+    expect(session.loginError()).toBe('Client "abc" is not authorized to access resource server "https://api.example".');
+  });
+
+  it('falls back to the error code, then to a generic text, when the provider gives no description', () => {
+    const { auth0, session } = setup();
+    auth0.error$.next({ error: 'access_denied' });
+    expect(session.loginError()).toBe('access_denied');
+    auth0.error$.next(new Error(''));
+    expect(session.loginError()).toBe('The sign-in could not be completed.');
+  });
+
+  it('login passes the typed e-mail as login_hint (it only pre-fills the provider form)', async () => {
+    const { auth0, session } = setup();
+    await session.login('/home', { loginHint: 'maria@example.test' });
+    expect(auth0.loginWithRedirect).toHaveBeenCalledWith({
+      appState: { target: '/home' },
+      authorizationParams: { prompt: 'login', login_hint: 'maria@example.test' },
+    });
   });
 
   it('logout returns to the origin and clears an expired-session flag', async () => {

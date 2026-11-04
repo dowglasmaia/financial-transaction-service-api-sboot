@@ -1,10 +1,15 @@
 package com.dowglasmaia.financialtransaction.account.infrastructure.security;
 
 import com.dowglasmaia.financialtransaction.account.application.usecase.CheckCallerLinkedUseCase;
+import java.util.List;
 import java.util.function.Supplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Component;
 
@@ -16,17 +21,29 @@ import org.springframework.stereotype.Component;
 @Component("customerLinkedAuthorization")
 class CustomerLinkedAuthorization implements AuthorizationManager<RequestAuthorizationContext> {
 
+    private static final Logger log = LoggerFactory.getLogger(CustomerLinkedAuthorization.class);
+
     private final CheckCallerLinkedUseCase checkCallerLinked;
 
     CustomerLinkedAuthorization(CheckCallerLinkedUseCase checkCallerLinked) {
         this.checkCallerLinked = checkCallerLinked;
     }
 
+    /** Same decision as before; a refusal of a signed-in caller is logged with its reason (never a token or a subject). */
     @Override
     public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext context) {
         Authentication caller = authentication.get();
-        boolean customer = caller != null && caller.getAuthorities().stream()
-              .anyMatch(authority -> "ROLE_CUSTOMER".equals(authority.getAuthority()));
-        return new AuthorizationDecision(customer && checkCallerLinked.execute());
+        List<String> roles = caller == null ? List.of() : caller.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+        if (!roles.contains("ROLE_CUSTOMER")) {
+            if (caller != null && !(caller instanceof AnonymousAuthenticationToken)) {
+                log.info("Access denied (403): the token has no ROLE_CUSTOMER (roles in the token: {})", roles);
+            }
+            return new AuthorizationDecision(false);
+        }
+        boolean linked = checkCallerLinked.execute();
+        if (!linked) {
+            log.info("Access denied (403): the token subject is not linked to a customer");
+        }
+        return new AuthorizationDecision(linked);
     }
 }

@@ -1,16 +1,18 @@
 # Local development profile (SPRING_PROFILES_ACTIVE=local), versioned on purpose.
-# The credentials are the throw-away ones of the local compose database (.env.example: POSTGRES_* on host port 5433);
-# they protect nothing outside your machine. Real or shared environments use DB_URL / DB_USER / DB_PASSWORD from the environment.
+# The defaults are the throw-away credentials of the local compose database (.env.example: POSTGRES_* on host port 5433);
+# they protect nothing outside your machine. An environment variable always wins: docker compose sets DB_URL, DB_USER,
+# DB_PASSWORD, KAFKA_BOOTSTRAP_SERVERS and MAIABANK_URL for the API container (it runs with this profile too, for the seed),
+# and real or shared environments set them as well. Without them (API run from the IDE) the defaults below apply.
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/transactions
-    username: transactions
-    password: "change-me"
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/transactions}
+    username: ${DB_USER:transactions}
+    password: ${DB_PASSWORD:change-me}
   jpa:
     show-sql: true
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
 api:
   client:
     maiabank:
-      url: http://localhost:8089/api/v1/transactions
+      url: ${MAIABANK_URL:http://localhost:8089/api/v1/transactions}

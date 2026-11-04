@@ -9,6 +9,12 @@ export interface SessionUser {
   readonly picture: string;
 }
 
+/** Optional inputs of {@link SessionService.login}. */
+export interface LoginOptions {
+  /** The e-mail typed on the sign-in page: it only pre-fills the identity provider's form (never a credential). */
+  readonly loginHint?: string;
+}
+
 /**
  * The app's view of the sign-in session. The rest of the app depends on this class, never on the OIDC library, so the
  * identity provider (or the library) can change in one place. Tokens never leave this boundary except through
@@ -20,10 +26,12 @@ export abstract class SessionService {
   abstract readonly user: Signal<SessionUser | null>;
   /** True after the API or the identity provider said the session is no longer valid (shows the "session expired" dialog). */
   abstract readonly expired: Signal<boolean>;
+  /** Why the identity provider refused the sign-in (the callback came back with an error), or null. Never a token. */
+  abstract readonly loginError: Signal<string | null>;
 
   /** Resolves when the library finished handling a redirect callback / the first session check. */
   abstract whenSettled(): Promise<SessionStatus>;
-  abstract login(returnTo?: string): Promise<void>;
+  abstract login(returnTo?: string, options?: LoginOptions): Promise<void>;
   abstract logout(): Promise<void>;
   /** The access token for the API, or null when there is none. `renew` forces a silent refresh. */
   abstract accessToken(options?: { renew?: boolean }): Promise<string | null>;

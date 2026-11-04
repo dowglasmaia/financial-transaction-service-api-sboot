@@ -81,6 +81,8 @@ export class LandingPage {
     if (this.query.has('error')) void this.router.navigate(['/signin'], { queryParams: { failed: 1 }, replaceUrl: true });
     effect(() => {
       if (this.session.status() === 'authenticated') void this.router.navigateByUrl('/home', { replaceUrl: true });
+      // the SDK consumes the ?error=… of a refused callback and lands here: show it on the sign-in page instead of staying silent
+      if (this.session.loginError()) void this.router.navigate(['/signin'], { queryParams: { failed: 1 }, replaceUrl: true });
     });
   }
 }

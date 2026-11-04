@@ -67,10 +67,12 @@ Dashboard: <https://manage.auth0.com/>. Tenant used by this project: `dev-twljoc
    - *Application Type* = **Single Page Application**.
    - *Allowed Callback URLs*, *Allowed Logout URLs*, *Allowed Web Origins* = `http://localhost:4200` (add `https://oauth.pstmn.io/v1/callback` to the callback list if you test with Postman). Leave *Cross-Origin Authentication* off and the *Allowed Origins (CORS)* box empty.
    - *Refresh Token Rotation* = on. Click **Save Changes** (nothing is autosaved).
-2. **API** (*Applications > APIs > Create API*; never reuse the built-in "Auth0 Management API")
-   - Name `Financial Transaction API`, Identifier `https://api.financial-transaction.local` (cannot be changed later), signing algorithm **RS256**.
-   - *Settings*: **Allow Offline Access** on; set **Token Expiration** to something short (e.g. 3600 s; the default is 24 h).
-   - *Application Access*: authorize `Transaction-app` for user access; client access = none. No permissions/scopes are needed.
+2. **Authorize the app on the API** (*Applications > APIs*) — **without this every sign-in is refused** with `Client "…" is not authorized to access resource server "https://api.financial-transaction.local"`
+   1. Open the API whose *Identifier* is `https://api.financial-transaction.local` (name `Financial Transaction API`; create it if it does not exist: signing algorithm **RS256**, *Allow Offline Access* on, a short *Token Expiration* such as 3600 s; never reuse the built-in "Auth0 Management API").
+   2. Open the **Application Access** tab (in some dashboards it is called *Machine to Machine Applications*).
+   3. Find **Transaction-app** and authorize it. Under *User Access* leave **Authorized** (client access: none; no permissions/scopes are needed).
+   4. Save.
+   5. Check on the application itself (*Applications > Applications > Transaction-app > Settings*) that `http://localhost:4200` is in **Allowed Callback URLs**, **Allowed Logout URLs** and **Allowed Web Origins**, then **Save Changes**.
 3. **Post-Login Action** (*Actions > Library > Create Action > Build from scratch*, trigger *Login / Post Login*) - paste and **Deploy**:
    ```js
    exports.onExecutePostLogin = async (event, api) => {
@@ -90,6 +92,15 @@ export SEED_OWNER_SUB='auth0|<user_id of the first test user>'
 ```
 
 Other settings have defaults for this tenant and can be overridden: `AUTH_ISSUER` (with the **trailing slash**), `AUTH_AUDIENCE`, `AUTH_ROLES_CLAIM`, `CORS_ALLOWED_ORIGINS` (see `.env.example`). With `docker compose`, put `SEED_OWNER_SUB` in `.env`.
+
+### Sign-in problems and what they mean
+| What you see | Cause | Fix |
+|---|---|---|
+| Clicking **Sign in** returns to the sign-in page with *"Auth0 said: Client … is not authorized to access resource server …"* | *Transaction-app* is not authorized on the API | Section 1, item 2 above (Application Access > Authorized) |
+| *"Callback URL mismatch"* or a CORS/origin error on the Auth0 page | `http://localhost:4200` missing from the application URLs | Section 1, items 1 and 2.5 above |
+| After signing in, Home shows **"no access"** and the browser console shows `GET /api/v1/accounts/me 403` | The token is valid but refused. **The API console says which reason** (INFO line): `Access denied (403): the token has no ROLE_CUSTOMER (roles in the token: [...])` = the user has another Auth0 role assigned (the Action then sends that role instead of `customer`): remove it under *User Management > Users > (user) > Roles*, or fix the Action; `Access denied (403): the token subject is not linked to a customer` = the user's `sub` is not `SEED_OWNER_SUB`/`SEED_SECOND_SUB` | Fix as described, then restart the API (the seed relinks on start) and sign in again |
+| The sign-in goes straight to Home without a form | An old Auth0 single-sign-on session exists | Not a bug; since 2026-11-04 the app asks for the form every time (`prompt=login`). **Sign out** also ends the Auth0 session |
+| After a page reload you must click Sign in again | Tokens are kept in memory only (owner decision) | Expected; one click, no password (the Auth0 cookie signs you in again) |
 
 ### 3. Get a user token (Postman)
 *Authorization* tab > type **OAuth 2.0** > Grant Type **Authorization Code (With PKCE)**:
