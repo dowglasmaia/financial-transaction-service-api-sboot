@@ -1,6 +1,6 @@
 # SPEC-FINAL-01 — Final test round
 
-**Status:** Draft (not authorized) · **Depends on:** all other specs Done (MONO-01, BE-01…BE-08, FE-01…FE-05) · **Parallel with:** none
+**Status:** Draft (not authorized; absorbs FE-05 on 2026-11-04) · **Depends on:** all other specs Done (MONO-01, BE-01…BE-04, FE-02, SL-00…SL-06, ARCH-01/02, BE-07, BE-08) · **Parallel with:** none
 **Read first:** `../memory/produto.md`, `../memory/contexto-tecnico.md`. Protocol: `../shared/como-executar.md`.
 
 ## Objective
@@ -11,11 +11,12 @@ A. **Backend regression:** `cd api-financial-transaction-service && ./mvnw -B ve
 B. **Stack smoke:** `docker compose up --build`; `/actuator/health` UP; Kafka topic exists; seed/test user linked.
 C. **API black-box:** every endpoint in `memory/produto.md` called with curl/Postman (Postman collection updated): happy path + each documented error; 401/403/404 matrix; idempotent replay; pagination.
 D. **Money integrity:** concurrent debits, Pix with MaiaBank down, recharge with Kafka down — balance/ledger consistent.
-E. **Frontend e2e (Playwright):** flows F-0…F-9 at 360/768/1280, dark and light.
+E. **Frontend e2e (Playwright):** flows F-0…F-9 at **1280/768/390** (the viewports of the slice suites), dark and light, with the mock IdP on the compose stack; plus a manual **320 px** responsive pass. (Formerly FE-05.)
 F. **Accessibility:** axe on every screen; keyboard-only completion of each money flow.
 G. **Security checks:** no secrets in repo (secret scan), dependency scan result, no tokens/PII in logs or URLs, CORS limited to the app origin.
 H. **Rules checklist:** each rule in `memory/produto.md` ticked against a test or a manual check.
 I. **Exploratory pass (manual, 30 min):** odd inputs, refresh mid-flow, back button, expired session, slow network.
+J. **Demo README with screenshots:** how to run the demo (compose + app), the tour of the screens at 1280 and 390 in both themes, linked from the root README. (Formerly FE-05.)
 
 **Out of scope:** new features, performance benchmarking beyond sanity checks.
 
@@ -24,11 +25,12 @@ I. **Exploratory pass (manual, 30 min):** odd inputs, refresh mid-flow, back but
 - [ ] B Stack smoke
 - [ ] C API black-box matrix
 - [ ] D Money-integrity scenarios
-- [ ] E Frontend e2e on 3 viewports × 2 themes
+- [ ] E Frontend e2e on 3 viewports × 2 themes + manual 320 px pass
 - [ ] F Accessibility and keyboard pass
 - [ ] G Security checks
 - [ ] H Rules checklist against `memory/produto.md`
 - [ ] I Exploratory pass
+- [ ] J Demo README + screenshots (formerly FE-05)
 - [ ] Write `app-financial-transaction-service/docs/test-report.md` (results, evidence, defects found/fixed, accepted limitations)
 - [ ] Fix defects found (each with a regression test) and re-run the affected checks
 
@@ -44,7 +46,7 @@ The report exists and every row of the matrix above has a result and evidence.
 - Any defect that needs a behaviour/contract change; any limitation proposed for acceptance.
 
 ## Skills
-`java-persistence-performance` (D), `ui-ux-pro-max` (F, pre-delivery checklist), `angular-tailwind-ui-specialist` (ui-review-checklist).
+`java-persistence-performance` (D), `ui-ux-pro-max` (E, F, J, pre-delivery checklist), `angular-tailwind-ui-specialist` (ui-review-checklist).
 
 ## Result
 _Filled on completion._

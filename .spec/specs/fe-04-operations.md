@@ -1,7 +1,7 @@
 # SPEC-FE-04 — Pix, Deposit, Recharge, Withdrawal
 
 **Status:** Superseded (2026-11-03, D-31) — executed through the vertical slices · **Depends on:** FE-03, BE-03 · **Parallel with:** none
-> **Do not execute this spec on its own.** Scope catalogue only. Withdrawal + shared result panel → **SL-03**; Deposit → **SL-04**; Recharge → **SL-05**; Pix → **SL-06**. The visual reference is now `Maia Bank v2.dc.html`.
+> **Do not execute this spec on its own.** Scope catalogue only. Withdrawal + shared result panel → **SL-03**; Deposit and Recharge → **SL-04**; Pix → **SL-06**. The visual reference is now `Maia Bank v2.dc.html`.
 **Read first:** `../memory/produto.md`, `../memory/contexto-tecnico.md` (incl. *Frontend agent autonomy*) and the visual/flow reference `../../prototype/Maia Bank UI prototype/` (open `Maia Bank.dc.html`). Protocol: `../shared/como-executar.md` (tick a task only after verification + evidence line).
 
 ## Objective

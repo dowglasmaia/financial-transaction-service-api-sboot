@@ -14,4 +14,4 @@ Spec-Driven Development for a **small web banking prototype** (monorepo: `api-fi
 | protocol | `shared/como-executar.md` | How to execute and record evidence |
 | template | `template/SPEC_TEMPLATE.md` | Shape of a spec |
 
-Current state: foundation specs (MONO-01, BE-01…BE-04, FE-01, FE-02) are done; the rest is delivered as **vertical slices SL-00…SL-06** (backend + frontend + e2e per branch/PR, D-31) followed by BE-07, BE-08, FE-05 and FINAL-01. Live status per spec: `specs/README.md`. Visual reference: `prototype/Maia Bank UI prototype/Maia Bank v2.dc.html`.
+Current state: foundation specs (MONO-01, BE-01…BE-04, FE-01, FE-02) are done; the rest is delivered as **vertical slices SL-00…SL-06** (backend + frontend + e2e per branch/PR, D-31) followed by BE-07, BE-08 and FINAL-01 (which absorbs FE-05). Live status per spec: `specs/README.md`. Visual reference: `prototype/Maia Bank UI prototype/Maia Bank v2.dc.html`.

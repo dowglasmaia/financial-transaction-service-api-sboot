@@ -1,8 +1,8 @@
 # SPEC-SL-03 — Withdrawal + shared result panel + idempotency
 
-**Status:** Draft (not authorized) · **Depends on:** SL-02 · **Parallel with:** none
+**Status:** Draft (not authorized; revised 2026-11-04) · **Depends on:** SL-02 · **Parallel with:** none
 **Branch:** `slice/03-withdrawal` · **Track:** Backend + Frontend + E2E
-**Absorbs:** FE-04 (Withdrawal, shared result panel), BE-06 (`Idempotency-Key`, Flyway `V4`), BE-05 (null/invalid body handling for withdrawal).
+**Absorbs:** FE-04 (Withdrawal, shared result panel), BE-06 (`Idempotency-Key`, Flyway `V4`), BE-05 (null/invalid body handling for **all four POST operations**, decided 2026-11-04).
 **Read first:** `../memory/produto.md` (rules 1, 2; ATM withdrawal), `../memory/contexto-tecnico.md` (BE-03 design), `../spec-execution-flow.md` §1b, v2 reference (Withdraw, review dialog, result panel in its three outcomes). Protocol: `../shared/como-executar.md`.
 
 ## Objective
@@ -13,11 +13,13 @@ Approve the idempotency design (defaults below): header optional; same key + sam
 
 ## Scope
 **Backend**
-- `Idempotency-Key` (optional header, max 64 chars) on **all four POST money endpoints** via one component (Flyway **`V4`**: table keyed by `(subject, key)` with request hash, stored status, `created_at`); the replay returns the stored status/body without touching balance, ledger or outbox. Concurrent identical keys: one wins, the other waits or replays — no double debit.
+- `Idempotency-Key` (optional header, max 64 chars) on **all four POST money endpoints** via one component (Flyway **`V4`**: table keyed by `(subject, key)` with request hash, stored status, `created_at`); the replay returns the stored status/body without touching balance, ledger or outbox. Concurrent identical keys: one wins, the other waits or replays — no double debit. **Placement (skill D8):** a generic component in `shared.idempotency` (servlet filter around the four POST paths plus a small store on the `V4` table; the key scope is the token `sub`); it imports no feature and replays without calling the use cases.
+- **Body shape validation of all four POST operations, once** (withdrawal, deposit, recharge, Pix): null body, missing, blank or non-positive fields → 422 with the existing messages, never 500/NPE (the checks live in `ValidateBodyRequest`, `transaction.api`). The Pix key rules (CPF check digits, e-mail, phone; F-11) stay in SL-06 and the recharge phone/carrier rules in SL-04; those slices only add their operation-specific tests.
 - Withdrawal: `{amount}` only is the supported body; null body / missing or non-positive amount → 422 with the existing messages (never 500); optional `agency`/`numberAccount` keep their BE-04 semantics (owner's own number else 404).
 - Contract: header parameter and replay behaviour documented (preview → approval).
 
 **Frontend**
+- Shared **amount presets** (`app-amount-presets`: preset buttons, "Use full balance", the balance feedback) and **review dialog** (`app-review-dialog`: title, receipt lines, confirm/cancel, pending state), reused by SL-04 and SL-06 and documented in `shared/ui`.
 - Shared **result panel** (`success` / `business failure` / `uncertain`) with icon animation, receipt lines, and actions (New …, Back to home, View transactions, Try again); **operation shell** that guarantees: one in-flight request, button disabled while pending, double-click sends exactly one request, **no automatic retry of any POST**.
 - `Idempotency-Key`: generated per user attempt; reused only when the user explicitly presses "Try again" after an uncertain outcome.
 - **Withdraw page:** amount with presets (R$ 50/100/200/500) and "Use full balance"; client feedback "The amount can't exceed your available balance." and "Enter an amount greater than zero." (feedback only; the server decides); review dialog; request body is exactly `{amount}`; result variants:
@@ -32,15 +34,16 @@ Approve the idempotency design (defaults below): header optional; same key + sam
 ## Tasks
 - [ ] HUMAN: approve the idempotency design
 - [ ] CONTRACT: preview header + behaviour; wait for approval
-- [ ] BE tests first (red): replay with the same key does not double-debit; same key different body → 422; parallel same-key requests debit once; no key behaves as today; null/zero/negative amount → 422 without 500; exact-balance withdrawal → 204
+- [ ] BE tests first (red): null/blank/non-positive bodies of deposit, recharge and Pix → 422 without 500 (parametrized over the four operations); replay with the same key does not double-debit; same key different body → 422; parallel same-key requests debit once; no key behaves as today; null/zero/negative amount → 422 without 500; exact-balance withdrawal → 204
 - [ ] BE: `V4` + idempotency component wired to all four POSTs; suite green
 - [ ] FE tests first (red): double click → one request; no retry on failure; body is `{amount}` only; key reused only on explicit retry; three result variants render; formatting of the amount
-- [ ] FE: result panel + operation shell + Withdraw page + review dialog
+- [ ] FE: result panel + operation shell + amount presets + review dialog + Withdraw page
 - [ ] E2E: withdraw 100 → balance down by 100 and a row appears; exact full balance → balance 0; amount above balance → business-failure panel with unchanged balance; forced network failure → uncertain panel and "Try again" reuses the key (backend debits once); axe on the page and the dialog
 - [ ] Postman: withdrawal requests with and without `Idempotency-Key`
 - [ ] Docs: result-panel usage in `features/…/doc.md`
 
 ## Acceptance
+- [ ] No money POST answers 500 for a null/blank/non-positive body (all four operations)
 - [ ] Replaying a POST with the same `Idempotency-Key` does not double-debit (proved for withdrawal; the component is reused by SL-04…06)
 - [ ] Withdrawal request body is `{amount}` only; double click sends exactly one request; no POST is auto-retried
 - [ ] A debit of exactly the full balance succeeds; amount > balance → 422 and balance unchanged

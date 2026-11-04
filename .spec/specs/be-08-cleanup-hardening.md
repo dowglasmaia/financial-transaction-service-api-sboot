@@ -1,6 +1,6 @@
 # SPEC-BE-08 — Cleanup and portfolio-grade hardening
 
-**Status:** Draft (not authorized) · **Depends on:** BE-07 (and ARCH-02) · **Parallel with:** FE-05
+**Status:** Draft (not authorized) · **Depends on:** BE-07 (and ARCH-02) · **Parallel with:** none
 **Read first:** `../memory/produto.md`, `../memory/contexto-tecnico.md`. Protocol: `../shared/como-executar.md` (tick a task only after verification + evidence line).
 
 ## Objective

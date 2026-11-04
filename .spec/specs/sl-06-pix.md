@@ -1,8 +1,8 @@
 # SPEC-SL-06 — Pix (three steps, with the external MaiaBank call)
 
-**Status:** Draft (not authorized) · **Depends on:** SL-05 · **Parallel with:** none
+**Status:** Draft (not authorized; revised 2026-11-04) · **Depends on:** SL-04 (deposit + recharge) · **Parallel with:** none
 **Branch:** `slice/06-pix` · **Track:** Backend + Frontend + E2E
-**Absorbs:** FE-04 (Pix), BE-05 (CPF/e-mail/phone validators, null bodies, F-11).
+**Absorbs:** FE-04 (Pix), BE-05 (CPF/e-mail/phone rules, F-11). The null/blank body *shape* checks of the Pix request were done in SL-03.
 **Read first:** `../memory/produto.md` (rules 3, 5: key formats, reserve → MaiaBank → confirm/compensate, no local credit), `../memory/contexto-tecnico.md` (F-09, BE-03 Pix design), `../spec-execution-flow.md` §1b, v2 reference (Pix steps 1-3, key types, review, result). Protocol: `../shared/como-executar.md`.
 
 ## Objective
@@ -13,7 +13,7 @@ Provide the **MaiaBank contract** only if the Pix payload must change (F-09: `re
 
 ## Scope
 **Backend**
-- Validator fixes (F-11): CPF length, repeated digits and check digits; e-mail regex; phone rule; null body / missing `pixKey`, `keyType`, `transactionAmount` → 422 with existing messages (no NPE/500); idempotency from SL-03 applies to the whole reserve → call → confirm/compensate sequence.
+- Rule fixes (F-11), in `transaction.domain` (`CPFValidator`, `EmailValidator`, `PhoneValidator`, used through the value object `PixKey`): CPF length, repeated digits and check digits; e-mail regex; phone rule — the existing characterization tests that pin today's behaviour are updated on purpose and the change is listed in the Result; the error message keeps the lower-case key type (`PixKeyType.label()`, e.g. "…specified type: cpf"); idempotency from SL-03 applies to the whole reserve → call → confirm/compensate sequence.
 - Behaviour unchanged: reserve (debit + `PENDING` row) → MaiaBank → confirm (`COMPLETED`) or compensate (credit back, `FAILED`); no local recipient credited; Feign timeouts and circuit breaker as built in BE-03.
 - Contract: key type enum and error statuses documented.
 
@@ -30,7 +30,7 @@ Provide the **MaiaBank contract** only if the Pix payload must change (F-09: `re
 
 ## Tasks
 - [ ] HUMAN: confirm the MaiaBank stub is up (and provide its contract only if the payload must change)
-- [ ] BE tests first (red): CPF edge cases (length, repeated digits, wrong check digits), e-mail, phone, null bodies → 422 with no NPE; MaiaBank 500/timeout leaves balance and ledger consistent (existing tests stay green); replay with the same key sends one Pix
+- [ ] BE tests first (red): CPF edge cases (length, repeated digits, wrong check digits), e-mail, phone → 422 with no NPE; MaiaBank 500/timeout leaves balance and ledger consistent (existing tests stay green); replay with the same key sends one Pix
 - [ ] BE: validator fixes; suite green
 - [ ] FE tests first (red): CPF/e-mail/phone masks and validity rules identical to the backend cases; step navigation and back; review masks the key; one request on double click; no retry; copy for the three outcomes
 - [ ] FE: Pix page (stepper, three steps), review, result variants

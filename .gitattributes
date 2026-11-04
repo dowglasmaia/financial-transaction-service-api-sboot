@@ -1,0 +1,5 @@
+# Keep the Maven wrapper and shell scripts LF on every OS (a CRLF in maven-wrapper.properties makes ./mvnw reject the distributionUrl on Windows)
+mvnw text eol=lf
+*.sh text eol=lf
+**/.mvn/wrapper/maven-wrapper.properties text eol=lf
+mvnw.cmd text eol=crlf

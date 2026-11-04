@@ -1,6 +1,8 @@
 # SPEC-SL-05 — Mobile recharge (requested, never "completed")
 
-**Status:** Draft (not authorized) · **Depends on:** SL-04 · **Parallel with:** none
+> **Do not execute this spec on its own.** Merged into **SL-04** (`sl-04-deposit-and-recharge.md`) on 2026-11-04: after SL-03 the recharge page is almost only frontend and shares every piece with Deposit. The text below is kept as the scope catalogue.
+
+**Status:** Superseded by SL-04 · **Depends on:** SL-03 · **Parallel with:** none
 **Branch:** `slice/05-recharge` · **Track:** Backend + Frontend + E2E
 **Absorbs:** FE-04 (Recharge), BE-05 (recharge validators, null bodies).
 **Read first:** `../memory/produto.md` (rules 4, 6: carriers, outbox, byte-identical Kafka payload), `../memory/contexto-tecnico.md` (BE-03 outbox), `../spec-execution-flow.md` §1b, v2 reference (Recharge page, Home quick-recharge card). Protocol: `../shared/como-executar.md`.
