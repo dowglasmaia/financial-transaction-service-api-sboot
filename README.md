@@ -1,16 +1,307 @@
-# Financial Transaction Service (monorepo)
+<div align="center">
 
-Functional portfolio prototype of a modern online bank (web only, test data).
+# 🏦 Maia Bank — Financial Transaction Service
+
+**A full-stack digital-bank prototype: Pix, deposits, mobile top-ups and ATM withdrawals — built spec by spec with Claude Code.**
+
+A Spring Boot API and an Angular web app, designed contract-first, covered by hundreds of automated tests, and delivered through Specification-Driven Development (SDD).
+
+[![API CI](https://github.com/dowglasmaia/financial-transaction-service-api-sboot/actions/workflows/api-ci.yml/badge.svg)](https://github.com/dowglasmaia/financial-transaction-service-api-sboot/actions/workflows/api-ci.yml)
+[![App CI](https://github.com/dowglasmaia/financial-transaction-service-api-sboot/actions/workflows/app-ci.yml/badge.svg)](https://github.com/dowglasmaia/financial-transaction-service-api-sboot/actions/workflows/app-ci.yml)
+[![CodeQL](https://github.com/dowglasmaia/financial-transaction-service-api-sboot/actions/workflows/codeql.yml/badge.svg)](https://github.com/dowglasmaia/financial-transaction-service-api-sboot/actions/workflows/codeql.yml)
+
+![Java 25](https://img.shields.io/badge/-Java%2025-007396?style=flat-square&logo=openjdk&logoColor=white)
+![Spring Boot 3.5](https://img.shields.io/badge/-Spring%20Boot%203.5-6DB33F?style=flat-square&logo=springboot&logoColor=white)
+![Angular 21](https://img.shields.io/badge/-Angular%2021-DD0031?style=flat-square&logo=angular&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/-PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white)
+![Apache Kafka](https://img.shields.io/badge/-Apache%20Kafka-231F20?style=flat-square&logo=apachekafka&logoColor=white)
+![Auth0](https://img.shields.io/badge/-Auth0-EB5424?style=flat-square&logo=auth0&logoColor=white)
+![Docker](https://img.shields.io/badge/-Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
+![Claude Code](https://img.shields.io/badge/-Built%20with%20Claude%20Code-D97757?style=flat-square&logo=anthropic&logoColor=white)
+
+</div>
+
+> **Demo product.** Maia Bank is a portfolio prototype, not a real bank. Every name, account and amount is fictitious, and no real money moves.
+
+---
+
+## 📑 Table of contents
+
+1. [What is this project?](#-what-is-this-project)
+2. [The product and its business rules](#-the-product-and-its-business-rules)
+3. [Architecture](#-architecture)
+4. [Technology stack](#-technology-stack)
+5. [How it is built: SDD + Claude Code](#-how-it-is-built-sdd--claude-code)
+6. [Quality and proof](#-quality-and-proof)
+7. [Repository layout](#-repository-layout)
+8. [Run back and front together](#run-back-and-front-together)
+9. [Authentication (Auth0)](#authentication-auth0---how-it-works-and-how-to-configure-it)
+10. [Project status](#-project-status)
+11. [About the developer](#-about-the-developer)
+
+---
+
+## 🎯 What is this project?
+
+Maia Bank is the kind of product a modern neobank ships: a customer signs in, sees the balance and the latest activity, and can **send a Pix**, **deposit** money, **top up a mobile phone** or **withdraw cash** — with a clear statement of everything that happened.
+
+It exists for two reasons:
+
+| | |
+|---|---|
+| **Business** | Show how a small money-moving product can be correct, safe and pleasant to use: no customer is ever left debited by a failed payment, no operation runs twice by accident, and nobody can see another customer's data. |
+| **Engineering** | Show a professional way of working with AI: a human owner who decides, written specifications that define "done", and an AI agent (Claude Code) that implements them test-first, one small step at a time, under review. |
+
+It is a **monorepo** with two applications that move together:
+
+| Part | What it is | Folder |
+|---|---|---|
+| ☕ **Backend** | Spring Boot REST API — the single source of truth for money | [`api-financial-transaction-service`](api-financial-transaction-service) |
+| 🅰️ **Frontend** | Angular web app — dark and light themes, responsive, tested at 1280, 768 and 390 px | [`app-financial-transaction-service`](app-financial-transaction-service) |
+| 📐 **Specs** | The SDD knowledge base: product memory, technical memory, 20+ specs | [`.spec`](.spec) |
+
+---
+
+## 💼 The product and its business rules
+
+### What a customer can do
+
+| Capability | What happens | Endpoint (`/api/v1`) |
+|---|---|---|
+| **Sign in** | Auth0 Universal Login (the app never sees a password) | — |
+| **See the account** | Agency, number and balance of the signed-in customer | `GET /accounts/me` |
+| **Read the statement** | Filter by period, type and page; totals of money in and out; open any transaction | `GET /transactions`, `GET /transactions/{id}` |
+| **Send a Pix** | Three steps: key → amount → review. Keys: CPF, e-mail or phone | `POST /transactions/send-pix` |
+| **Deposit** | Credit any existing account (a boleto is simulated over the real deposit) | `POST /transactions/deposit` |
+| **Top up a mobile phone** | Carriers VIVO, CLARO, TIM and ALGAR; shown as *requested*, never "completed" | `POST /transactions/recharge-mobile` |
+| **Withdraw at an ATM** | Debits the caller's account; quick-amount presets | `POST /transactions/atm-withdrawal` |
+
+### Rules the system never breaks
+
+These rules are the business heart of the project. Each one is written in the specs and protected by tests.
+
+- 🛡️ **A failed Pix never leaves the customer debited.** The flow is *reserve* (debit + pending ledger row) → call the external bank (MaiaBank) → *confirm* or *compensate* (credit back). A circuit breaker and timeouts protect the call.
+- ⚖️ **The balance rule lives in one place.** A debit is allowed only when `balance ≥ amount`, and it is atomic, so two simultaneous requests can never overdraw an account.
+- 🔁 **No operation runs twice by accident.** Every money request accepts an `Idempotency-Key`. The same key returns the stored answer (`Idempotent-Replayed: true`) instead of moving money again.
+- 🔒 **You only see your own data.** The token's `sub` is linked to one customer; a foreign resource answers `404`, and a valid token without the `customer` role answers `403`.
+- 💶 **Money is exact.** `BigDecimal`, at most two decimal places. More places are rejected with `422`, never silently rounded.
+- 📨 **No lost events.** A recharge writes the debit, the ledger row and the Kafka event in **one** transaction (transactional outbox, at-least-once).
+- 🙈 **Privacy by default.** Logs never carry an account number, agency, Pix key, phone, e-mail or token; Pix keys are masked on screen.
+- ⏱️ **Honest about uncertainty.** After a network error on a write, the app never retries by itself: it tells the customer to check the statement.
+
+> Full behaviour contract: [`.spec/memory/produto.md`](.spec/memory/produto.md).
+
+---
+
+## 🧱 Architecture
+
+```
+                         ┌──────────────────────────┐
+   Browser               │   Auth0 (OIDC + PKCE)    │
+ ┌──────────────┐ login  │   roles claim in the     │
+ │ Angular 21   │◄──────►│   access token (JWT)     │
+ │ signals,     │        └────────────┬─────────────┘
+ │ Tailwind 4   │                     │ JWKS (public keys)
+ └──────┬───────┘                     ▼
+        │ HTTPS + Bearer token ┌───────────────────────────────────────────┐
+        └─────────────────────►│ Spring Boot API (resource server)         │
+                               │  api ─► application ─► domain             │
+                               │  (REST)  (use cases)   (pure Java)        │
+                               │           ▲                               │
+                               │           └── infrastructure (adapters)   │
+                               └───┬───────────┬────────────┬──────────────┘
+                                   │           │            │
+                             ┌─────▼────┐ ┌────▼─────┐ ┌────▼──────────┐
+                             │PostgreSQL│ │  Kafka   │ │ MaiaBank API  │
+                             │ + Flyway │ │ (outbox) │ │ (Pix, Feign + │
+                             └──────────┘ └──────────┘ │ Resilience4j) │
+                                                       └───────────────┘
+```
+
+### Backend: "Hexagonal Pragmática"
+
+The API is organised **by feature**, with dependencies pointing inward and a domain that knows no framework:
+
+```
+com.dowglasmaia.financialtransaction
+├── account/        api · application (port, usecase) · domain · infrastructure
+├── transaction/    api · application (port, usecase) · domain · infrastructure
+└── shared/         error · idempotency · money · security · web   (kept minimal)
+```
+
+- **One use case class per operation** (`MakePixTransferUseCase`, `MakeDepositUseCase`, …).
+- **Ports only for outputs** (repositories, MaiaBank client, event publisher, caller identity).
+- **Enforced, not hoped for:** an ArchUnit test runs in every build, and an offline checker reports `0 violation(s)` in strict mode.
+- **Contract-first:** the OpenAPI file is the contract; interfaces and models are generated from it, and the CI compares versions with `openapi-diff`.
+
+### Frontend
+
+Angular 21 with standalone components, signals, a shared `OperationController` (one request in flight, no automatic retry of writes) and a design system shared by every page: stepper, amount presets, review dialog and result panel. The UI follows an approved visual prototype ([`prototype/`](prototype)).
+
+---
+
+## ⚡ Technology stack
+
+### ☕ Backend
+
+![Java 25](https://img.shields.io/badge/-Java%2025%20(Temurin)-007396?style=flat-square&logo=openjdk&logoColor=white)
+[![Spring Boot](https://img.shields.io/badge/-Spring%20Boot%203.5-6DB33F?style=flat-square&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Spring Security](https://img.shields.io/badge/-Spring%20Security-6DB33F?style=flat-square&logo=springsecurity&logoColor=white)](https://spring.io/projects/spring-security)
+[![Spring Data JPA](https://img.shields.io/badge/-Spring%20Data%20JPA-6DB33F?style=flat-square&logo=spring&logoColor=white)](https://spring.io/projects/spring-data-jpa)
+[![Spring Cloud OpenFeign](https://img.shields.io/badge/-OpenFeign-6DB33F?style=flat-square&logo=spring&logoColor=white)](https://spring.io/projects/spring-cloud-openfeign)
+[![Resilience4j](https://img.shields.io/badge/-Resilience4j-F55749?style=flat-square&logo=java&logoColor=white)](https://resilience4j.github.io/resilience4j/)
+[![Apache Maven](https://img.shields.io/badge/-Maven-C71A36?style=flat-square&logo=apachemaven&logoColor=white)](https://maven.apache.org/)
+[![OpenAPI](https://img.shields.io/badge/-OpenAPI%203-6BA539?style=flat-square&logo=openapiinitiative&logoColor=white)](https://www.openapis.org/)
+[![Lombok](https://img.shields.io/badge/-Lombok-CA0C00?style=flat-square&logo=java&logoColor=white)](https://projectlombok.org/)
+
+### 🗄️ Data, messaging and security
+
+[![PostgreSQL](https://img.shields.io/badge/-PostgreSQL%2014-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Flyway](https://img.shields.io/badge/-Flyway%2011-CC0200?style=flat-square&logo=flyway&logoColor=white)](https://flywaydb.org/)
+[![Apache Kafka](https://img.shields.io/badge/-Apache%20Kafka-231F20?style=flat-square&logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
+[![Auth0](https://img.shields.io/badge/-Auth0%20(OIDC%20%2B%20PKCE)-EB5424?style=flat-square&logo=auth0&logoColor=white)](https://auth0.com/)
+[![JWT](https://img.shields.io/badge/-JWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
+
+### 🅰️ Frontend
+
+[![Angular](https://img.shields.io/badge/-Angular%2021-DD0031?style=flat-square&logo=angular&logoColor=white)](https://angular.dev/)
+[![TypeScript](https://img.shields.io/badge/-TypeScript%205.9-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![RxJS](https://img.shields.io/badge/-RxJS-B7178C?style=flat-square&logo=reactivex&logoColor=white)](https://rxjs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/-Tailwind%20CSS%204-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Auth0 SDK](https://img.shields.io/badge/-auth0--angular-EB5424?style=flat-square&logo=auth0&logoColor=white)](https://github.com/auth0/auth0-angular)
+[![Nginx](https://img.shields.io/badge/-Nginx-009639?style=flat-square&logo=nginx&logoColor=white)](https://nginx.org/)
+
+### 🧪 Quality and security
+
+[![JUnit 5](https://img.shields.io/badge/-JUnit%205-25A162?style=flat-square&logo=junit5&logoColor=white)](https://junit.org/junit5/)
+[![Testcontainers](https://img.shields.io/badge/-Testcontainers-9B2D8F?style=flat-square&logo=testcontainers&logoColor=white)](https://testcontainers.com/)
+[![Vitest](https://img.shields.io/badge/-Vitest-6E9F18?style=flat-square&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Playwright](https://img.shields.io/badge/-Playwright-2EAD33?style=flat-square&logo=playwright&logoColor=white)](https://playwright.dev/)
+[![axe](https://img.shields.io/badge/-axe%20accessibility-663399?style=flat-square&logoColor=white)](https://www.deque.com/axe/)
+[![ArchUnit](https://img.shields.io/badge/-ArchUnit-F58025?style=flat-square&logo=java&logoColor=white)](https://www.archunit.org/)
+[![JaCoCo](https://img.shields.io/badge/-JaCoCo-D22128?style=flat-square&logo=java&logoColor=white)](https://www.jacoco.org/)
+[![CodeQL](https://img.shields.io/badge/-CodeQL-181717?style=flat-square&logo=github&logoColor=white)](https://codeql.github.com/)
+[![Dependabot](https://img.shields.io/badge/-Dependabot-025E8C?style=flat-square&logo=dependabot&logoColor=white)](https://docs.github.com/en/code-security/dependabot)
+
+### 📈 Observability and delivery
+
+[![Micrometer](https://img.shields.io/badge/-Micrometer-1F6FB2?style=flat-square&logo=micrometer&logoColor=white)](https://micrometer.io/)
+[![Prometheus](https://img.shields.io/badge/-Prometheus-E6522C?style=flat-square&logo=prometheus&logoColor=white)](https://prometheus.io/)
+[![Docker](https://img.shields.io/badge/-Docker%20Compose-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
+[![GitHub Actions](https://img.shields.io/badge/-GitHub%20Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white)](https://github.com/features/actions)
+[![Postman](https://img.shields.io/badge/-Postman-FF6C37?style=flat-square&logo=postman&logoColor=white)](https://www.postman.com/)
+
+### 🤖 AI-driven workflow
+
+[![Claude Code](https://img.shields.io/badge/-Claude%20Code-D97757?style=flat-square&logo=anthropic&logoColor=white)](https://claude.com/claude-code)
+![SDD](https://img.shields.io/badge/-Spec--Driven%20Development-0F172A?style=flat-square)
+![Skills](https://img.shields.io/badge/-Claude%20Skills-0F172A?style=flat-square)
+![TDD](https://img.shields.io/badge/-Test--first-0F172A?style=flat-square)
+
+---
+
+## 🤖 How it is built: SDD + Claude Code
+
+This project is as much about **how** it was built as about **what** was built.
+
+### The idea
+
+> **Nothing is implemented without an approved spec. Nothing is "done" without evidence.**
+
+The owner (a human) decides *what* and *why*. Claude Code does the typing, always inside a written specification, always test-first, and always stopping where a decision belongs to the owner.
+
+```
+   ┌─────────────┐   approve   ┌─────────────┐  tests first  ┌──────────────┐
+   │ 1. SPEC     │────────────►│ 2. BRANCH   │──────────────►│ 3. IMPLEMENT │
+   │ goal, scope │             │ from a      │  (see red,    │ smallest step│
+   │ tasks, gates│             │ fresh main  │   then green) │ one commit   │
+   └──────▲──────┘             └─────────────┘               └──────┬───────┘
+          │                                                         │
+   ┌──────┴───────┐   owner opens the PR,   ┌─────────────┐   ┌─────▼────────┐
+   │ 6. MEMORY    │◄── CI green, merges ────│ 5. REVIEW   │◄──│ 4. EVIDENCE  │
+   │ kept in sync │                         │ human gate  │   │ tick a task  │
+   └──────────────┘                         └─────────────┘   │ only w/ proof│
+                                                              └──────────────┘
+```
+
+### The four building blocks
+
+| Block | What it is | Where |
+|---|---|---|
+| 📐 **Specs** | One file per piece of work: goal, scope, tasks, acceptance criteria, a *Minimal validation* block and "Stop and ask" gates | [`.spec/specs`](.spec/specs) |
+| 🧠 **Memory** | What the agent must read first: the product contract and the technical decisions (numbered `D-xx`) | [`.spec/memory`](.spec/memory) |
+| 🧰 **Skills** | Reusable expertise packages that Claude Code loads on demand (see below) | `~/.claude/skills` |
+| 🔍 **Reviews and gates** | Human approval points, CI pipelines and an architecture checker | [`.spec/spec-execution-flow.md`](.spec/spec-execution-flow.md) |
+
+### Skills used
+
+Skills give the agent consistent, project-grade habits instead of improvising each time.
+
+| Skill | Used for |
+|---|---|
+| `java-spring-create-module` | Creating and migrating backend features into the hexagonal layout, with a scaffold script and an architecture checker |
+| `openapi-rest-contract` | Contract-first changes: **preview → explicit approval → generate** |
+| `java-modern-engineering` | Idiomatic Java 17/21/25 code, refactoring and migrations |
+| `java-persistence-performance` | JPA, SQL, transactions, concurrency and Flyway |
+| `springboot-patterns` | REST, layering, logging and async patterns |
+| `angular-architect` · `angular-developer` | Angular 21 structure, signals, forms, HTTP and tests |
+| `angular-module-scaffold` | Feature pages built from approved OpenAPI operations |
+| `angular-tailwind-ui-specialist` · `ui-ux-pro-max` | Responsive, accessible UI with design tokens |
+
+### The workflow in practice
+
+1. **Foundation specs** (`MONO`, `BE-01…04`, `FE-02`): monorepo, a safety net of characterization tests, Flyway, money integrity, Auth0 and ownership.
+2. **Architecture specs** (`ARCH-01/02`): the backend moved to the hexagonal layout with **behaviour frozen** and guarded by the existing tests.
+3. **Vertical slices** (`SL-00…SL-06`): one slice = one branch = one PR carrying **backend + frontend + e2e** for one user-visible capability: sign-in, statement, withdrawal, deposit and recharge, Pix.
+4. **Closing specs** (`BE-07`, `BE-08`): Spring Boot 3.5 and Java 25, then clean-up and hardening (exact money, correlation id, private management port, PII-free logs, GitHub-native scans).
+5. **Final rounds** (`E2E-01`, `FINAL-01`): a Cypress suite and a manual test round by the owner.
+
+### Rules the agent follows every time
+
+- ✅ **Tests first:** write the failing test, watch it fail, then make it pass.
+- ✅ **One commit per task**, named `<SPEC>: <task>`.
+- ✅ **Tick a task only with an evidence line** (command, result, count).
+- ✅ **Report honestly** what was executed and what was only written.
+- ⛔ **Stop and ask** when a contract, behaviour or scope change is not in the spec.
+- ⛔ **Never** open the PR, merge, or push to `main`: those are the owner's steps.
+- ⛔ **Never** type a password or handle a secret: the real Auth0 login is a manual step, and automated tests use a mock identity provider.
+
+### Human decisions that shaped the project
+
+Some choices were deliberately left to the owner, for example: reject amounts with more than two decimals instead of rounding (`422`); use only GitHub-native security scans; use Eclipse Temurin images; keep access tokens in memory only; keep Playwright and add one Cypress spec on top. Every decision is recorded in [`.spec/memory/contexto-tecnico.md`](.spec/memory/contexto-tecnico.md).
+
+---
+
+## ✅ Quality and proof
+
+| Check | Result | Where it runs |
+|---|---|---|
+| Backend tests (unit + integration with a real PostgreSQL) | **410 tests, 0 failures** on Java 25 | `api-ci` / `./mvnw verify` |
+| Architecture rules (ArchUnit + strict checker) | **0 violations** | every build |
+| Browser tests (Playwright, mock identity provider) | **114 / 114** across 3 viewports (1280, 768, 390 px) | `npm run e2e` |
+| Accessibility (axe) | Run inside the e2e flows | `npm run e2e` |
+| Deprecated Java APIs (`jdeprscan --release 25`) | **0** | BE-07 |
+| Static security analysis | CodeQL (Java, TypeScript); first runs happen on GitHub | GitHub Actions |
+| Dependency updates | Dependabot (Maven, npm, Docker, Actions); configured, runs on GitHub | GitHub |
+| API compatibility | `openapi-diff` between contract versions | `api-ci` |
+
+The numbers above were measured during the specs; see each spec's *Result* section for the evidence line. Checks that exist but have not run yet are marked as such in the specs.
+
+---
+
+## 📂 Repository layout
 
 | Folder | What | CI |
 |---|---|---|
 | `api-financial-transaction-service/` | Spring Boot API (Pix, deposit, recharge, withdrawal, statement) | `.github/workflows/api-ci.yml` |
-| `app-financial-transaction-service/` | Angular web app (created by spec FE-02) | `.github/workflows/app-ci.yml` |
+| `app-financial-transaction-service/` | Angular web app | `.github/workflows/app-ci.yml` |
 | `prototype/` | Approved UI/UX prototype - visual and flow reference for the frontend | - |
 | `.spec/` | SDD knowledge base: `memory/`, `specs/`, execution flow | - |
-| `docker-compose.yml` | Local stack (API, PostgreSQL, Kafka, MaiaBank stub) | - |
+| `docker-compose.yml` | Local stack (API, PostgreSQL, Kafka, MaiaBank stub, web) | - |
 
-Each application has its own isolated pipeline (path-filtered) and is built and tested independently.
+Each application has its own isolated, path-filtered pipeline and is built and tested independently. More detail: [API README](api-financial-transaction-service/README.md) · [App README](app-financial-transaction-service/README.md).
+
+---
 
 ## Run back and front together
 
@@ -149,3 +440,60 @@ Click **Get New Access Token**, sign in as the test user in the Auth0 window, an
 | 404 on another customer's data | Ownership working | - |
 
 More symptoms and fixes: `.claude/skills/auth-oidc-config/references/auth0-portal-guide.md` (project skill `auth-oidc-config`, which also validates the inputs, generates the configuration files and verifies the tenant and a token). Design and decisions: `.spec/auth-auth0.md`.
+
+---
+
+## 📊 Project status
+
+| Area | Status |
+|---|---|
+| Backend: money integrity, Auth0 resource server, ownership, idempotency | ✅ Done |
+| Backend: hexagonal architecture, Java 25 / Spring Boot 3.5, hardening | ✅ Implemented (BE-07, BE-08) |
+| Frontend: sign-in, Home, statement, withdrawal, deposit, recharge, Pix | ✅ Done (slices SL-00…SL-06) |
+| Cypress suite (`E2E-01`) | 📝 Specified, waiting for the owner's approval |
+| Final manual test round (`FINAL-01`) | 🔜 Next |
+
+The index with every spec and its status is in [`.spec/specs/README.md`](.spec/specs/README.md). Not planned on purpose: account registration, cards, budgets, scheduled payments, a mobile app and real KYC.
+
+---
+
+## 👨‍💻 About the developer
+
+<table>
+  <tr>
+    <td align="center" width="160">
+      <img src="app-financial-transaction-service/public/img/dowglas.png" alt="Photo of Dowglas Maia" width="128" height="128" />
+    </td>
+    <td>
+      <h3>Dowglas Maia</h3>
+      <p><strong>Senior Java Engineer</strong> — designed and developed this project.</p>
+      <p>
+        I build back-end systems with Java and Spring Boot, modern front ends with Angular, and I like to
+        make the whole path visible: from the business rule, to the specification, to the test that proves it.
+        This repository is my way of showing how I work with AI as a teammate: the decisions stay human, and the
+        agent works inside a spec, under tests and review.
+      </p>
+      <p>
+        <a href="https://www.linkedin.com/in/dowglasmaia/"><img alt="LinkedIn" src="https://img.shields.io/badge/-LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white" /></a>
+        <a href="https://github.com/dowglasmaia"><img alt="GitHub" src="https://img.shields.io/badge/-GitHub-181717?style=flat-square&logo=github&logoColor=white" /></a>
+        <a href="https://www.malt.com/profile/dowglasmaia"><img alt="Malt" src="https://img.shields.io/badge/-Malt-FC5757?style=flat-square&logo=malt&logoColor=white" /></a>
+      </p>
+    </td>
+  </tr>
+</table>
+
+**What this project shows about my work**
+
+- Business rules turned into code that cannot be bypassed (atomic balance, compensation, idempotency, ownership).
+- Hexagonal architecture that is *checked by tests*, not only drawn in a diagram.
+- Full-stack delivery in vertical slices, with the contract, the API, the UI and the browser tests moving together.
+- Security and privacy as part of the design: OIDC with PKCE, role-based access, private management port, PII-free logs.
+- A repeatable way of working with an AI agent: specs, memory, skills, evidence and human review.
+
+---
+
+<div align="center">
+
+© Dowglas Maia · Maia Bank is a demo product, not a real bank · Test data only
+
+</div>
