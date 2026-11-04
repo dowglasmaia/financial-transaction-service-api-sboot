@@ -13,7 +13,7 @@ RUN npm ci --no-audit --no-fund
 COPY . .
 RUN npm run build
 
-FROM nginx:1.27-alpine
+FROM nginx:1.31-alpine
 ENV API_UPSTREAM=http://financial-transaction-api:8088
 # nginx:alpine renders /etc/nginx/templates/*.template with the environment at start (only the variables we name)
 ENV NGINX_ENVSUBST_FILTER=API_
