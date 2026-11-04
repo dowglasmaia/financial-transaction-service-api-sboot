@@ -1,0 +1,16 @@
+# Local development profile (SPRING_PROFILES_ACTIVE=local), versioned on purpose.
+# The credentials are the throw-away ones of the local compose database (.env.example: POSTGRES_* on host port 5433);
+# they protect nothing outside your machine. Real or shared environments use DB_URL / DB_USER / DB_PASSWORD from the environment.
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/transactions
+    username: transactions
+    password: "change-me"
+  jpa:
+    show-sql: true
+  kafka:
+    bootstrap-servers: localhost:9092
+api:
+  client:
+    maiabank:
+      url: http://localhost:8089/api/v1/transactions
