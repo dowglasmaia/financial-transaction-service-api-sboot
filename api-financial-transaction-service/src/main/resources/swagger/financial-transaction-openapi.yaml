@@ -1,10 +1,15 @@
 openapi: 3.0.3
 info:
   title: Financial Transaction Service
-  description: API for banking operations such as sending Pix, recharging mobile phones, and querying transactions.
-  version: 1.0.0
+  description: >-
+    API for banking operations of the signed-in customer: statement, transaction detail, deposit, withdrawal,
+    mobile recharge and Pix. Every operation needs a bearer token; the customer is always taken from the token.
+  version: 1.1.0
 servers:
-  - url: https://localhost:8080/api/v1/
+  - url: /api/v1
+
+security:
+  - bearerAuth: []
 
 paths:
   /transactions/send-pix:
@@ -12,7 +17,7 @@ paths:
       tags:
         - Transactions
       summary: Send Pix
-      description: Method to send a Pix transaction.
+      description: Sends a Pix from the caller's account (reserve, call the bank, confirm or give the money back).
       operationId: sendPix
       requestBody:
         description: Pix transaction data.
@@ -22,33 +27,23 @@ paths:
               $ref: '#/components/schemas/PixRequest'
         required: true
       responses:
-        200:
-          description: OK
-        400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResponseError'
+        204:
+          description: Pix sent
         401:
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResponseError'
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        422:
+          $ref: '#/components/responses/UnprocessableEntity'
         500:
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResponseError'
+          $ref: '#/components/responses/InternalError'
 
   /transactions/recharge-mobile:
     post:
       tags:
         - Transactions
       summary: Recharge Mobile
-      description: Method to recharge a mobile phone.
+      description: Requests a mobile recharge; the debit is immediate and the carrier credit is asynchronous.
       operationId: rechargeMobile
       requestBody:
         description: Mobile recharge data.
@@ -58,33 +53,23 @@ paths:
               $ref: '#/components/schemas/MobileRechargeRequest'
         required: true
       responses:
-        200:
-          description: OK
-        400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResponseError'
+        204:
+          description: Recharge requested
         401:
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResponseError'
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        422:
+          $ref: '#/components/responses/UnprocessableEntity'
         500:
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResponseError'
+          $ref: '#/components/responses/InternalError'
 
   /transactions/atm-withdrawal:
     post:
       tags:
         - Transactions
       summary: Withdraw
-      description: Method to perform a withdrawal.
+      description: Withdraws from the caller's own account.
       operationId: withdraw
       requestBody:
         description: Withdrawal data.
@@ -94,33 +79,25 @@ paths:
               $ref: '#/components/schemas/WithdrawRequest'
         required: true
       responses:
-        200:
-          description: OK
-        400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResponseError'
+        204:
+          description: Withdrawal registered
         401:
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResponseError'
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        422:
+          $ref: '#/components/responses/UnprocessableEntity'
         500:
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResponseError'
+          $ref: '#/components/responses/InternalError'
 
   /transactions/deposit:
     post:
       tags:
         - Transactions
       summary: Deposit
-      description: Method to deposit money into an account.
+      description: Deposits money into an existing account (third-party deposits are allowed).
       operationId: deposit
       requestBody:
         description: Deposit data.
@@ -130,38 +107,51 @@ paths:
               $ref: '#/components/schemas/DepositRequest'
         required: true
       responses:
-        200:
-          description: OK
-        400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResponseError'
+        204:
+          description: Deposit registered
         401:
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResponseError'
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        422:
+          $ref: '#/components/responses/UnprocessableEntity'
         500:
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResponseError'
+          $ref: '#/components/responses/InternalError'
 
   /transactions:
     get:
       tags:
         - Transactions
       summary: Get Transactions
-      description: Method to get a user's transactions.
+      description: >-
+        Statement of the caller's account for a period: completed operations only, with the totals of the WHOLE period
+        (independent of the page and of the type filter) and the current balance. The period is half-open,
+        [from 00:00, to + 1 day 00:00), in the time zone America/Sao_Paulo. Send `from` and `to` (ISO dates);
+        `initial-date` and `final-date` (dd/MM/yyyy) are deprecated and mean the same period.
       operationId: getTransactions
       parameters:
+        - name: from
+          in: query
+          description: "First day of the period (ISO date, yyyy-MM-dd)"
+          required: false
+          schema:
+            type: string
+            format: date
+            example: "2026-03-10"
+        - name: to
+          in: query
+          description: "Last day of the period, included (ISO date, yyyy-MM-dd)"
+          required: false
+          schema:
+            type: string
+            format: date
+            example: "2026-03-11"
         - name: initial-date
           in: query
-          description: "Initial date for filtering transactions (format: dd/MM/yyyy)"
+          deprecated: true
+          description: "Deprecated, use `from`. First day of the period (format: dd/MM/yyyy)"
           required: false
           schema:
             type: string
@@ -169,12 +159,53 @@ paths:
             example: "10/10/2024"
         - name: final-date
           in: query
-          description: "Final date for filtering transactions (format: dd/MM/yyyy)"
+          deprecated: true
+          description: "Deprecated, use `to`. Last day of the period, included (format: dd/MM/yyyy)"
           required: false
           schema:
             type: string
             pattern: "^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/([0-9]{4})$"
             example: "10/10/2024"
+        - name: type
+          in: query
+          description: "Lists only this type of operation (the totals still cover the whole period)"
+          required: false
+          schema:
+            type: string
+            enum: [DEPOSIT, PIX, PHONE_RECHARGE, WITHDRAW]
+        - name: sort
+          in: query
+          description: "Sort field"
+          required: false
+          schema:
+            type: string
+            enum: [date, amount]
+            default: date
+        - name: order
+          in: query
+          description: "Sort direction"
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: page
+          in: query
+          description: "Page number, starting at 0"
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          description: "Rows per page (1 to 100)"
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
       responses:
         200:
           description: OK
@@ -183,24 +214,62 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionsResponse'
         401:
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResponseError'
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        422:
+          $ref: '#/components/responses/UnprocessableEntity'
         500:
-          description: Internal Server Error
+          $ref: '#/components/responses/InternalError'
+
+  /transactions/summary:
+    get:
+      tags:
+        - Transactions
+      summary: Get the summary of a period
+      description: >-
+        Totals of the caller's completed operations for the same half-open period as the statement, plus one bucket
+        per day (time zone America/Sao_Paulo), so a screen never has to add rows up.
+      operationId: getTransactionsSummary
+      parameters:
+        - name: from
+          in: query
+          description: "First day of the period (ISO date, yyyy-MM-dd)"
+          required: true
+          schema:
+            type: string
+            format: date
+            example: "2026-03-10"
+        - name: to
+          in: query
+          description: "Last day of the period, included (ISO date, yyyy-MM-dd)"
+          required: true
+          schema:
+            type: string
+            format: date
+            example: "2026-03-11"
+      responses:
+        200:
+          description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseError'
+                $ref: '#/components/schemas/TransactionsSummaryResponse'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        422:
+          $ref: '#/components/responses/UnprocessableEntity'
+        500:
+          $ref: '#/components/responses/InternalError'
 
   /transactions/{id}:
     get:
       tags:
         - Transactions
       summary: Get Transaction
-      description: Method to get a Transaction.
+      description: One operation of the caller's account. An id that belongs to another customer behaves as an unknown one.
       operationId: getTransaction
       parameters:
         - name: id
@@ -219,17 +288,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionResponse'
         401:
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResponseError'
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
         500:
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResponseError'
+          $ref: '#/components/responses/InternalError'
 
   /accounts/me:
     get:
@@ -238,8 +303,6 @@ paths:
       summary: Get my account
       description: Account of the signed-in customer. It takes no id, the account comes from the token, so no other customer's data can be requested.
       operationId: getMyAccount
-      security:
-        - bearerAuth: []
       responses:
         200:
           description: OK
@@ -248,19 +311,45 @@ paths:
               schema:
                 $ref: '#/components/schemas/AccountResponse'
         401:
-          description: Unauthorized (no token, or a token that is not valid for this API)
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResponseError'
+          $ref: '#/components/responses/Unauthorized'
         403:
-          description: Forbidden (valid token, but the identity is not linked to a customer)
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResponseError'
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalError'
 
 components:
+  responses:
+    Unauthorized:
+      description: Unauthorized (no token, or a token that is not valid for this API)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResponseError'
+    Forbidden:
+      description: Forbidden (valid token, but the identity is not a customer linked to an account)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResponseError'
+    NotFound:
+      description: Not found (unknown account or transaction, or one that is not the caller's)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResponseError'
+    UnprocessableEntity:
+      description: The request is well formed but a field or a business rule is rejected (the message says which)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResponseError'
+    InternalError:
+      description: Unexpected failure (no internal detail is returned)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResponseError'
+
   schemas:
     DepositRequest:
       type: object
@@ -279,7 +368,6 @@ components:
         agency:
           type: string
           example: '0001'
-
     PixRequest:
       type: object
       required:
@@ -293,7 +381,6 @@ components:
         transactionAmount:
           type: number
           format: decimal
-
           example: 150.75
         keyType:
           type: string
@@ -302,7 +389,6 @@ components:
             - email
             - cpf
           example: 'cpf'
-
     MobileRechargeRequest:
       type: object
       required:
@@ -333,7 +419,6 @@ components:
           type: number
           format: decimal
           example: 50.00
-
     WithdrawRequest:
       type: object
       required:
@@ -349,46 +434,13 @@ components:
         numberAccount:
           type: string
           example: '1234567'
-
-    User:
-      type: object
-      properties:
-        name:
-          type: string
-          example: 'John Doe'
-        CPF:
-          type: string
-          minLength: 11
-          maxLength: 11
-          example: '12345678900'
-        email:
-          type: string
-          format: email
-          example: 'john.doe@example.com'
-        phone:
-          type: integer
-          minLength: 11
-          maxLength: 11
-          example: 99988887777
-
-    Account:
-      type: object
-      properties:
-        agency:
-          type: string
-          example: '0001'
-        number:
-          type: string
-          example: '1234567'
-        balance:
-          type: number
-          format: decimal
-
-          example: 1000.00
-
     TransactionResponse:
       type: object
       properties:
+        id:
+          type: string
+          format: uuid
+          example: "6c6fa8c9-743a-4c79-9cf6-e1d5e25ad4a5"
         amount:
           type: number
           format: decimal
@@ -399,8 +451,8 @@ components:
           example: '2024-05-22T10:00:00Z'
         transactionType:
           type: string
-          example: 'Pix'
-
+          enum: [DEPOSIT, PIX, PHONE_RECHARGE, WITHDRAW]
+          example: 'PIX'
     TransactionsResponse:
       type: object
       properties:
@@ -408,6 +460,50 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TransactionResponse'
+        sumIncoming:
+          type: number
+          format: decimal
+          description: Sum of the DEPOSIT rows of the whole period
+          example: 2000.00
+        sumOutgoing:
+          type: number
+          format: decimal
+          description: Sum of the PIX, PHONE_RECHARGE and WITHDRAW rows of the whole period
+          example: 1500.00
+        balance:
+          type: number
+          format: decimal
+          description: Current balance of the caller's account
+          example: 10500.00
+        page:
+          type: integer
+          example: 0
+        size:
+          type: integer
+          example: 20
+        totalElements:
+          type: integer
+          format: int64
+          description: Number of rows of the period after the type filter (all pages)
+          example: 42
+    DailyTotal:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2026-03-10"
+        incoming:
+          type: number
+          format: decimal
+          example: 100.00
+        outgoing:
+          type: number
+          format: decimal
+          example: 35.00
+    TransactionsSummaryResponse:
+      type: object
+      properties:
         sumIncoming:
           type: number
           format: decimal
@@ -420,17 +516,19 @@ components:
           type: number
           format: decimal
           example: 10500.00
-
+        series:
+          type: array
+          items:
+            $ref: '#/components/schemas/DailyTotal'
     ResponseError:
       type: object
       properties:
         code:
           type: string
-          example: 'ERR001'
+          example: 'UNPROCESSABLE_ENTITY'
         message:
           type: string
-          example: 'Error'
-
+          example: 'Dates are required: send from and to.'
     AccountResponse:
       type: object
       required:
@@ -448,7 +546,6 @@ components:
           type: number
           format: decimal
           example: 5000.00
-
   securitySchemes:
     bearerAuth:
       type: http

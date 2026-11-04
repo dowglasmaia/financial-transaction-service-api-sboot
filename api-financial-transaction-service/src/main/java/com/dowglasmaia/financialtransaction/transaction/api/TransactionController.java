@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import static com.dowglasmaia.financialtransaction.transaction.api.ValidateBodyRequest.*;
@@ -80,11 +81,17 @@ public class TransactionController implements TransactionsApi {
     }
 
     @Override
-    public ResponseEntity<TransactionsResponseDTO> getTransactions(String initialDate, String finalDate){
+    public ResponseEntity<TransactionsResponseDTO> getTransactions(LocalDate from, LocalDate to, String initialDate, String finalDate,
+                                                                   String type, String sort, String order, Integer page, Integer size){
         Statement statement = getStatement.execute(initialDate, finalDate);
         var transactions = toTransactionsResponse(statement.transactions());
         transactions.setBalance(statement.balance());
         return ResponseEntity.status(HttpStatus.OK).body(transactions);
+    }
+
+    @Override
+    public ResponseEntity<TransactionsSummaryResponseDTO> getTransactionsSummary(LocalDate from, LocalDate to){
+        throw new UnsupportedOperationException("summary: next task");
     }
 
     @Override

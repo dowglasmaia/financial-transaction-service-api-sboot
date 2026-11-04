@@ -7,6 +7,7 @@ import com.dowglasmaia.provider.model.TransactionsResponseDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class TransactionMapper {
@@ -17,7 +18,8 @@ public class TransactionMapper {
         List<TransactionResponseDTO> newTransactions = transactions.stream()
               .map(transactionMap -> {
                   TransactionResponseDTO transaction = new TransactionResponseDTO();
-                  transaction.setTransactionType(transactionMap.getTransactionType().name());
+                  transaction.setId(idOf(transactionMap));
+                  transaction.setTransactionType(TransactionResponseDTO.TransactionTypeEnum.fromValue(transactionMap.getTransactionType().name()));
                   transaction.setAmount(transactionMap.getAmount());
                   transaction.setDateHour(transactionMap.getDateHour());
                   return transaction;
@@ -44,10 +46,15 @@ public class TransactionMapper {
         return transactionsResponse;
     }
 
+    private static UUID idOf(Transaction transaction){
+        return transaction.getId() == null ? null : UUID.fromString(transaction.getId());
+    }
+
     public static TransactionResponseDTO toTransactionRequest(Transaction transaction){
         TransactionResponseDTO response = new TransactionResponseDTO();
+        response.setId(idOf(transaction));
         response.setAmount(transaction.getAmount());
-        response.setTransactionType(transaction.getTransactionType().name());
+        response.setTransactionType(TransactionResponseDTO.TransactionTypeEnum.fromValue(transaction.getTransactionType().name()));
         response.setDateHour(transaction.getDateHour());
         return response;
     }

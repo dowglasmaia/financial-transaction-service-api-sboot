@@ -27,7 +27,7 @@ public class MockBuild {
 
         response.setDateHour(OffsetDateTime.now());
         response.setAmount(BigDecimal.valueOf(5000.00));
-        response.setTransactionType("PIX");
+        response.setTransactionType(TransactionResponseDTO.TransactionTypeEnum.PIX);
         return response;
     }
 

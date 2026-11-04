@@ -39,7 +39,8 @@ class StatementCharacterizationTest extends AbstractIntegrationTest {
         assertThat(body.get("sumOutgoing").decimalValue()).isEqualByComparingTo("55");
         assertThat(body.get("balance").decimalValue()).isEqualByComparingTo("5000");
         JsonNode first = body.get("transaction").get(0);
-        assertThat(first.fieldNames()).toIterable().containsExactlyInAnyOrder("transactionType", "amount", "dateHour"); // BR-53: no id
+        assertThat(first.fieldNames()).toIterable().containsExactlyInAnyOrder("id", "transactionType", "amount", "dateHour"); // SL-02: rows now carry their id (additive; BR-53 changed on purpose)
+        assertThat(first.get("id").asText()).isNotBlank();
     }
 
     @Test
