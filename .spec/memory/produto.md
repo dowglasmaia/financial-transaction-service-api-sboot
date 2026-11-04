@@ -20,7 +20,7 @@ Ledger types: `PIX`, `PHONE_RECHARGE`, `WITHDRAW` (outgoing), `DEPOSIT` (incomin
 ## Rules that must be preserved (regression contract)
 1. 204/404/422 statuses, `{code,message}` shape and existing messages stay.
 2. `amount > 0` on every operation.
-3. Pix key formats: CPF (check digits), e-mail regex, phone `^[1-9]{2}9[0-9]{8}$` (area code + 9 digits). Key "existence" is not verified (stub) — keep it that way.
+3. Pix key formats: CPF (check digits), e-mail regex, phone `^[1-9]{2}9[0-9]{8}$` (area code + 9 digits). Key "existence" is not verified (stub) — keep it that way. Since SL-06 the CPF rule also needs exactly 11 digits and rejects repeated digits; the e-mail rule is stricter (no consecutive dots, no edge hyphens, TLD letters 2-24, max 77 characters); a key is never logged or shown whole.
 4. Recharge phone = `areaCode + phoneNumber` matching the same phone regex; carrier must be one of four.
 5. Pix = reserve (debit + PENDING ledger row) → call MaiaBank (`POST` to `api.client.maiabank.url`) → confirm (COMPLETED) or compensate (credit back, FAILED). On failure the customer is **never left debited**. **No local recipient is credited** (decided). The statement only includes COMPLETED rows.
 6. Recharge = debit + ledger + event written in ONE transaction; the original request JSON reaches Kafka topic `recharge-mobile-topic` through a transactional outbox (same payload bytes, at-least-once). No consumer exists yet.

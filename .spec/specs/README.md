@@ -93,8 +93,8 @@ Approve the class mapping table and the security split (ARCH-01) and the transac
 | SL-01 | Merged (PR #16), verified with the mock IdP (116 backend tests, 174 unit tests, 21 e2e). **Open (owner):** real Auth0 sign-in for both users + the portal URLs, then the SL-01 continuation prompt closes it. Tokens stay in memory (owner decision 2026-11-03) |
 | SL-02 | Merged (PR #22); contract 1.1.0, statement/detail/summary, openapi-diff job |
 | SL-03 | Merged (PR #23) |
-| SL-04 | Implemented on `slice/04-deposit-and-recharge` (285 backend tests, 307 unit tests, 93 e2e); awaiting the owner's PR, review and green pipelines |
-| SL-06 | Draft (revised 2026-11-04 after ARCH-01/02; not authorized) |
+| SL-04 | Merged (PR #24) |
+| SL-06 | Implemented on `slice/06-pix` (371 backend tests, 379 unit tests, 114 e2e); awaiting the owner's PR, review and green pipelines |
 | SL-05 | Merged into SL-04 (2026-11-04) |
 | BE-07 | Draft (Java 21 build already pre-applied locally, uncommitted; see the spec note) |
 | BE-08 | Draft |
