@@ -4,6 +4,7 @@ package com.dowglasmaia.financialtransaction.transaction.api;
 import com.dowglasmaia.financialtransaction.transaction.application.usecase.GetStatementUseCase;
 import com.dowglasmaia.financialtransaction.transaction.application.usecase.GetTransactionByIdUseCase;
 import com.dowglasmaia.financialtransaction.transaction.application.usecase.MakeAtmWithdrawalUseCase;
+import com.dowglasmaia.financialtransaction.transaction.application.usecase.GetTransactionsSummaryUseCase;
 import com.dowglasmaia.financialtransaction.transaction.application.usecase.MakeDepositUseCase;
 import com.dowglasmaia.financialtransaction.transaction.application.usecase.MakePixTransferUseCase;
 import com.dowglasmaia.financialtransaction.transaction.application.usecase.RequestMobileRechargeUseCase;
@@ -55,6 +56,8 @@ public class TransactionControllerTest {
     private MakePixTransferUseCase makePixTransfer;
     @MockBean
     private MakeDepositUseCase makeDeposit;
+    @MockBean
+    private GetTransactionsSummaryUseCase getTransactionsSummary;
     @MockBean
     private RequestMobileRechargeUseCase requestMobileRecharge;
     @MockBean
@@ -116,7 +119,7 @@ public class TransactionControllerTest {
         var id = UUID.randomUUID();
 
         given(getTransactionById.execute(Mockito.any()))
-              .willReturn(Transaction.restore("t-1", TransactionType.valueOf(response.getTransactionType()), "acc-1", response.getAmount(), "agency-1",
+              .willReturn(Transaction.restore(UUID.randomUUID().toString(), TransactionType.valueOf(response.getTransactionType().toString()), "acc-1", response.getAmount(), "agency-1",
                     TransactionStatus.COMPLETED, response.getDateHour()));
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -126,7 +129,7 @@ public class TransactionControllerTest {
         mvc.perform(requestBuilder)
               .andExpect(status().isOk())
               .andExpect(jsonPath("$.amount").value(response.getAmount()))
-              .andExpect(jsonPath("$.transactionType").value(response.getTransactionType()));
+              .andExpect(jsonPath("$.transactionType").value(response.getTransactionType().toString()));
     }
 
 }

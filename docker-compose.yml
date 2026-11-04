@@ -26,6 +26,23 @@ services:
       - pg-db
       - kafka
 
+  # The web app (nginx serving the Angular build, forwarding /api/ to the API). Optional, like the API: `--profile web`
+  # (add `--profile api` for the API it talks to). It listens on 4200 so the Auth0 callback/logout URLs of `ng serve` keep
+  # working; stop `npm start` first, or change WEB_PORT and register that origin in Auth0.
+  financial-transaction-web:
+    profiles: ["web"]
+    build:
+      context: ./app-financial-transaction-service
+      dockerfile: Dockerfile
+    ports:
+      - "${WEB_PORT:-4200}:80"
+    environment:
+      API_UPSTREAM: http://financial-transaction-api:8088
+    networks:
+      - maianet
+    depends_on:
+      - financial-transaction-api
+
   pg-db:
     container_name: pg-db
     image: postgres:14.12-alpine3.18

@@ -1,0 +1,125 @@
+<section class="grid gap-6" aria-labelledby="statement-title">
+  <header>
+    <h1 id="statement-title" class="font-display text-3xl font-bold">Transactions</h1>
+    <p class="text-sm text-content-muted">Your completed operations. Totals cover the whole period, not just this page.</p>
+  </header>
+
+  <div class="grid gap-3" role="group" aria-label="Filters">
+    <div class="flex flex-wrap gap-2" role="group" aria-label="Period">
+      @for (period of periods; track period.key) {
+        <app-chip [selected]="period.key === 'custom' ? customOpen() : !customOpen() && filters().period === period.key" (toggled)="setPeriod(period.key)">{{ period.label }}</app-chip>
+      }
+    </div>
+
+    @if (customOpen()) {
+      <form class="flex flex-wrap items-end gap-3" (submit)="$event.preventDefault(); applyCustom()" aria-label="Custom period">
+        <label class="grid gap-1 text-sm font-semibold">
+          From
+          <input type="date" name="from" class="h-11 rounded-control border border-line-input bg-surface-raised px-3" [value]="customFrom()" (input)="customFrom.set(inputValue($event))" />
+        </label>
+        <label class="grid gap-1 text-sm font-semibold">
+          To
+          <input type="date" name="to" class="h-11 rounded-control border border-line-input bg-surface-raised px-3" [value]="customTo()" (input)="customTo.set(inputValue($event))" />
+        </label>
+        <button appButton variant="secondary" type="submit" [disabled]="!customFrom() || !customTo() || customInvalid()">Apply</button>
+        @if (customInvalid()) {
+          <p class="w-full text-sm text-expense" role="alert">The start date must not be after the end date.</p>
+        }
+      </form>
+    }
+
+    <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Type">
+      @for (chip of typeChips; track chip.label) {
+        <app-chip [selected]="filters().type === chip.type" (toggled)="setType(chip.type)">{{ chip.label }}</app-chip>
+      }
+      <label class="ml-auto flex items-center gap-2 text-sm font-semibold">
+        Sort by
+        <select class="h-11 rounded-control border border-line-input bg-surface-raised px-3" [value]="sortValue()" (change)="setSort(inputValue($event))">
+          <option value="date-desc">Newest first</option>
+          <option value="date-asc">Oldest first</option>
+          <option value="amount-desc">Highest amount</option>
+          <option value="amount-asc">Lowest amount</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  @if (store.totals(); as totals) {
+    <div class="grid gap-3 sm:grid-cols-3" aria-label="Totals of the period">
+      <app-kpi-tile label="Incoming" icon="ph-bold ph-arrow-down-left" tone="income" [value]="format(totals.incoming)" />
+      <app-kpi-tile label="Outgoing" icon="ph-bold ph-arrow-up-right" tone="expense" [value]="format(totals.outgoing)" />
+      <app-kpi-tile label="Current balance" icon="ph-bold ph-wallet" [value]="format(totals.balance)" />
+    </div>
+  }
+
+  @switch (store.state()) {
+    @case ('error') {
+      <app-alert kind="error" title="We couldn't load your transactions">
+        {{ store.error()?.message }}
+        @if (store.error()?.requestId; as requestId) {
+          <span class="mt-1 block text-xs text-content-muted">Request id: {{ requestId }}</span>
+        }
+        <button appButton variant="secondary" type="button" class="mt-3" (click)="retry()">Try again</button>
+      </app-alert>
+    }
+    @case ('ready') {
+      @if (store.isEmpty()) {
+        <app-empty-state title="No transactions in this period" message="Try another period or remove the type filter." icon="ph-bold ph-receipt">
+          <button appButton variant="secondary" type="button" (click)="setPeriod('90')">Show the last 90 days</button>
+        </app-empty-state>
+      } @else {
+        <p class="text-sm text-content-muted" aria-live="polite">Showing {{ firstShown() }}–{{ lastShown() }} of {{ store.total() }}</p>
+
+        <ul class="grid gap-3 md:hidden" aria-label="Transactions">
+          @for (row of store.rows(); track row.id) {
+            <li>
+              <a [routerLink]="['/transactions', row.id]" class="block rounded-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                <app-ledger-row [type]="row.transactionType!" [amount]="row.amount!" [date]="row.dateHour!" />
+              </a>
+            </li>
+          }
+        </ul>
+
+        <div class="hidden overflow-x-auto rounded-card border border-line bg-glass shadow-card md:block">
+          <table class="w-full text-left">
+            <caption class="sr-only">Transactions of the period</caption>
+            <thead class="text-sm text-content-muted">
+              <tr>
+                <th scope="col" class="px-4 py-3 font-semibold">Operation</th>
+                <th scope="col" class="px-4 py-3 font-semibold">Date</th>
+                <th scope="col" class="px-4 py-3 text-right font-semibold">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of store.rows(); track row.id) {
+                <tr class="border-t border-line">
+                  <td class="px-4 py-3">
+                    <a [routerLink]="['/transactions', row.id]" class="font-semibold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                      {{ types[row.transactionType!].label }}
+                    </a>
+                  </td>
+                  <td class="px-4 py-3 text-content-muted">{{ row.dateHour | date: 'MMM d, y, h:mm a' }}</td>
+                  <td class="px-4 py-3 text-right font-display font-semibold" [class]="types[row.transactionType!].direction === 'in' ? 'text-income' : 'text-expense'">
+                    <span class="sr-only">{{ types[row.transactionType!].direction === 'in' ? 'Money in' : 'Money out' }} </span>{{ types[row.transactionType!].direction === 'in' ? '+' : '−' }} {{ format(row.amount!) }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <nav class="flex items-center justify-between gap-3" aria-label="Pages">
+          <button appButton variant="secondary" type="button" [disabled]="!hasPrevious()" (click)="goToPage(-1)">Previous</button>
+          <button appButton variant="secondary" type="button" [disabled]="!hasNext()" (click)="goToPage(1)">Next</button>
+        </nav>
+      }
+    }
+    @default {
+      <div aria-busy="true" aria-label="Loading your transactions" class="grid gap-3">
+        <app-skeleton [height]="72" />
+        <app-skeleton [height]="72" />
+        <app-skeleton [height]="72" />
+      </div>
+    }
+  }
+</section>

@@ -77,3 +77,13 @@ Text pairs ≥ 4.5:1 and control borders ≥ 3:1 for `content`, `content-muted`,
 - **Test runner:** Vitest via Angular's `@angular/build:unit-test` (`npm test`), jsdom. Reason: Angular 21's default runner, no Karma/Jasmine stack.
 - **Chart library:** none. The prototype's charts are hand-made SVG/CSS; Home (SL-02) builds them the same way (zero dependency, full control of the accessible table fallback).
 - **New dependencies:** `@phosphor-icons/web` (icons, design-mandated), `vitest`, `jsdom`, `@types/node` (dev). No UI/state library. SL-00 added **no** dependency.
+
+## SL-02 — Statement, Detail, Home summary
+| # | Deviation | Why | Where |
+|---|---|---|---|
+| 10 | Rows carry the transaction **id** and link to the Detail page; the prototype's rows have no id | The Detail page is by id (`GET /transactions/{id}`) | `statement-page`, `home-page`, `detail-page` |
+| 11 | Period chips are **7 / 30 / 90 days + Custom** (two date inputs, single day allowed); the prototype shows fixed sample periods | The backend takes `from`/`to` whole days (Sao Paulo); the filters live in the URL so a link is shareable | `statement-page`, `statement-query.ts` |
+| 12 | Type chips map to the API `type` filter; sort is a select (newest, oldest, highest, lowest) and paging is Previous / Next with "Showing X–Y of N" | Server-side sort and paging (`sort`, `order`, `page`, `size`); totals cover the whole period, never the page | `statement-page` |
+| 13 | Chart is a hand-made SVG with **solid vs dashed** lines (not colour alone) and a **"View as table"** fallback carrying the same numbers | Accessibility; no chart library | `shared/ui/line-chart.component.ts` |
+| 14 | Dropped: search box, CSV export, per-row status chips (every row is "Registered"), statement balance-after-row column | Out of scope for SL-02; the ledger has no running balance or status per row to show | — |
+| 15 | Desktop shows a **table**, mobile a list of rows (same data) | Readability at both widths | `statement-page` |
