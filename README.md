@@ -21,6 +21,11 @@ A Spring Boot API and an Angular web app, designed contract-first, covered by hu
 
 </div>
 
+<p align="center">
+  <img src="docs/demo.gif" alt="30-second demo of Maia Bank: sign in, balance, statement, Pix, deposit, recharge and withdrawal" width="860" />
+  <br /><sub>30-second tour of the app (sped up). Sign in, statement, Pix, deposit, recharge and withdrawal.</sub>
+</p>
+
 > **Demo product.** Maia Bank is a portfolio prototype, not a real bank. Every name, account and amount is fictitious, and no real money moves.
 
 ---
