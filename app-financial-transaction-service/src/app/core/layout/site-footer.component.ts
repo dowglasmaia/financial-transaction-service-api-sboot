@@ -20,6 +20,7 @@ export const PROFILE_LINKS: readonly ProfileLink[] = [
   { label: 'LinkedIn', handle: 'in/dowglasmaia', href: 'https://www.linkedin.com/in/dowglasmaia/', icon: 'ph ph-linkedin-logo' },
   { label: 'GitHub', handle: 'dowglasmaia', href: 'https://github.com/dowglasmaia', icon: 'ph ph-github-logo' },
   { label: 'Malt', handle: 'dowglasmaia', href: 'https://www.malt.com/profile/dowglasmaia', icon: 'ph ph-briefcase' },
+  { label: 'Website', handle: 'www.dowglasmaia.com', href: 'https://www.dowglasmaia.com', icon: 'ph ph-globe' },
 ];
 
 /** What this prototype is built with, for the "references" column. */

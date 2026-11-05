@@ -20,6 +20,7 @@ describe('SiteFooterComponent', () => {
     ['LinkedIn', 'https://www.linkedin.com/in/dowglasmaia/'],
     ['GitHub', 'https://github.com/dowglasmaia'],
     ['Malt', 'https://www.malt.com/profile/dowglasmaia'],
+    ['Website', 'https://www.dowglasmaia.com'],
   ])('links to the %s profile', async (label, href) => {
     const { el } = await render();
     const link = Array.from(el.querySelectorAll('a')).find((a) => a.textContent?.includes(label));
