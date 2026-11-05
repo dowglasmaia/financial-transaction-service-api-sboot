@@ -18,8 +18,8 @@ claim). **Never use it outside tests**: anyone can "sign in" as any listed user.
 
 ## Run
 ```bash
-# from the repo root: infra + API + mock IdP (the overlay points the API at the mock and seeds the two mock customers)
-docker compose -f docker-compose.yml -f docker-compose.e2e.yml --profile api --profile e2e up -d --build
+# from the repo root: the whole stack + the mock IdP (e2e.env points the API at the mock and seeds the two mock customers)
+docker compose --env-file .env --env-file e2e.env --profile e2e up -d --build
 
 cd app-financial-transaction-service
 npm run e2e:install     # once: downloads Chromium
