@@ -297,7 +297,8 @@ The numbers above were measured during the specs; see each spec's *Result* secti
 | `app-financial-transaction-service/` | Angular web app | `.github/workflows/app-ci.yml` |
 | `prototype/` | Approved UI/UX prototype - visual and flow reference for the frontend | - |
 | `.spec/` | SDD knowledge base: `memory/`, `specs/`, execution flow | - |
-| `docker-compose.yml` | Local stack (API, PostgreSQL, Kafka, MaiaBank stub, web) | - |
+| `docker-compose.yml` | The whole stack in one file (web, API, PostgreSQL, Kafka, MaiaBank stub; mock IdP with `--profile e2e`) | - |
+| `e2e.env` | Overrides that point the stack at the mock identity provider (no secret) | - |
 
 Each application has its own isolated, path-filtered pipeline and is built and tested independently. More detail: [API README](api-financial-transaction-service/README.md) · [App README](app-financial-transaction-service/README.md).
 
@@ -305,31 +306,46 @@ Each application has its own isolated, path-filtered pipeline and is built and t
 
 ## Run back and front together
 
-Everything below starts from the repo root. Ports: Postgres `5433`, Kafka `9092`, Kafdrop `19000`, MaiaBank stub `8089`, API `8088`, app `4200`.
+**One compose file runs everything.** `docker-compose.yml` holds the web app, the API and every dependency, so a single command brings the whole product up. Ports: web app `4200`, API `8088`, PostgreSQL `5433`, Kafka `9092`, Kafdrop `19000`, MaiaBank stub `8089`.
+
+| Service | What | Port |
+|---|---|---|
+| `financial-transaction-web` | Angular build served by nginx, forwards `/api/` to the API | `4200` |
+| `financial-transaction-api` | Spring Boot API (profile `local`: demo seed) | `8088` |
+| `pg-db` | PostgreSQL 14 (healthcheck) | `5433` |
+| `zookeeper` · `kafka` · `kafdrop` | Kafka broker and its web UI | `9092` · `19000` |
+| `maiabank-api` | Stub of the external bank used by Pix | `8089` |
+| `mock-idp` | Mock identity provider, **only** with `--profile e2e` | `9099` |
 
 ```bash
-cp .env.example .env                                                         # once (local, throw-away values)
-docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api              # infrastructure only
+cp .env.example .env                  # once (local, throw-away values); add SEED_OWNER_SUB / SEED_SECOND_SUB
+docker compose up -d --build          # the whole stack: open http://localhost:4200
+docker compose down                   # stop it (data stays in the postgresql_data volume)
 ```
 
-**API** - from the IDE (run configuration with `SPRING_PROFILES_ACTIVE=local`, `SEED_OWNER_SUB`, optional `SEED_SECOND_SUB`) **or** in Docker: `docker compose --profile api up -d --build` (it needs `SEED_OWNER_SUB` / `SEED_SECOND_SUB` in `.env`, the Auth0 `user_id` of your test users).
+The API waits for PostgreSQL to be healthy, and the web app waits for the API to be healthy (`/actuator/health` on the private port `8090`, never published).
 
-**App** - `cd app-financial-transaction-service && npm ci && npm start`, then open <http://localhost:4200>. The dev server proxies `/api` to `localhost:8088`.
-
-**Real Auth0 sign-in (manual):** in the Auth0 dashboard (application *Transaction-app*) add `http://localhost:4200` to *Allowed Callback URLs*, *Allowed Logout URLs* and *Allowed Web Origins*. Then click **Access my account** and sign in with a test user. The app reads its Auth0 values from `app-financial-transaction-service/public/config.json` (public values only).
-
-**Automated end-to-end (no password, mock identity provider):**
+**Only the dependencies** (when you run the API from the IDE and the app with `npm start`):
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.e2e.yml --profile api --profile e2e up -d --build
+docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api
+```
+
+**API from the IDE** - run configuration with `SPRING_PROFILES_ACTIVE=local`, `SEED_OWNER_SUB`, optional `SEED_SECOND_SUB`. In Docker the two `SEED_*` values come from `.env` (the Auth0 `user_id` of your test users).
+
+**App from the terminal** - `cd app-financial-transaction-service && npm ci && npm start`, then open <http://localhost:4200> (stop the `financial-transaction-web` container first, or set `WEB_PORT`). The dev server proxies `/api` to `localhost:8088`.
+
+**Real Auth0 sign-in (manual):** in the Auth0 dashboard (application *Transaction-app*) add `http://localhost:4200` to *Allowed Callback URLs*, *Allowed Logout URLs* and *Allowed Web Origins*. Then click **Access my account** and sign in with a test user. The app reads its Auth0 values from `app-financial-transaction-service/public/config.json` (public values only); the web container mounts that same file, so you can edit it without rebuilding.
+
+**Automated end-to-end (no password, mock identity provider):** the same file, with the identity values overridden by `e2e.env` (it holds no secret) and the `e2e` profile that adds `mock-idp`:
+
+```bash
+docker compose --env-file .env --env-file e2e.env --profile e2e up -d --build
 cd app-financial-transaction-service && npm run e2e:install && npm run e2e   # 3 viewports: 1280 / 768 / 390
+docker compose --env-file .env --env-file e2e.env --profile e2e down         # back to the real Auth0 setup afterwards
 ```
 
-Details of the e2e setup (mock IdP users, how the browser reaches it): `app-financial-transaction-service/e2e/README.md`.
-
-**Web app in Docker** - `docker compose --profile api --profile web up -d --build` serves the Angular build with nginx on http://localhost:4200 (same origin as `ng serve`, so the Auth0 callback URLs already registered keep working; stop `npm start` first or set `WEB_PORT`). nginx forwards `/api/` to the API container; the public Auth0 values are the build's `config.json`, replaceable by mounting a file over `/usr/share/nginx/html/config.json`.
-
-Shortcut: `docker compose --profile api up --build` runs everything including the API in Docker. API details: `api-financial-transaction-service/README.md`. Work is driven by `.spec/spec-execution-flow.md`.
+Details of the e2e setup (mock IdP users, how the browser reaches it): `app-financial-transaction-service/e2e/README.md`. API details: `api-financial-transaction-service/README.md`. Work is driven by `.spec/spec-execution-flow.md`.
 
 ## Authentication (Auth0) - how it works and how to configure it
 

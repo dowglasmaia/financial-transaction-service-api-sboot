@@ -1,8 +1,20 @@
-# Local development stack. Credentials come from the environment (copy .env.example to .env).
+# Maia Bank - the whole stack in ONE file: web app, API and every dependency.
+#
+#   cp .env.example .env                 # once (local, throw-away values)
+#   docker compose up -d --build         # web (4200) + API (8088) + PostgreSQL + Kafka + MaiaBank stub
+#
+# Only the dependencies (API and app run from the IDE / `npm start`):
+#   docker compose up -d pg-db zookeeper kafka kafdrop maiabank-api
+#
+# Automated browser tests (mock identity provider, no password, no Auth0):
+#   docker compose --env-file .env --env-file e2e.env --profile e2e up -d --build
+# e2e.env only overrides the identity values below; the browser reaches the mock as http://mock-idp:9099
+# (map it to 127.0.0.1; Playwright does it with --host-resolver-rules).
+#
+# Credentials come from the environment (copy .env.example to .env). Nothing secret is stored here.
 services:
-  # The API is optional here: run it from the IDE (profile local, port 8088) or add `--profile api` to run it in Docker.
+  # Spring Boot API. SPRING_PROFILES_ACTIVE=local seeds the demo customer (never use that in production).
   financial-transaction-api:
-    profiles: ["api"]
     build:
       context: ./api-financial-transaction-service
       dockerfile: Dockerfile
@@ -27,6 +39,9 @@ services:
         condition: service_healthy
       kafka:
         condition: service_started
+      mock-idp:                       # only exists with `--profile e2e`; ignored otherwise
+        condition: service_started
+        required: false
     # BE-08: the actuator is on its own port (8090, not published); health is what "ready" means for the web app and the e2e.
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8090/actuator/health | grep -q UP"]
@@ -35,11 +50,11 @@ services:
       retries: 12
       start_period: 40s
 
-  # The web app (nginx serving the Angular build, forwarding /api/ to the API). Optional, like the API: `--profile web`
-  # (add `--profile api` for the API it talks to). It listens on 4200 so the Auth0 callback/logout URLs of `ng serve` keep
-  # working; stop `npm start` first, or change WEB_PORT and register that origin in Auth0.
+  # The web app: nginx serving the Angular build and forwarding /api/ to the API. It listens on 4200 so the Auth0
+  # callback/logout URLs of `ng serve` keep working: stop `npm start` first, or change WEB_PORT and register that origin
+  # in Auth0. The public Auth0 values are read from the mounted config.json (public values only, no secret); the e2e
+  # points WEB_CONFIG at the mock identity provider.
   financial-transaction-web:
-    profiles: ["web"]
     build:
       context: ./app-financial-transaction-service
       dockerfile: Dockerfile
@@ -47,6 +62,8 @@ services:
       - "${WEB_PORT:-4200}:80"
     environment:
       API_UPSTREAM: http://financial-transaction-api:8088
+    volumes:
+      - ${WEB_CONFIG:-./app-financial-transaction-service/public/config.json}:/usr/share/nginx/html/config.json:ro
     networks:
       - maianet
     depends_on:
@@ -114,6 +131,23 @@ services:
       - maianet
     ports:
       - "8089:8089"
+
+  # Mock identity provider for the automated browser tests (Node stdlib, Auth0 path layout). Started only with
+  # `--profile e2e`; it never runs in a normal `docker compose up`.
+  mock-idp:
+    profiles: ["e2e"]
+    image: node:22-alpine
+    working_dir: /app
+    command: ["node", "server.mjs"]
+    environment:
+      PORT: "9099"
+      PUBLIC_URL: http://mock-idp:9099
+    volumes:
+      - ./app-financial-transaction-service/e2e/mock-idp:/app:ro
+    ports:
+      - "9099:9099"
+    networks:
+      - maianet
 
 networks:
   maianet:

@@ -20,7 +20,7 @@ One Cypress suite that proves every user-visible flow of Maia Bank end to end on
 * A Cypress project in `app-financial-transaction-service/cypress/` (TypeScript, Cypress 15.x pinned, `cypress-axe` for accessibility), run with `npm run cy:run` (headless) and `npm run cy:open`.
 * Specs (one file per area) with the scenario ids of §5; viewports **1280×800, 768×1024, 390×844** and themes **dark and light**.
 * A black-box API matrix (`cy.request`) for the endpoints in `produto.md`, including 401/403/404/422, idempotent replay, pagination, correlation id and the management port.
-* A GitHub Actions workflow `e2e.yml` that starts the compose stack (`docker-compose.e2e.yml`, `--profile api --profile e2e`), waits for the health check and runs the suite.
+* A GitHub Actions workflow `e2e.yml` that starts the compose stack (`docker-compose.yml` with `--env-file .env --env-file e2e.env --profile e2e`), waits for the health check and runs the suite.
 * The manual-round checklist (§10) and a place to log findings: `app-financial-transaction-service/docs/manual-round.md`.
 
 **Out of scope:** removing or porting away Playwright, Cypress Cloud / dashboards, visual-regression screenshots, performance tests, real Auth0 (never automated; the owner signs in by hand).
@@ -85,13 +85,13 @@ These are the technical traps of this app; the executor must solve them, not wor
 * [ ] `e2e.yml` is green on a pull request.
 
 ## 8. Mandatory verification
-`docker compose -f docker-compose.yml -f docker-compose.e2e.yml --profile api --profile e2e up -d --build` → wait for `healthy` → `cd app-financial-transaction-service && npm run cy:run` (3×) and `npm run e2e` (Playwright, once). Report what was **executed** and what was only written.
+`docker compose --env-file .env --env-file e2e.env --profile e2e up -d --build` → wait for `healthy` → `cd app-financial-transaction-service && npm run cy:run` (3×) and `npm run e2e` (Playwright, once). Report what was **executed** and what was only written.
 
 ## 9. Approval gates / Stop and ask
 Stop and ask before: adding any dependency other than Cypress and `cypress-axe`; changing product code to make a test pass (report it as a defect instead, with a regression test); weakening an assertion; removing a Playwright test; touching the mock IdP behaviour used by Playwright.
 
 ## 10. Manual round after the suite (owner) — checklist and where to log findings
-Do this on the real Auth0 login (`npm start` + API from the IDE or `--profile api`), in a normal browser, then write each finding in `docs/manual-round.md` as **ID · screen · what happened · expected · severity (blocker / should / nice) · screenshot**. Improvements become new specs or small fixes; each one gets a Cypress scenario.
+Do this on the real Auth0 login (`npm start` + API from the IDE or `docker compose up -d --build`), in a normal browser, then write each finding in `docs/manual-round.md` as **ID · screen · what happened · expected · severity (blocker / should / nice) · screenshot**. Improvements become new specs or small fixes; each one gets a Cypress scenario.
 1. **Sign-in and session:** both customers; sign out; refresh on each page; expired session; two tabs.
 2. **Home:** balance count-up, period chips, chart and its table, recent rows open the detail, Quick actions, quick recharge hand-over.
 3. **Money flows, each one:** happy path; double click; browser Back during the review; typing odd values (`1,5`, `0,00`, `10.005`, huge numbers, pasted text); airplane mode mid-request and **Try again**; slow network (DevTools throttling).
