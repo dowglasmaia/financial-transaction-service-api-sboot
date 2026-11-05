@@ -498,6 +498,7 @@ The index with every spec and its status is in [`.spec/specs/README.md`](.spec/s
         <a href="https://www.linkedin.com/in/dowglasmaia/"><img alt="LinkedIn" src="https://img.shields.io/badge/-LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white" /></a>
         <a href="https://github.com/dowglasmaia"><img alt="GitHub" src="https://img.shields.io/badge/-GitHub-181717?style=flat-square&logo=github&logoColor=white" /></a>
         <a href="https://www.malt.com/profile/dowglasmaia"><img alt="Malt" src="https://img.shields.io/badge/-Malt-FC5757?style=flat-square&logo=malt&logoColor=white" /></a>
+        <a href="https://www.dowglasmaia.com"><img alt="Website" src="https://img.shields.io/badge/-www.dowglasmaia.com-0F172A?style=flat-square&logo=googlechrome&logoColor=white" /></a>
       </p>
     </td>
   </tr>
@@ -515,6 +516,6 @@ The index with every spec and its status is in [`.spec/specs/README.md`](.spec/s
 
 <div align="center">
 
-© Dowglas Maia · Maia Bank is a demo product, not a real bank · Test data only
+© Dowglas Maia · <a href="https://www.dowglasmaia.com">www.dowglasmaia.com</a> · Maia Bank is a demo product, not a real bank · Test data only
 
 </div>
